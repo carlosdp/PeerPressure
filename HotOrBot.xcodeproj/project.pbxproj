@@ -7,18 +7,43 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BF0186D52B87FBCB0051746C /* MatchesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF0186D42B87FBCB0051746C /* MatchesView.swift */; };
+		BF0186D72B87FDA60051746C /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF0186D62B87FDA60051746C /* Models.swift */; };
+		BF0186D92B87FF540051746C /* PreviewData.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF0186D82B87FF540051746C /* PreviewData.swift */; };
+		BF0186DB2B8904730051746C /* SwipeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF0186DA2B8904730051746C /* SwipeViewModel.swift */; };
+		BF0186DD2B89056F0051746C /* SwipeController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF0186DC2B89056F0051746C /* SwipeController.swift */; };
 		BFE41C472B87D64C004462A4 /* HotOrBotApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE41C462B87D64C004462A4 /* HotOrBotApp.swift */; };
 		BFE41C492B87D64C004462A4 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE41C482B87D64C004462A4 /* ContentView.swift */; };
 		BFE41C4B2B87D650004462A4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BFE41C4A2B87D650004462A4 /* Assets.xcassets */; };
 		BFE41C4E2B87D650004462A4 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BFE41C4D2B87D650004462A4 /* Preview Assets.xcassets */; };
+		BFE41C562B87D690004462A4 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = BFE41C552B87D690004462A4 /* Auth */; };
+		BFE41C582B87D690004462A4 /* Functions in Frameworks */ = {isa = PBXBuildFile; productRef = BFE41C572B87D690004462A4 /* Functions */; };
+		BFE41C5A2B87D690004462A4 /* PostgREST in Frameworks */ = {isa = PBXBuildFile; productRef = BFE41C592B87D690004462A4 /* PostgREST */; };
+		BFE41C5C2B87D690004462A4 /* Realtime in Frameworks */ = {isa = PBXBuildFile; productRef = BFE41C5B2B87D690004462A4 /* Realtime */; };
+		BFE41C5E2B87D690004462A4 /* Storage in Frameworks */ = {isa = PBXBuildFile; productRef = BFE41C5D2B87D690004462A4 /* Storage */; };
+		BFE41C602B87D690004462A4 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = BFE41C5F2B87D690004462A4 /* Supabase */; };
+		BFE41C622B87D6A5004462A4 /* Supabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE41C612B87D6A5004462A4 /* Supabase.swift */; };
+		BFE41C642B87F96D004462A4 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE41C632B87F96D004462A4 /* LoginView.swift */; };
+		BFE41C682B87FA38004462A4 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE41C672B87FA38004462A4 /* ProfileView.swift */; };
+		BFE41C6A2B87FA4C004462A4 /* SwipeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE41C692B87FA4C004462A4 /* SwipeView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		BF0186D42B87FBCB0051746C /* MatchesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchesView.swift; sourceTree = "<group>"; };
+		BF0186D62B87FDA60051746C /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		BF0186D82B87FF540051746C /* PreviewData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewData.swift; sourceTree = "<group>"; };
+		BF0186DA2B8904730051746C /* SwipeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeViewModel.swift; sourceTree = "<group>"; };
+		BF0186DC2B89056F0051746C /* SwipeController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeController.swift; sourceTree = "<group>"; };
+		BF0186DE2B890F3A0051746C /* HotOrBot.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HotOrBot.entitlements; sourceTree = "<group>"; };
 		BFE41C432B87D64C004462A4 /* HotOrBot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HotOrBot.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BFE41C462B87D64C004462A4 /* HotOrBotApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotOrBotApp.swift; sourceTree = "<group>"; };
 		BFE41C482B87D64C004462A4 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		BFE41C4A2B87D650004462A4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		BFE41C4D2B87D650004462A4 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		BFE41C612B87D6A5004462A4 /* Supabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Supabase.swift; sourceTree = "<group>"; };
+		BFE41C632B87F96D004462A4 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		BFE41C672B87FA38004462A4 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		BFE41C692B87FA4C004462A4 /* SwipeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -26,6 +51,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BFE41C5A2B87D690004462A4 /* PostgREST in Frameworks */,
+				BFE41C582B87D690004462A4 /* Functions in Frameworks */,
+				BFE41C602B87D690004462A4 /* Supabase in Frameworks */,
+				BFE41C562B87D690004462A4 /* Auth in Frameworks */,
+				BFE41C5E2B87D690004462A4 /* Storage in Frameworks */,
+				BFE41C5C2B87D690004462A4 /* Realtime in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -51,10 +82,19 @@
 		BFE41C452B87D64C004462A4 /* HotOrBot */ = {
 			isa = PBXGroup;
 			children = (
+				BF0186DE2B890F3A0051746C /* HotOrBot.entitlements */,
 				BFE41C462B87D64C004462A4 /* HotOrBotApp.swift */,
 				BFE41C482B87D64C004462A4 /* ContentView.swift */,
 				BFE41C4A2B87D650004462A4 /* Assets.xcassets */,
 				BFE41C4C2B87D650004462A4 /* Preview Content */,
+				BFE41C612B87D6A5004462A4 /* Supabase.swift */,
+				BFE41C632B87F96D004462A4 /* LoginView.swift */,
+				BFE41C672B87FA38004462A4 /* ProfileView.swift */,
+				BFE41C692B87FA4C004462A4 /* SwipeView.swift */,
+				BF0186D42B87FBCB0051746C /* MatchesView.swift */,
+				BF0186D62B87FDA60051746C /* Models.swift */,
+				BF0186DA2B8904730051746C /* SwipeViewModel.swift */,
+				BF0186DC2B89056F0051746C /* SwipeController.swift */,
 			);
 			path = HotOrBot;
 			sourceTree = "<group>";
@@ -63,6 +103,7 @@
 			isa = PBXGroup;
 			children = (
 				BFE41C4D2B87D650004462A4 /* Preview Assets.xcassets */,
+				BF0186D82B87FF540051746C /* PreviewData.swift */,
 			);
 			path = "Preview Content";
 			sourceTree = "<group>";
@@ -83,6 +124,14 @@
 			dependencies = (
 			);
 			name = HotOrBot;
+			packageProductDependencies = (
+				BFE41C552B87D690004462A4 /* Auth */,
+				BFE41C572B87D690004462A4 /* Functions */,
+				BFE41C592B87D690004462A4 /* PostgREST */,
+				BFE41C5B2B87D690004462A4 /* Realtime */,
+				BFE41C5D2B87D690004462A4 /* Storage */,
+				BFE41C5F2B87D690004462A4 /* Supabase */,
+			);
 			productName = HotOrBot;
 			productReference = BFE41C432B87D64C004462A4 /* HotOrBot.app */;
 			productType = "com.apple.product-type.application";
@@ -111,6 +160,9 @@
 				Base,
 			);
 			mainGroup = BFE41C3A2B87D64C004462A4;
+			packageReferences = (
+				BFE41C542B87D690004462A4 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+			);
 			productRefGroup = BFE41C442B87D64C004462A4 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -137,7 +189,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BF0186DD2B89056F0051746C /* SwipeController.swift in Sources */,
 				BFE41C492B87D64C004462A4 /* ContentView.swift in Sources */,
+				BF0186DB2B8904730051746C /* SwipeViewModel.swift in Sources */,
+				BF0186D52B87FBCB0051746C /* MatchesView.swift in Sources */,
+				BFE41C622B87D6A5004462A4 /* Supabase.swift in Sources */,
+				BF0186D72B87FDA60051746C /* Models.swift in Sources */,
+				BFE41C682B87FA38004462A4 /* ProfileView.swift in Sources */,
+				BF0186D92B87FF540051746C /* PreviewData.swift in Sources */,
+				BFE41C6A2B87FA4C004462A4 /* SwipeView.swift in Sources */,
+				BFE41C642B87F96D004462A4 /* LoginView.swift in Sources */,
 				BFE41C472B87D64C004462A4 /* HotOrBotApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -269,12 +330,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = HotOrBot/HotOrBot.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"HotOrBot/Preview Content\"";
 				DEVELOPMENT_TEAM = R67KRJS7KF;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Hot or Bot Debug";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -285,7 +348,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.carlosdp.HotOrBot;
+				PRODUCT_BUNDLE_IDENTIFIER = com.carlosdp.HotOrBot.debug;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -298,12 +361,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = HotOrBot/HotOrBot.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"HotOrBot/Preview Content\"";
 				DEVELOPMENT_TEAM = R67KRJS7KF;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Hot or Bot";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -344,6 +409,50 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		BFE41C542B87D690004462A4 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase-community/supabase-swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.3.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		BFE41C552B87D690004462A4 /* Auth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BFE41C542B87D690004462A4 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Auth;
+		};
+		BFE41C572B87D690004462A4 /* Functions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BFE41C542B87D690004462A4 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Functions;
+		};
+		BFE41C592B87D690004462A4 /* PostgREST */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BFE41C542B87D690004462A4 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = PostgREST;
+		};
+		BFE41C5B2B87D690004462A4 /* Realtime */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BFE41C542B87D690004462A4 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Realtime;
+		};
+		BFE41C5D2B87D690004462A4 /* Storage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BFE41C542B87D690004462A4 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Storage;
+		};
+		BFE41C5F2B87D690004462A4 /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BFE41C542B87D690004462A4 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = BFE41C3B2B87D64C004462A4 /* Project object */;
 }

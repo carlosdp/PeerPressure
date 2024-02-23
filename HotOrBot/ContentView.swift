@@ -8,17 +8,28 @@
 import SwiftUI
 
 struct ContentView: View {
+    let auth = SupabaseAuth.shared
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        if auth.isAuthenticated {
+            TabView {
+                SwipeController()
+                    .tabItem {
+                        Image(systemName: "person.2")
+                    }
+                
+                MatchesView()
+                    .tabItem {
+                        Image(systemName: "heart")
+                    }
+                
+                ProfileView(profile: profiles[0])
+                    .tabItem {
+                        Image(systemName: "person")
+                    }
+            }
+        } else {
+            LoginView()
         }
-        .padding()
     }
-}
-
-#Preview {
-    ContentView()
 }
