@@ -21,5 +21,8 @@ struct SwipeController: View {
                 }
             }
         }
+        .task {
+            await model.queueProfiles()
+        }
     }
 }

@@ -16,7 +16,7 @@ func dateFromString(from: String) -> Date {
 
 let profiles = [
     Profile(
-        id: "0",
+        id: UUID(),
         firstName: "Carlos",
         birthDate: dateFromString(from: "19920720"),
         biographicalData: BiographicalData(

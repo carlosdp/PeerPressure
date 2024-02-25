@@ -11,9 +11,19 @@ import Foundation
 class SwipeViewModel {
     var queuedProfiles: [Profile] = []
     
+    struct CreateMatchParams: Encodable {
+        let profileId: UUID
+        let isMatch: Bool
+        
+        enum CodingKeys: String, CodingKey {
+            case profileId = "profile_id"
+            case isMatch = "is_match"
+        }
+    }
+    
     func queueProfiles() async {
         do {
-            let profiles: [Profile] = try await supabase.database.from("profiles").select().execute().value
+            let profiles: [Profile] = try await supabase.database.rpc("get_unmatched_profiles").select().execute().value
             queuedProfiles = profiles
         } catch {
             print("Could not fetch profiles: \(error)")
@@ -21,12 +31,20 @@ class SwipeViewModel {
     }
     
     func match() async {
-        // TODO: actually implement
-        queuedProfiles.remove(at: 0)
+        do {
+            try await supabase.database.rpc("create_match", params: CreateMatchParams(profileId: queuedProfiles[0].id!, isMatch: true)).execute()
+            queuedProfiles.remove(at: 0)
+        } catch {
+            print("Could not match profile: \(error)")
+        }
     }
     
     func skip() async {
-        // TODO: actually implement
-        queuedProfiles.remove(at: 0)
+        do {
+            try await supabase.database.rpc("create_match", params: CreateMatchParams(profileId: queuedProfiles[0].id!, isMatch: false)).execute()
+            queuedProfiles.remove(at: 0)
+        } catch {
+            print("Could not match profile: \(error)")
+        }
     }
 }

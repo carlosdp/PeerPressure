@@ -29,6 +29,7 @@ class SupabaseAuth {
     static let shared = SupabaseAuth()
     var isAuthenticated: Bool = false
     var requiresAuthentication: Bool = true
+    var user: User?
     
     @ObservationIgnored
     private var authStateTask: Task<(), Never>?
@@ -36,9 +37,23 @@ class SupabaseAuth {
     init() {
         self.authStateTask = Task {
             for await state in await supabase.auth.authStateChanges {
-                if [.initialSession, .signedIn, .signedOut].contains(state.event) {
-                    self.isAuthenticated = state.session != nil
-                    self.requiresAuthentication = !self.isAuthenticated
+                if [.initialSession, .signedIn].contains(state.event) {
+                    do {
+                        self.user = try await supabase.auth.user()
+                        self.isAuthenticated = true
+                        self.requiresAuthentication = false
+                    } catch {
+                        try? await supabase.auth.signOut()
+                        self.isAuthenticated = false
+                        self.requiresAuthentication = true
+                        self.user = nil
+                    }
+                }
+                
+                if state.event == .signedOut {
+                    self.isAuthenticated = false
+                    self.requiresAuthentication = true
+                    self.user = user
                 }
             }
         }

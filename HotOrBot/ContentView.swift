@@ -9,24 +9,36 @@ import SwiftUI
 
 struct ContentView: View {
     let auth = SupabaseAuth.shared
+    let profileModel = ProfileViewModel.shared
     
     var body: some View {
         if auth.isAuthenticated {
-            TabView {
-                SwipeController()
-                    .tabItem {
-                        Image(systemName: "person.2")
+            Group {
+                if profileModel.profile != nil {
+                    TabView {
+                        SwipeController()
+                            .tabItem {
+                                Image(systemName: "person.2")
+                            }
+                        
+                        MatchesView()
+                            .tabItem {
+                                Image(systemName: "heart")
+                            }
+                        
+                        ProfileView(profile: profiles[0])
+                            .tabItem {
+                                Image(systemName: "person")
+                            }
                     }
-                
-                MatchesView()
-                    .tabItem {
-                        Image(systemName: "heart")
-                    }
-                
-                ProfileView(profile: profiles[0])
-                    .tabItem {
-                        Image(systemName: "person")
-                    }
+                } else {
+                   OnboardingController()
+                }
+            }
+            .task {
+                Task {
+                    await profileModel.fetchProfile()
+                }
             }
         } else {
             LoginView()

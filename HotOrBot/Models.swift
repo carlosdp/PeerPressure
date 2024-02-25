@@ -6,12 +6,19 @@
 //
 
 import Foundation
+import CoreLocation
 
-struct BiographicalData: Decodable {
+struct BiographicalData: Codable {
     // height in feet
     let height: Double?
     let college: String?
     let work: String?
+    
+    init() {
+        self.height = nil
+        self.college = nil
+        self.work = nil
+    }
     
     public init(height: Double?, college: String?, work: String?) {
         self.height = height
@@ -50,11 +57,70 @@ struct BiographicalData: Decodable {
     }
 }
 
-struct Profile: Decodable {
-    let id: String
-    let firstName: String
-    let birthDate: Date
-    let biographicalData: BiographicalData
+class Profile: Codable {
+    var id: UUID?
+    var userId: UUID?
+    var firstName: String = ""
+    var gender: String = "male"
+    var birthDate: Date = Date()
+    var location: CLLocationCoordinate2D?
+    var displayLocation: String = ""
+    var biographicalData: BiographicalData = BiographicalData()
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case userId = "user_id"
+        case firstName = "first_name"
+        case gender
+        case birthDate = "birth_date"
+        case location
+        case displayLocation = "display_location"
+        case biographicalData = "biographical_data"
+    }
+    
+    init() {
+        
+    }
+    
+    init(id: UUID, firstName: String, birthDate: Date, biographicalData: BiographicalData) {
+        self.id = id
+        self.firstName = firstName
+        self.birthDate = birthDate
+        self.biographicalData = biographicalData
+    }
+    
+    required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.id = try container.decode(UUID.self, forKey: .id)
+        self.userId = try container.decodeIfPresent(UUID.self, forKey: .userId)
+        self.firstName = try container.decode(String.self, forKey: .firstName)
+        self.gender = try container.decode(String.self, forKey: .gender)
+        let rawBirthDate = try container.decode(String.self, forKey: .birthDate)
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-DD"
+        guard let birthDate = dateFormatter.date(from: rawBirthDate) else {
+            throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: container.codingPath, debugDescription: "Date invalid"))
+        }
+        self.birthDate = birthDate
+        self.displayLocation = try container.decode(String.self, forKey: .displayLocation)
+        self.biographicalData = try container.decode(BiographicalData.self, forKey: .biographicalData)
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        if self.id != nil {
+            try container.encode(self.id, forKey: .id)
+        }
+        try container.encode(self.userId, forKey: .userId)
+        try container.encode(self.firstName, forKey: .firstName)
+        try container.encode(self.gender, forKey: .gender)
+        try container.encode(self.birthDate, forKey: .birthDate)
+        if let location = self.location {
+            try container.encode("POINT(\(location.latitude) \(location.longitude))", forKey: .location)
+        }
+        try container.encode(self.displayLocation, forKey: .displayLocation)
+        try container.encode(self.biographicalData, forKey: .biographicalData)
+    }
 }
 
 extension Profile {
