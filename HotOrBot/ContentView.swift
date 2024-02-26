@@ -26,7 +26,7 @@ struct ContentView: View {
                                 Image(systemName: "heart")
                             }
                         
-                        ProfileView(profile: profiles[0])
+                        ProfileController()
                             .tabItem {
                                 Image(systemName: "person")
                             }

@@ -10,9 +10,9 @@ import CoreLocation
 
 struct BiographicalData: Codable {
     // height in feet
-    let height: Double?
-    let college: String?
-    let work: String?
+    var height: Double?
+    var college: String?
+    var work: String?
     
     init() {
         self.height = nil

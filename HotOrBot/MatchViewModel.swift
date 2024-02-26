@@ -14,7 +14,6 @@ class MatchViewModel {
     func fetchMatches() async {
         do {
             self.matches = try await supabase.database.rpc("get_matches").execute().value
-            print(self.matches)
         } catch {
             print("Error fetching matches: \(error)")
         }

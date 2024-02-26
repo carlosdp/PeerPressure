@@ -23,6 +23,39 @@ class ProfileViewModel {
         }
     }
     
+    func insertProfile(_ profile: Profile) async {
+        if let user = auth.user {
+            do {
+                profile.userId = user.id
+                
+                self.profile = try await supabase.database.from("profiles").insert(profile).select().single().execute().value
+            } catch {
+                print("Error inserting profile: \(error)")
+            }
+        } else {
+            print("User not logged in, cannot insert profile")
+        }
+    }
+    
+    func updateProfile(_ profile: Profile) async {
+        if let user = auth.user {
+            do {
+                profile.userId = user.id
+                
+                guard let profileId = profile.id else {
+                    print("Profile must have ID to be inserted")
+                    return
+                }
+                
+                self.profile = try await supabase.database.from("profiles").update(profile).eq("id", value: profileId).select().single().execute().value
+            } catch {
+                print("Error updating profile: \(error)")
+            }
+        } else {
+            print("User not logged in, cannot update profile")
+        }
+    }
+    
     func upsertProfile(_ profile: Profile) async {
         if let user = auth.user {
             do {

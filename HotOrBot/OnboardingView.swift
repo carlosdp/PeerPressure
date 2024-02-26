@@ -43,55 +43,10 @@ struct OnboardingStep_BirthDate: View {
     @Binding
     var profile: Profile
     
-    @State
-    private var month: String = "January"
-    @State
-    private var day: Int = 1
-    @State
-    private var year: Int = 1950
-    
     var body: some View {
-        HStack {
-            Picker("Month", selection: $month) {
-                ForEach(monthsOfYear, id: \.self) { month in
-                    Text(month)
-                }
-                
-            }
-            .pickerStyle(.wheel)
-            .onChange(of: month) {
-                updateBirthDate()
-            }
-            
-            Picker("Day", selection: $day) {
-                ForEach(1...31, id: \.self) { day in
-                    Text("\(day)")
-                }
-            }
-            .pickerStyle(.wheel)
-            .onChange(of: day) {
-                updateBirthDate()
-            }
-            
-            Picker("Year", selection: $year) {
-                ForEach(1950...2006, id: \.self) { year in
-                    Text(verbatim: "\(year)")
-                }
-            }
-            .pickerStyle(.wheel)
-            .onChange(of: year) {
-                updateBirthDate()
-            }
-        }
-        .task {
-            updateBirthDate()
-        }
-    }
-    
-    private func updateBirthDate() {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM dd, yyyy"
-        profile.birthDate = formatter.date(from: "\(month) \(day), \(year)")!
+        DatePicker("Birth Date", selection: $profile.birthDate, displayedComponents: [.date])
+            .datePickerStyle(.wheel)
+            .labelsHidden()
     }
 }
 

@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ProfileView: View {
     var profile: Profile
+    var onEdit: (() -> Void)?
     
     var body: some View {
         ScrollView {
@@ -55,9 +56,18 @@ struct ProfileView: View {
             }
             .padding(20)
         }
+        .toolbar {
+            if let onEdit = self.onEdit {
+                Button(action: onEdit) {
+                    Text("Edit")
+                }
+            }
+        }
     }
 }
 
 #Preview {
-    ProfileView(profile: profiles[0])
+    NavigationStack {
+        ProfileView(profile: profiles[0]) { }
+    }
 }
