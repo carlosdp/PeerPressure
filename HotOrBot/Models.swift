@@ -131,3 +131,8 @@ extension Profile {
         return ageComponents.year ?? 0
     }
 }
+
+struct Match: Identifiable, Decodable {
+    var id: UUID
+    var profile: Profile
+}

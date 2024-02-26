@@ -13,6 +13,10 @@
 		BF0186DB2B8904730051746C /* SwipeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF0186DA2B8904730051746C /* SwipeViewModel.swift */; };
 		BF0186DD2B89056F0051746C /* SwipeController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF0186DC2B89056F0051746C /* SwipeController.swift */; };
 		BF09FDAF2B8BC7F200F97F76 /* OnboardingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF09FDAE2B8BC7F200F97F76 /* OnboardingController.swift */; };
+		BF09FDB12B8C55C500F97F76 /* MatchController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF09FDB02B8C55C500F97F76 /* MatchController.swift */; };
+		BF09FDB32B8C55CE00F97F76 /* MatchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF09FDB22B8C55CE00F97F76 /* MatchView.swift */; };
+		BF09FDB52B8C58FC00F97F76 /* MatchesController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF09FDB42B8C58FC00F97F76 /* MatchesController.swift */; };
+		BF09FDB72B8C591D00F97F76 /* MatchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF09FDB62B8C591D00F97F76 /* MatchViewModel.swift */; };
 		BF74A3A12B8A7D9E00D87E99 /* ProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF74A3A02B8A7D9E00D87E99 /* ProfileViewModel.swift */; };
 		BF74A3A32B8A7F4A00D87E99 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF74A3A22B8A7F4A00D87E99 /* OnboardingView.swift */; };
 		BF74A3A62B8AA70100D87E99 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF74A3A52B8AA70100D87E99 /* MapKit.framework */; };
@@ -40,6 +44,10 @@
 		BF0186DC2B89056F0051746C /* SwipeController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeController.swift; sourceTree = "<group>"; };
 		BF0186DE2B890F3A0051746C /* HotOrBot.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HotOrBot.entitlements; sourceTree = "<group>"; };
 		BF09FDAE2B8BC7F200F97F76 /* OnboardingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingController.swift; sourceTree = "<group>"; };
+		BF09FDB02B8C55C500F97F76 /* MatchController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchController.swift; sourceTree = "<group>"; };
+		BF09FDB22B8C55CE00F97F76 /* MatchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchView.swift; sourceTree = "<group>"; };
+		BF09FDB42B8C58FC00F97F76 /* MatchesController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchesController.swift; sourceTree = "<group>"; };
+		BF09FDB62B8C591D00F97F76 /* MatchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchViewModel.swift; sourceTree = "<group>"; };
 		BF74A3A02B8A7D9E00D87E99 /* ProfileViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModel.swift; sourceTree = "<group>"; };
 		BF74A3A22B8A7F4A00D87E99 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		BF74A3A52B8AA70100D87E99 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
@@ -118,6 +126,10 @@
 				BF74A3A02B8A7D9E00D87E99 /* ProfileViewModel.swift */,
 				BF74A3A22B8A7F4A00D87E99 /* OnboardingView.swift */,
 				BF09FDAE2B8BC7F200F97F76 /* OnboardingController.swift */,
+				BF09FDB02B8C55C500F97F76 /* MatchController.swift */,
+				BF09FDB22B8C55CE00F97F76 /* MatchView.swift */,
+				BF09FDB42B8C58FC00F97F76 /* MatchesController.swift */,
+				BF09FDB62B8C591D00F97F76 /* MatchViewModel.swift */,
 			);
 			path = HotOrBot;
 			sourceTree = "<group>";
@@ -214,6 +226,7 @@
 			files = (
 				BF0186DD2B89056F0051746C /* SwipeController.swift in Sources */,
 				BFE41C492B87D64C004462A4 /* ContentView.swift in Sources */,
+				BF09FDB32B8C55CE00F97F76 /* MatchView.swift in Sources */,
 				BF0186DB2B8904730051746C /* SwipeViewModel.swift in Sources */,
 				BF0186D52B87FBCB0051746C /* MatchesView.swift in Sources */,
 				BFE41C622B87D6A5004462A4 /* Supabase.swift in Sources */,
@@ -221,10 +234,13 @@
 				BF74A3A12B8A7D9E00D87E99 /* ProfileViewModel.swift in Sources */,
 				BFE41C682B87FA38004462A4 /* ProfileView.swift in Sources */,
 				BF0186D92B87FF540051746C /* PreviewData.swift in Sources */,
+				BF09FDB72B8C591D00F97F76 /* MatchViewModel.swift in Sources */,
+				BF09FDB52B8C58FC00F97F76 /* MatchesController.swift in Sources */,
 				BFE41C6A2B87FA4C004462A4 /* SwipeView.swift in Sources */,
 				BF09FDAF2B8BC7F200F97F76 /* OnboardingController.swift in Sources */,
 				BFE41C642B87F96D004462A4 /* LoginView.swift in Sources */,
 				BF74A3A32B8A7F4A00D87E99 /* OnboardingView.swift in Sources */,
+				BF09FDB12B8C55C500F97F76 /* MatchController.swift in Sources */,
 				BFE41C472B87D64C004462A4 /* HotOrBotApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

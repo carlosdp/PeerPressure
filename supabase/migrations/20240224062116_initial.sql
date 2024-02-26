@@ -54,7 +54,12 @@ returns setof profiles as $$
   select * from profiles where (user_id != auth.uid() or user_id is null) and id in (select matched_profile_id from matches where profile_id = (select id from profiles where user_id = auth.uid()) or matched_profile_id = (select id from profiles where user_id = auth.uid()));
 $$ language sql stable;
 
+-- function that returns jsonb of match_id and a profile field containing the matching profile for the match for the logged in user
 create or replace function get_matches()
-returns setof matches as $$
-  select * from matches where profile_id = (select id from profiles where user_id = auth.uid()) or matched_profile_id = (select id from profiles where user_id = auth.uid());
+returns setof jsonb as $$
+  select jsonb_build_object('id', m.id, 'profile', jsonb_build_object('id', p.id, 'first_name', p.first_name, 'birth_date', p.birth_date
+    , 'gender', p.gender, 'location', p.location, 'display_location', p.display_location, 'biographical_data', p.biographical_data, 'preferences', p.preferences))
+  from matches m
+  join profiles p on ((p.user_id is null or p.user_id != auth.uid()) and (m.profile_id = p.id or m.matched_profile_id = p.id))
+  where m.profile_id = (select id from profiles where user_id = auth.uid()) or m.matched_profile_id = (select id from profiles where user_id = auth.uid());
 $$ language sql stable;
