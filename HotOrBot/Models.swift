@@ -132,7 +132,36 @@ extension Profile {
     }
 }
 
-struct Match: Identifiable, Decodable {
+class Match: Identifiable, Decodable {
     var id: UUID
     var profile: Profile
+    
+    init(id: UUID, profile: Profile) {
+        self.id = id
+        self.profile = profile
+    }
+}
+
+class ChatMessage: Identifiable, Codable {
+    var id: UUID
+    var matchId: UUID
+    var senderId: UUID
+    var message: String
+    var createdAt: Date
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case matchId = "match_id"
+        case senderId = "sender_id"
+        case message
+        case createdAt = "created_at"
+    }
+    
+    init(id: UUID, matchId: UUID, senderId: UUID, message: String, createdAt: Date) {
+        self.id = id
+        self.matchId = matchId
+        self.senderId = senderId
+        self.message = message
+        self.createdAt = createdAt
+    }
 }

@@ -17,6 +17,9 @@
 		BF09FDB32B8C55CE00F97F76 /* MatchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF09FDB22B8C55CE00F97F76 /* MatchView.swift */; };
 		BF09FDB52B8C58FC00F97F76 /* MatchesController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF09FDB42B8C58FC00F97F76 /* MatchesController.swift */; };
 		BF09FDB72B8C591D00F97F76 /* MatchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF09FDB62B8C591D00F97F76 /* MatchViewModel.swift */; };
+		BF09FDB92B8CFD0500F97F76 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF09FDB82B8CFD0500F97F76 /* ChatView.swift */; };
+		BF09FDBB2B8D039000F97F76 /* ChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF09FDBA2B8D039000F97F76 /* ChatViewModel.swift */; };
+		BF09FDBD2B8D052500F97F76 /* ChatController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF09FDBC2B8D052500F97F76 /* ChatController.swift */; };
 		BF74A3A12B8A7D9E00D87E99 /* ProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF74A3A02B8A7D9E00D87E99 /* ProfileViewModel.swift */; };
 		BF74A3A32B8A7F4A00D87E99 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF74A3A22B8A7F4A00D87E99 /* OnboardingView.swift */; };
 		BF74A3A62B8AA70100D87E99 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF74A3A52B8AA70100D87E99 /* MapKit.framework */; };
@@ -48,6 +51,9 @@
 		BF09FDB22B8C55CE00F97F76 /* MatchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchView.swift; sourceTree = "<group>"; };
 		BF09FDB42B8C58FC00F97F76 /* MatchesController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchesController.swift; sourceTree = "<group>"; };
 		BF09FDB62B8C591D00F97F76 /* MatchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchViewModel.swift; sourceTree = "<group>"; };
+		BF09FDB82B8CFD0500F97F76 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
+		BF09FDBA2B8D039000F97F76 /* ChatViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModel.swift; sourceTree = "<group>"; };
+		BF09FDBC2B8D052500F97F76 /* ChatController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatController.swift; sourceTree = "<group>"; };
 		BF74A3A02B8A7D9E00D87E99 /* ProfileViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModel.swift; sourceTree = "<group>"; };
 		BF74A3A22B8A7F4A00D87E99 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		BF74A3A52B8AA70100D87E99 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
@@ -130,6 +136,9 @@
 				BF09FDB22B8C55CE00F97F76 /* MatchView.swift */,
 				BF09FDB42B8C58FC00F97F76 /* MatchesController.swift */,
 				BF09FDB62B8C591D00F97F76 /* MatchViewModel.swift */,
+				BF09FDB82B8CFD0500F97F76 /* ChatView.swift */,
+				BF09FDBA2B8D039000F97F76 /* ChatViewModel.swift */,
+				BF09FDBC2B8D052500F97F76 /* ChatController.swift */,
 			);
 			path = HotOrBot;
 			sourceTree = "<group>";
@@ -224,7 +233,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BF09FDB92B8CFD0500F97F76 /* ChatView.swift in Sources */,
 				BF0186DD2B89056F0051746C /* SwipeController.swift in Sources */,
+				BF09FDBD2B8D052500F97F76 /* ChatController.swift in Sources */,
 				BFE41C492B87D64C004462A4 /* ContentView.swift in Sources */,
 				BF09FDB32B8C55CE00F97F76 /* MatchView.swift in Sources */,
 				BF0186DB2B8904730051746C /* SwipeViewModel.swift in Sources */,
@@ -241,6 +252,7 @@
 				BFE41C642B87F96D004462A4 /* LoginView.swift in Sources */,
 				BF74A3A32B8A7F4A00D87E99 /* OnboardingView.swift in Sources */,
 				BF09FDB12B8C55C500F97F76 /* MatchController.swift in Sources */,
+				BF09FDBB2B8D039000F97F76 /* ChatViewModel.swift in Sources */,
 				BFE41C472B87D64C004462A4 /* HotOrBotApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
