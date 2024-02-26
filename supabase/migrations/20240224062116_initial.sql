@@ -63,3 +63,9 @@ returns setof jsonb as $$
   join profiles p on ((p.user_id is null or p.user_id != auth.uid()) and (m.profile_id = p.id or m.matched_profile_id = p.id))
   where m.profile_id = (select id from profiles where user_id = auth.uid()) or m.matched_profile_id = (select id from profiles where user_id = auth.uid());
 $$ language sql stable;
+
+create or replace function send_message(match_id uuid, message text)
+returns void as $$
+  insert into messages (match_id, sender_id, message)
+  values (match_id, (select id from profiles where user_id = auth.uid()), message);
+$$ language sql;

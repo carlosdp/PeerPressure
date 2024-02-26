@@ -16,7 +16,11 @@ struct MatchController: View {
     private var profileModel = ProfileViewModel.shared
     
     var body: some View {
-        MatchView(match: match, profile: profileModel.profile!, messages: chatModel.messages)
+        MatchView(match: match, profile: profileModel.profile!, messages: chatModel.messages) { message in
+            Task {
+                await chatModel.sendMessage(matchId: match.id, message: message)
+            }
+        }
             .task {
                 Task {
                     await chatModel.fetchMessages(matchId: match.id)
