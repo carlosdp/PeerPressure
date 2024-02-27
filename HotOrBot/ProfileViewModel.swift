@@ -77,11 +77,11 @@ class ProfileViewModel {
     
     private func prepareProfile(_ profile: Profile) async throws -> Profile {
         if let profileId = profile.id {
-            if let profileImageData = profile.profilePhoto?.jpegData(compressionQuality: 1.0) {
+            if let profileImageData = profile.profilePhoto?.pngData() {
                 let imageId = UUID()
                 
-                let key = "\(profileId)/profile/\(imageId).jpg"
-                try await supabase.storage.from("photos").upload(path: key, file: profileImageData)
+                let key = "\(profileId)/profile/\(imageId).png"
+                try await supabase.storage.from("photos").upload(path: key, file: profileImageData, options: .init(contentType: "image/png"))
                 
                 profile.profilePhotoKey = key
             }

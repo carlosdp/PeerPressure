@@ -2,7 +2,7 @@ import { rawMessage, generateImage } from './utils.js';
 import { createClient } from '@supabase/supabase-js';
 import axios from 'axios';
 
-const supabase = createClient('http://localhost:54321', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0');
+const supabase = createClient('http://localhost:54321', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU');
 
 async function generateProfile(location, age, gender, prompt) {
   console.log(`Generating profile for ${location}, (age: ${age}, gender: ${gender})...`)
@@ -53,11 +53,12 @@ async function generateProfile(location, age, gender, prompt) {
 
   if (message.content) {
     console.error('Error generating profile: content returned from message');
+    return;
   }
 
   const args = JSON.parse(message.tool_calls[0].function.arguments);
 
-  const { error } = await supabase.from('profiles').insert({
+  const { data: profile, error } = await supabase.from('profiles').insert({
     first_name: args.first_name,
     // todo: make more random
     birth_date: new Date(new Date().getFullYear() - age, 1, 1),
@@ -68,12 +69,58 @@ async function generateProfile(location, age, gender, prompt) {
     biographical_data: {
       college: args.college,
     }
-  });
+  }).select().single();
 
   if (error) {
     console.error('Error inserting profile into database:', error);
 
     throw new Error('Error inserting profile into database');
+  }
+
+  console.log('Coming up with a profile photo...');
+
+  const imageMessage = await rawMessage('gpt-3.5-turbo', [
+    {
+      role: 'system',
+      content: `You are an expert photographer for dating profile photos. Based on the following dating profile, describe a cool, attractive profile photo for the person. Come up with a detailed description of the person in your description, based on their profile data. The prompt should be simple, for example: "a beautiful blonde haired girl, sitting on the grass with friends in the courtyard of a college campus, fall leaves on the ground, everyone smiling"`
+    },
+    {
+      role: 'user',
+      content: JSON.stringify(args),
+    },
+    {
+      role: 'system',
+      content: 'Return prompt only in your message',
+    }
+  ],
+  {
+    temperature: 0.5,
+  });
+
+  if (!imageMessage.content) {
+    console.error('Error generating image description: no content returned from message');
+    return;
+  }
+
+  console.log('Generating profile image...');
+  console.log(imageMessage.content);
+
+  const image = await generateImage(`${imageMessage.content}, hyper realistic, natural, real`, '1024x1792', 'natural');
+  const imageKey = `${profile.id}/profile/${Math.random().toString(36).substring(7)}.png`;
+  console.log(imageKey);
+
+  const { error: imageError } = await supabase.storage.from('photos').upload(imageKey, image, { contentType: 'image/png' });
+  if (imageError) {
+    console.error('Error uploading profile image to storage:', imageError);
+    return;
+  }
+
+  const { error: updateError } = await supabase.from('profiles').update({
+    profile_photo_key: imageKey,
+  }).eq('id', profile.id);
+  if (updateError) {
+    console.error('Error updating profile photo key:', updateError);
+    return;
   }
 }
 
