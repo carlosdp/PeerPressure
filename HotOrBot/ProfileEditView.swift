@@ -8,9 +8,47 @@
 import SwiftUI
 import PhotosUI
 
+struct HeightField: View {
+    @Binding var heightInFeet: Double
+
+    @State private var feet: Int = 0
+    @State private var inches: Int = 0
+    
+    let maxFeet = 10
+    let maxInches = 11
+
+    var body: some View {
+        HStack {
+            Picker(selection: $feet, label: Text("Feet")) {
+                ForEach(2...maxFeet, id: \.self) {
+                    Text("\($0) ft")
+                }
+            }.pickerStyle(WheelPickerStyle())
+
+            Picker(selection: $inches, label: Text("Inches")) {
+                ForEach(0...maxInches, id: \.self) {
+                    Text("\($0) in")
+                }
+            }.pickerStyle(WheelPickerStyle())
+        }
+        .onAppear(perform: {
+            let totalInches = Int(round(heightInFeet * 12))
+            feet = totalInches / 12
+            inches = totalInches % 12
+        })
+        .onChange(of: feet) {
+            heightInFeet = Double(feet) + Double(inches) / 12.0
+        }
+        .onChange(of: inches) {
+            heightInFeet = Double(feet) + Double(inches) / 12.0
+        }
+    }
+}
+
 enum ProfileFieldValue {
     case string(Binding<String>)
     case date(Binding<Date>)
+    case height(Binding<Double>)
 }
 
 struct ProfileEditItemView: View {
@@ -28,6 +66,8 @@ struct ProfileEditItemView: View {
                     DatePicker(label, selection: value, displayedComponents: [.date])
                         .datePickerStyle(.wheel)
                         .labelsHidden()
+                case .height(let value):
+                    HeightField(heightInFeet: value)
                 }
             }
             .padding(.horizontal)
@@ -55,9 +95,7 @@ struct ProfileEditView: View {
             Section("Basics") {
                 ProfileEditItemView(icon: "person", label: "First Name", value: .string($profile.firstName))
                 ProfileEditItemView(icon: "birthday.cake", label: "Birthday", value: .date($profile.birthDate))
-                /*
-                ProfileEditItemView(icon: "ruler", label: "Height")
-                */
+                ProfileEditItemView(icon: "ruler", label: "Height", value: .height($profile.biographicalData.height ?? 5.0))
             }
             
             Section("Background") {
