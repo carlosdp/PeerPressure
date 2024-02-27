@@ -12,6 +12,8 @@ create table profiles (
   display_location varchar not null,
   biographical_data jsonb not null default '{}',
   preferences jsonb not null default '{}',
+  profile_photo_key varchar,
+  blocks jsonb not null default '[]',
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
@@ -33,6 +35,13 @@ create table messages (
 );
 
 insert into storage.buckets (id, name) values ('photos', 'photos');
+create policy "Users can upload photos for their profile"
+on storage.objects for insert with check (
+    bucket_id = 'photos'
+    and (storage.foldername(name))[1]::uuid = (select id from profiles where user_id = auth.uid())
+);
+create policy "Authenticated users can read photos"
+on storage.objects for select using ( bucket_id = 'photos' and auth.role() = 'authenticated' );
 
 create or replace function get_profile()
 returns profiles as $$

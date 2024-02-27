@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import PhotosUI
 
 enum ProfileFieldValue {
     case string(Binding<String>)
@@ -47,6 +48,10 @@ struct ProfileEditView: View {
     
     var body: some View {
         List {
+            Section("Photos") {
+                ProfileImageEditor(image: $profile.profilePhoto)
+            }
+            
             Section("Basics") {
                 ProfileEditItemView(icon: "person", label: "First Name", value: .string($profile.firstName))
                 ProfileEditItemView(icon: "birthday.cake", label: "Birthday", value: .date($profile.birthDate))

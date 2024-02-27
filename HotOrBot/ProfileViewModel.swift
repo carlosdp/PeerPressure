@@ -18,6 +18,7 @@ class ProfileViewModel {
     func fetchProfile() async {
         do {
             self.profile = try await supabase.database.rpc("get_profile").select().execute().value
+            try await self.profile?.fetchProfilePhoto()
         } catch {
             print("Error fetching profile: \(error)")
         }
@@ -47,7 +48,9 @@ class ProfileViewModel {
                     return
                 }
                 
-                self.profile = try await supabase.database.from("profiles").update(profile).eq("id", value: profileId).select().single().execute().value
+                let preparedProfile = try await prepareProfile(profile)
+                
+                self.profile = try await supabase.database.from("profiles").update(preparedProfile).eq("id", value: profileId).select().single().execute().value
             } catch {
                 print("Error updating profile: \(error)")
             }
@@ -61,12 +64,29 @@ class ProfileViewModel {
             do {
                 profile.userId = user.id
                 
-                self.profile = try await supabase.database.from("profiles").upsert(profile).select().single().execute().value
+                let preparedProfile = try await prepareProfile(profile)
+                
+                self.profile = try await supabase.database.from("profiles").upsert(preparedProfile).select().single().execute().value
             } catch {
                 print("Error upserting profile: \(error)")
             }
         } else {
             print("User not logged in, cannot upsert profile")
         }
+    }
+    
+    private func prepareProfile(_ profile: Profile) async throws -> Profile {
+        if let profileId = profile.id {
+            if let profileImageData = profile.profilePhoto?.jpegData(compressionQuality: 1.0) {
+                let imageId = UUID()
+                
+                let key = "\(profileId)/profile/\(imageId).jpg"
+                try await supabase.storage.from("photos").upload(path: key, file: profileImageData)
+                
+                profile.profilePhotoKey = key
+            }
+        }
+        
+        return profile
     }
 }

@@ -23,6 +23,7 @@
 		BF09FDBF2B8D212100F97F76 /* ProfileController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF09FDBE2B8D212100F97F76 /* ProfileController.swift */; };
 		BF09FDC12B8D298F00F97F76 /* ProfileEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF09FDC02B8D298F00F97F76 /* ProfileEditView.swift */; };
 		BF09FDC52B8D55B500F97F76 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF09FDC42B8D55B500F97F76 /* Utils.swift */; };
+		BF67C87A2B8E2E8F00899472 /* ProfileImageEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF67C8792B8E2E8F00899472 /* ProfileImageEditor.swift */; };
 		BF74A3A12B8A7D9E00D87E99 /* ProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF74A3A02B8A7D9E00D87E99 /* ProfileViewModel.swift */; };
 		BF74A3A32B8A7F4A00D87E99 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF74A3A22B8A7F4A00D87E99 /* OnboardingView.swift */; };
 		BF74A3A62B8AA70100D87E99 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF74A3A52B8AA70100D87E99 /* MapKit.framework */; };
@@ -60,6 +61,7 @@
 		BF09FDBE2B8D212100F97F76 /* ProfileController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileController.swift; sourceTree = "<group>"; };
 		BF09FDC02B8D298F00F97F76 /* ProfileEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileEditView.swift; sourceTree = "<group>"; };
 		BF09FDC42B8D55B500F97F76 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
+		BF67C8792B8E2E8F00899472 /* ProfileImageEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileImageEditor.swift; sourceTree = "<group>"; };
 		BF74A3A02B8A7D9E00D87E99 /* ProfileViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModel.swift; sourceTree = "<group>"; };
 		BF74A3A22B8A7F4A00D87E99 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		BF74A3A52B8AA70100D87E99 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
@@ -148,6 +150,7 @@
 				BF09FDBE2B8D212100F97F76 /* ProfileController.swift */,
 				BF09FDC02B8D298F00F97F76 /* ProfileEditView.swift */,
 				BF09FDC42B8D55B500F97F76 /* Utils.swift */,
+				BF67C8792B8E2E8F00899472 /* ProfileImageEditor.swift */,
 			);
 			path = HotOrBot;
 			sourceTree = "<group>";
@@ -256,6 +259,7 @@
 				BF74A3A12B8A7D9E00D87E99 /* ProfileViewModel.swift in Sources */,
 				BFE41C682B87FA38004462A4 /* ProfileView.swift in Sources */,
 				BF0186D92B87FF540051746C /* PreviewData.swift in Sources */,
+				BF67C87A2B8E2E8F00899472 /* ProfileImageEditor.swift in Sources */,
 				BF09FDB72B8C591D00F97F76 /* MatchViewModel.swift in Sources */,
 				BF09FDB52B8C58FC00F97F76 /* MatchesController.swift in Sources */,
 				BFE41C6A2B87FA4C004462A4 /* SwipeView.swift in Sources */,

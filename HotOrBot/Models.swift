@@ -7,6 +7,7 @@
 
 import Foundation
 import CoreLocation
+import UIKit
 
 struct BiographicalData: Codable {
     // height in feet
@@ -66,6 +67,9 @@ class Profile: Codable {
     var location: CLLocationCoordinate2D?
     var displayLocation: String = ""
     var biographicalData: BiographicalData = BiographicalData()
+    var profilePhotoKey: String?
+    
+    var profilePhoto: UIImage?
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -76,10 +80,10 @@ class Profile: Codable {
         case location
         case displayLocation = "display_location"
         case biographicalData = "biographical_data"
+        case profileImageKey = "profile_photo_key"
     }
     
     init() {
-        
     }
     
     init(id: UUID, firstName: String, birthDate: Date, biographicalData: BiographicalData) {
@@ -104,6 +108,7 @@ class Profile: Codable {
         self.birthDate = birthDate
         self.displayLocation = try container.decode(String.self, forKey: .displayLocation)
         self.biographicalData = try container.decode(BiographicalData.self, forKey: .biographicalData)
+        self.profilePhotoKey = try container.decodeIfPresent(String.self, forKey: .profileImageKey)
     }
     
     func encode(to encoder: Encoder) throws {
@@ -120,6 +125,14 @@ class Profile: Codable {
         }
         try container.encode(self.displayLocation, forKey: .displayLocation)
         try container.encode(self.biographicalData, forKey: .biographicalData)
+        try container.encode(self.profilePhotoKey, forKey: .profileImageKey)
+    }
+    
+    func fetchProfilePhoto() async throws {
+        if let key = self.profilePhotoKey {
+            let data = try await supabase.storage.from("photos").download(path: key)
+            self.profilePhoto = UIImage(data: data)
+        }
     }
 }
 
