@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Functions
 
 @Observable
 class ChatViewModel {
@@ -14,11 +15,6 @@ class ChatViewModel {
     struct SendMessageParams: Encodable {
         let matchId: UUID
         let message: String
-        
-        enum CodingKeys: String, CodingKey {
-            case matchId = "match_id"
-            case message
-        }
     }
     
     func fetchMessages(matchId: UUID) async {
@@ -31,7 +27,7 @@ class ChatViewModel {
     
     func sendMessage(matchId: UUID, message: String) async {
         do {
-            try await supabase.database.rpc("send_message", params: SendMessageParams(matchId: matchId, message: message)).execute()
+            try await supabaseF.functions.invoke("send-chat-message", options: FunctionInvokeOptions(body: SendMessageParams(matchId: matchId, message: message)))
             await fetchMessages(matchId: matchId)
         } catch {
             print("Error sending message: \(error)")
