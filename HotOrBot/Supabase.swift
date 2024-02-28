@@ -29,6 +29,16 @@ let supabaseF = SupabaseClient(
     supabaseKey: supabaseKey
 )
 
+let encoder: JSONEncoder = {
+  let encoder = PostgrestClient.Configuration.jsonEncoder
+  return encoder
+}()
+
+let decoder: JSONDecoder = {
+  let decoder = PostgrestClient.Configuration.jsonDecoder
+  return decoder
+}()
+
 @Observable
 class SupabaseAuth {
     static let shared = SupabaseAuth()

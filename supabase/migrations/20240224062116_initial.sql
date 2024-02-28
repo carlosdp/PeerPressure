@@ -34,6 +34,8 @@ create table messages (
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
+alter publication supabase_realtime add table messages;
+
 insert into storage.buckets (id, name) values ('photos', 'photos');
 create policy "Users can upload photos for their profile"
 on storage.objects for insert with check (
