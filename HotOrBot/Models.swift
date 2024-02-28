@@ -145,13 +145,21 @@ extension Profile {
     }
 }
 
-class Match: Identifiable, Decodable {
+class Match: Identifiable, Decodable, Equatable, Hashable {
     var id: UUID
     var profile: Profile
     
     init(id: UUID, profile: Profile) {
         self.id = id
         self.profile = profile
+    }
+    
+    static func == (lhs: Match, rhs: Match) -> Bool {
+        lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 }
 

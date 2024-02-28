@@ -21,9 +21,14 @@ struct ContentView: View {
                                 Image(systemName: "person.2")
                             }
                         
-                        MatchesController()
+                        LikesController()
                             .tabItem {
                                 Image(systemName: "heart")
+                            }
+                        
+                        MatchesController()
+                            .tabItem {
+                                Image(systemName: "message")
                             }
                         
                         ProfileController()

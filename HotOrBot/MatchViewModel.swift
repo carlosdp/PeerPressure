@@ -11,11 +11,37 @@ import Foundation
 class MatchViewModel {
     var matches: [Match] = []
     
+    struct MatchResponse: Encodable {
+        let isMatch: Bool
+        let matchAcceptedAt: Date
+        
+        enum CodingKeys: String, CodingKey {
+            case isMatch = "is_match"
+            case matchAcceptedAt = "match_accepted_at"
+        }
+    }
+    
     func fetchMatches() async {
         do {
             self.matches = try await supabase.database.rpc("get_matches").execute().value
         } catch {
             print("Error fetching matches: \(error)")
+        }
+    }
+    
+    func fetchLikes() async {
+        do {
+            self.matches = try await supabase.database.rpc("get_likes").execute().value
+        } catch {
+            print("Error fetching likes: \(error)")
+        }
+    }
+    
+    func respondToLike(matchId: UUID, accept: Bool) async {
+        do {
+            try await supabase.database.from("matches").update(MatchResponse(isMatch: accept, matchAcceptedAt: .now)).eq("id", value: matchId).execute()
+        } catch {
+            print("Error responding to like: \(error)")
         }
     }
 }

@@ -23,6 +23,7 @@ create table matches (
   profile_id uuid references profiles not null,
   matched_profile_id uuid references profiles not null,
   is_match boolean not null,
+  match_accepted_at timestamp with time zone,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
@@ -72,7 +73,16 @@ returns setof jsonb as $$
     , 'gender', p.gender, 'location', p.location, 'display_location', p.display_location, 'biographical_data', p.biographical_data, 'preferences', p.preferences))
   from matches m
   join profiles p on ((p.user_id is null or p.user_id != auth.uid()) and (m.profile_id = p.id or m.matched_profile_id = p.id))
-  where m.profile_id = (select id from profiles where user_id = auth.uid()) or m.matched_profile_id = (select id from profiles where user_id = auth.uid());
+  where m.is_match = true and m.match_accepted_at is not null and (m.profile_id = (select id from profiles where user_id = auth.uid()) or m.matched_profile_id = (select id from profiles where user_id = auth.uid()));
+$$ language sql stable;
+
+create or replace function get_likes()
+returns setof jsonb as $$
+  select jsonb_build_object('id', m.id, 'profile', jsonb_build_object('id', p.id, 'first_name', p.first_name, 'birth_date', p.birth_date
+    , 'gender', p.gender, 'location', p.location, 'display_location', p.display_location, 'biographical_data', p.biographical_data, 'preferences', p.preferences))
+  from matches m
+  join profiles p on ((p.user_id is null or p.user_id != auth.uid()) and (m.profile_id = p.id or m.matched_profile_id = p.id))
+  where m.is_match = true and m.match_accepted_at is null and m.matched_profile_id = (select id from profiles where user_id = auth.uid());
 $$ language sql stable;
 
 create or replace function send_message(match_id uuid, message text)
