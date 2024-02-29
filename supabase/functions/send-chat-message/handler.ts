@@ -72,7 +72,7 @@ db.listenQueue(async ({ queue, matchId }) => {
       temperature: 0.5,
     });
 
-    if (!message.content) {
+    if (!message.content || typeof message.content !== "string") {
       console.error("Message content missing");
       return;
     }
