@@ -25,6 +25,10 @@ class SwipeViewModel {
         do {
             let profiles: [Profile] = try await supabase.database.rpc("get_unmatched_profiles").select().execute().value
             queuedProfiles = profiles
+            
+            for profile in profiles {
+                try await profile.fetchProfilePhoto()
+            }
         } catch {
             print("Could not fetch profiles: \(error)")
         }

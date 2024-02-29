@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 func dateFromString(from: String) -> Date {
     let dateFormatter = DateFormatter()
@@ -23,7 +24,8 @@ let profiles = [
             height: 6.2,
             college: "Carnegie Mellon University",
             work: "CTO at Games Startup"
-        )
+        ),
+        profilePhoto: UIImage(named: "profile-photo-1")
     ),
     Profile(
         id: UUID(),
@@ -33,7 +35,8 @@ let profiles = [
             height: 5.5,
             college: "Brown University",
             work: "Lawyer"
-        )
+        ),
+        profilePhoto: UIImage(named: "profile-photo-1")
     )
 ]
 

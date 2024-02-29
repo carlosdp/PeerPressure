@@ -24,6 +24,10 @@ class MatchViewModel {
     func fetchMatches() async {
         do {
             self.matches = try await supabase.database.rpc("get_matches").execute().value
+            
+            for match in self.matches {
+                try await match.profile.fetchProfilePhoto()
+            }
         } catch {
             print("Error fetching matches: \(error)")
         }
@@ -32,6 +36,10 @@ class MatchViewModel {
     func fetchLikes() async {
         do {
             self.matches = try await supabase.database.rpc("get_likes").execute().value
+            
+            for match in self.matches {
+                try await match.profile.fetchProfilePhoto()
+            }
         } catch {
             print("Error fetching likes: \(error)")
         }

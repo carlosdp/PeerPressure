@@ -24,7 +24,8 @@ struct LikesView: View {
                 onUserAction(match.id, action)
             }
         }
-        .navigationTitle("Matches")
+        .navigationTitle("Likes")
+        .navigationBarTitleDisplayMode(.large)
     }
 }
 

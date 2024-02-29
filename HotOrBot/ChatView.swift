@@ -26,7 +26,7 @@ struct ProfileHeader: View {
     let minimumHeight: CGFloat = 30
     
     var body: some View {
-        Image(uiImage: UIImage(named: "profile-photo-1")!)
+        Image(uiImage: profile.profilePhoto ?? UIImage(named: "profile-photo-1")!)
             .resizable()
             .aspectRatio(contentMode: .fill)
             .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
@@ -98,7 +98,7 @@ struct ChatView: View {
     
     var body: some View {
         OffsetObservingScrollView(offset: $offset) {
-            ProfileHeader(profile: profile, scrollOffset: $offset)
+            ProfileHeader(profile: matchedProfile, scrollOffset: $offset)
             
             ForEach(messages) { message in
                 ChatItemView(
