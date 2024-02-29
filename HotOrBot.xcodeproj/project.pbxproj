@@ -103,6 +103,78 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		BF67C8852B912C2100899472 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				BF74A3A22B8A7F4A00D87E99 /* OnboardingView.swift */,
+				BF09FDAE2B8BC7F200F97F76 /* OnboardingController.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		BF67C8862B912C4700899472 /* Matches */ = {
+			isa = PBXGroup;
+			children = (
+				BF0186D42B87FBCB0051746C /* MatchesView.swift */,
+				BF09FDB02B8C55C500F97F76 /* MatchController.swift */,
+				BF09FDB42B8C58FC00F97F76 /* MatchesController.swift */,
+				BF09FDB22B8C55CE00F97F76 /* MatchView.swift */,
+				BF09FDB62B8C591D00F97F76 /* MatchViewModel.swift */,
+			);
+			path = Matches;
+			sourceTree = "<group>";
+		};
+		BF67C8872B912C6C00899472 /* Profile */ = {
+			isa = PBXGroup;
+			children = (
+				BF09FDBE2B8D212100F97F76 /* ProfileController.swift */,
+				BF09FDC02B8D298F00F97F76 /* ProfileEditView.swift */,
+				BF67C8792B8E2E8F00899472 /* ProfileImageEditor.swift */,
+				BF74A3A02B8A7D9E00D87E99 /* ProfileViewModel.swift */,
+				BFE41C672B87FA38004462A4 /* ProfileView.swift */,
+			);
+			path = Profile;
+			sourceTree = "<group>";
+		};
+		BF67C8882B912C8000899472 /* Swiping */ = {
+			isa = PBXGroup;
+			children = (
+				BF0186DA2B8904730051746C /* SwipeViewModel.swift */,
+				BF0186DC2B89056F0051746C /* SwipeController.swift */,
+				BFE41C692B87FA4C004462A4 /* SwipeView.swift */,
+			);
+			path = Swiping;
+			sourceTree = "<group>";
+		};
+		BF67C8892B912C9500899472 /* Chat */ = {
+			isa = PBXGroup;
+			children = (
+				BF09FDB82B8CFD0500F97F76 /* ChatView.swift */,
+				BF09FDBC2B8D052500F97F76 /* ChatController.swift */,
+				BF09FDBA2B8D039000F97F76 /* ChatViewModel.swift */,
+			);
+			path = Chat;
+			sourceTree = "<group>";
+		};
+		BF67C88A2B912CA800899472 /* Likes */ = {
+			isa = PBXGroup;
+			children = (
+				BF67C87B2B8FC4FD00899472 /* LikesController.swift */,
+				BF67C87D2B8FC51500899472 /* LikesView.swift */,
+				BF67C87F2B8FC57700899472 /* LikeView.swift */,
+			);
+			path = Likes;
+			sourceTree = "<group>";
+		};
+		BF67C88B2B912CB700899472 /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				BF09FDC42B8D55B500F97F76 /* Utils.swift */,
+				BF67C8832B90349000899472 /* OffsetObservingScrollView.swift */,
+			);
+			path = Helpers;
+			sourceTree = "<group>";
+		};
 		BF74A3A42B8AA70100D87E99 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -131,38 +203,22 @@
 		BFE41C452B87D64C004462A4 /* HotOrBot */ = {
 			isa = PBXGroup;
 			children = (
-				BF74A3A72B8AAADE00D87E99 /* Info.plist */,
-				BF0186DE2B890F3A0051746C /* HotOrBot.entitlements */,
 				BFE41C462B87D64C004462A4 /* HotOrBotApp.swift */,
 				BFE41C482B87D64C004462A4 /* ContentView.swift */,
+				BF67C88A2B912CA800899472 /* Likes */,
+				BF67C8892B912C9500899472 /* Chat */,
+				BF67C8882B912C8000899472 /* Swiping */,
+				BF67C8872B912C6C00899472 /* Profile */,
+				BF67C8862B912C4700899472 /* Matches */,
+				BF67C8852B912C2100899472 /* Onboarding */,
+				BF67C88B2B912CB700899472 /* Helpers */,
+				BF74A3A72B8AAADE00D87E99 /* Info.plist */,
+				BF0186DE2B890F3A0051746C /* HotOrBot.entitlements */,
 				BFE41C4A2B87D650004462A4 /* Assets.xcassets */,
 				BFE41C4C2B87D650004462A4 /* Preview Content */,
 				BFE41C612B87D6A5004462A4 /* Supabase.swift */,
 				BFE41C632B87F96D004462A4 /* LoginView.swift */,
-				BFE41C672B87FA38004462A4 /* ProfileView.swift */,
-				BFE41C692B87FA4C004462A4 /* SwipeView.swift */,
-				BF0186D42B87FBCB0051746C /* MatchesView.swift */,
 				BF0186D62B87FDA60051746C /* Models.swift */,
-				BF0186DA2B8904730051746C /* SwipeViewModel.swift */,
-				BF0186DC2B89056F0051746C /* SwipeController.swift */,
-				BF74A3A02B8A7D9E00D87E99 /* ProfileViewModel.swift */,
-				BF74A3A22B8A7F4A00D87E99 /* OnboardingView.swift */,
-				BF09FDAE2B8BC7F200F97F76 /* OnboardingController.swift */,
-				BF09FDB02B8C55C500F97F76 /* MatchController.swift */,
-				BF09FDB22B8C55CE00F97F76 /* MatchView.swift */,
-				BF09FDB42B8C58FC00F97F76 /* MatchesController.swift */,
-				BF09FDB62B8C591D00F97F76 /* MatchViewModel.swift */,
-				BF09FDB82B8CFD0500F97F76 /* ChatView.swift */,
-				BF09FDBA2B8D039000F97F76 /* ChatViewModel.swift */,
-				BF09FDBC2B8D052500F97F76 /* ChatController.swift */,
-				BF09FDBE2B8D212100F97F76 /* ProfileController.swift */,
-				BF09FDC02B8D298F00F97F76 /* ProfileEditView.swift */,
-				BF09FDC42B8D55B500F97F76 /* Utils.swift */,
-				BF67C8792B8E2E8F00899472 /* ProfileImageEditor.swift */,
-				BF67C87B2B8FC4FD00899472 /* LikesController.swift */,
-				BF67C87D2B8FC51500899472 /* LikesView.swift */,
-				BF67C87F2B8FC57700899472 /* LikeView.swift */,
-				BF67C8832B90349000899472 /* OffsetObservingScrollView.swift */,
 			);
 			path = HotOrBot;
 			sourceTree = "<group>";
