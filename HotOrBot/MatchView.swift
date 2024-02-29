@@ -29,32 +29,6 @@ struct MatchView: View {
     
     var body: some View {
         VStack {
-            ZStack {
-                Image(uiImage: UIImage(named: "profile-photo-1")!)
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
-                    .clipShape(.rect(cornerRadius: 20))
-                
-                VStack(alignment: .leading) {
-                    Spacer()
-                    
-                    HStack(alignment: .top) {
-                        Text(match.profile.firstName)
-                            .font(.system(size: 64, weight: .bold))
-                            .foregroundStyle(.white)
-                        Text(String(match.profile.getAgeInYears()))
-                            .font(.system(size: 32, weight: .bold))
-                            .foregroundStyle(.white)
-                        
-                        Spacer()
-                    }
-                }
-                .padding(20)
-                .frame(minWidth: 0, maxWidth: .infinity)
-            }
-            .frame(maxHeight: 175)
-            
             ChatView(profile: profile, matchedProfile: match.profile, messages: messages)
             
             ChatCompose { message in
@@ -62,14 +36,16 @@ struct MatchView: View {
                     onSend(message)
                 }
             }
+            .padding(.horizontal)
+            .padding(.bottom)
         }
-        .padding(.horizontal)
-        .padding(.bottom)
     }
 }
 
 #Preview {
-    MatchView(match: matches[0], profile: profiles[0], messages: messages) { message in
-        print(message)
+    NavigationStack {
+        MatchView(match: matches[0], profile: profiles[0], messages: messages) { message in
+            print(message)
+        }
     }
 }

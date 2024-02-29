@@ -41,26 +41,18 @@ let matches = [
     Match(id: UUID(), profile: profiles[1])
 ]
 
-let messages = [
-    ChatMessage(
-        id: UUID(),
-        matchId: matches[0].id,
-        senderId: profiles[1].id!,
-        message: "Hey! How are you doing?",
-        createdAt: .now
-    ),
-    ChatMessage(
-        id: UUID(),
-        matchId: matches[0].id,
-        senderId: profiles[0].id!,
-        message: "I'm good! How are you doing?",
-        createdAt: .now
-    ),
-    ChatMessage(
-        id: UUID(),
-        matchId: matches[0].id,
-        senderId: profiles[1].id!,
-        message: "Pretty good, having a good weekend?",
-        createdAt: .now
-    ),
-]
+let messages: [ChatMessage] = {
+    var messages = [ChatMessage]()
+    
+    for i in 1...20 {
+        messages.append(ChatMessage(
+            id: UUID(),
+            matchId: matches[0].id,
+            senderId: profiles[i % 2].id!,
+            message: "Hey! How are you doing?",
+            createdAt: .now
+        ))
+    }
+    
+    return messages
+}()

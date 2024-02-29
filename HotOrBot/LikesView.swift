@@ -12,23 +12,19 @@ struct LikesView: View {
     var onUserAction: (UUID, SwipeAction) -> Void
     
     var body: some View {
-        VStack(alignment: .leading) {
-            Text("Likes")
-                .font(.title)
-            List(matches) { match in
-                NavigationLink(value: match, label: {
-                    MatchItemView(profile: match.profile)
-                })
-            }
-            .listStyle(.plain)
-            .navigationDestination(for: Match.self) { match in
-                LikeView(match: match) { action in
-                    onUserAction(match.id, action)
-                }
-            }
-                
+        List(matches) { match in
+            NavigationLink(value: match, label: {
+                MatchItemView(profile: match.profile)
+            })
+            .listRowSeparator(.hidden)
         }
-        .padding(.horizontal)
+        .listStyle(.plain)
+        .navigationDestination(for: Match.self) { match in
+            LikeView(match: match) { action in
+                onUserAction(match.id, action)
+            }
+        }
+        .navigationTitle("Matches")
     }
 }
 

@@ -26,19 +26,17 @@ struct MatchesView: View {
     var matches: [Match]
     
     var body: some View {
-        VStack(alignment: .leading) {
-            Text("Matches")
-                .font(.title)
-            List(matches) { match in
-                NavigationLink {
-                    MatchController(match: match)
-                } label: {
-                    MatchItemView(profile: match.profile)
-                }
+        List(matches) { match in
+            NavigationLink {
+                MatchController(match: match)
+            } label: {
+                MatchItemView(profile: match.profile)
             }
-            .listStyle(.plain)
+            .listRowSeparator(.hidden)
         }
-        .padding(.horizontal)
+        .listStyle(.plain)
+        .navigationTitle("Matches")
+        .navigationBarTitleDisplayMode(.large)
     }
 }
 
