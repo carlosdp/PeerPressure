@@ -90,3 +90,8 @@ returns void as $$
   insert into messages (match_id, sender_id, message)
   values (match_id, (select id from profiles where user_id = auth.uid()), message);
 $$ language sql;
+
+create or replace function get_pending_bot_matches()
+returns setof matches as $$
+  select m.* from matches m left join profiles p on m.matched_profile_id = p.id where p.user_id is null and m.match_accepted_at is null and m.is_match = true;
+$$ language sql stable;

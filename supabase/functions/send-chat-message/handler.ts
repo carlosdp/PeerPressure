@@ -62,9 +62,9 @@ db.listenQueue(async ({ queue, matchId }) => {
         - You may come up with life events that are consistent with your profile, as long as you are consistent about them.
         - Be natural in your answers.
 
-        Your Profile: ${botProfile}
+        Your Profile: ${JSON.stringify(botProfile)}
 
-        Their Profile: ${userProfile}
+        Their Profile: ${JSON.stringify(userProfile)}
         `,
       },
       ...messages,

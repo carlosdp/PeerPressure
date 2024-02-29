@@ -3,6 +3,7 @@ import {
   Handler,
   serve,
 } from "https://deno.land/std@0.131.0/http/server.ts";
+import { matchJob } from "./jobs.ts";
 
 console.log("Setting up server function...");
 
@@ -34,6 +35,8 @@ function localdevHandler(req: Request, connInfo: ConnInfo) {
     );
   }
 }
+
+Deno.cron("match-bots", "* * * * *", matchJob);
 
 serve(localdevHandler);
 
