@@ -23,7 +23,6 @@ export async function matchJob() {
       if (Date.now() >= tracker.value.matchTime) {
         // match them
         const { error: matchError } = await supabase.from("matches").update({
-          is_match: true,
           match_accepted_at: new Date(),
         }).eq("id", match.id);
         if (matchError) {
@@ -89,10 +88,11 @@ export async function matchJob() {
           matchTime,
         });
       } else {
-        await supabase.from("matches").update({ is_match: false }).eq(
-          "id",
-          match.id,
-        );
+        await supabase.from("matches").update({ match_rejected_at: new Date() })
+          .eq(
+            "id",
+            match.id,
+          );
       }
     }
   }
