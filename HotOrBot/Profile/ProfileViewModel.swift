@@ -19,6 +19,7 @@ class ProfileViewModel {
         do {
             self.profile = try await supabase.database.rpc("get_profile").select().execute().value
             try await self.profile?.fetchProfilePhoto()
+            try await self.profile?.fetchProfilePhotos()
         } catch {
             print("Error fetching profile: \(error)")
         }
@@ -84,6 +85,19 @@ class ProfileViewModel {
                 try await supabase.storage.from("photos").upload(path: key, file: profileImageData, options: .init(contentType: "image/png"))
                 
                 profile.profilePhotoKey = key
+            }
+            
+            let unuploadedPhotos = profile.photos.filter({ $0.key == nil })
+            
+            for photo in unuploadedPhotos {
+                if let imageData = photo.image?.pngData() {
+                    let imageId = UUID()
+                    
+                    let key = "\(profileId)/profile/\(imageId).png"
+                    try await supabase.storage.from("photos").upload(path: key, file: imageData, options: .init(contentType: "image/png"))
+                    
+                    profile.photoKeys.append(key)
+                }
             }
         }
         

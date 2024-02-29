@@ -69,8 +69,15 @@ class Profile: Codable {
     var displayLocation: String = ""
     var biographicalData: BiographicalData = BiographicalData()
     var profilePhotoKey: String?
+    var photoKeys: [String] = []
     
     var profilePhoto: UIImage?
+    var photos: [ProfilePhoto] = []
+    
+    struct ProfilePhoto {
+        var key: String?
+        var image: UIImage?
+    }
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -82,6 +89,7 @@ class Profile: Codable {
         case displayLocation = "display_location"
         case biographicalData = "biographical_data"
         case profilePhotoKey = "profile_photo_key"
+        case photoKeys = "photo_keys"
     }
     
     init() {
@@ -111,6 +119,8 @@ class Profile: Codable {
         self.displayLocation = try container.decode(String.self, forKey: .displayLocation)
         self.biographicalData = try container.decode(BiographicalData.self, forKey: .biographicalData)
         self.profilePhotoKey = try container.decode(Optional<String>.self, forKey: .profilePhotoKey)
+        self.photoKeys = try container.decode(Array<String>.self, forKey: .photoKeys)
+        self.photos = self.photoKeys.map({ ProfilePhoto(key: $0) })
     }
     
     func encode(to encoder: Encoder) throws {
@@ -128,17 +138,27 @@ class Profile: Codable {
         try container.encode(self.displayLocation, forKey: .displayLocation)
         try container.encode(self.biographicalData, forKey: .biographicalData)
         try container.encode(self.profilePhotoKey, forKey: .profilePhotoKey)
+        try container.encode(self.photoKeys, forKey: .photoKeys)
     }
     
     func fetchProfilePhoto() async throws {
-        print("Checking photo for \(self.firstName)")
-        print(self.profilePhoto == nil)
-        print(self.profilePhotoKey)
         if self.profilePhoto == nil, let key = self.profilePhotoKey {
-            print("Loading photo from \(key) for \(self.firstName)")
             let data = try await supabase.storage.from("photos").download(path: key)
             self.profilePhoto = UIImage(data: data)
         }
+    }
+    
+    func fetchProfilePhotos() async throws {
+        for (i, photo) in photos.enumerated() {
+            if photo.image == nil, let key = photo.key {
+                let data = try await supabase.storage.from("photos").download(path: key)
+                photos[i].image = UIImage(data: data)
+            }
+        }
+    }
+    
+    func addPhoto(image: UIImage) {
+        self.photos.append(ProfilePhoto(image: image))
     }
 }
 

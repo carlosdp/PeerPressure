@@ -123,3 +123,80 @@ struct ProfileImageEditor: View {
         }
     }
 }
+
+@Observable
+class ProfileImageAddModel {
+    enum ImageState {
+        case empty
+        case loading(Progress)
+        case success(UIImage)
+        case failure(Error)
+    }
+    
+    var onImage: (UIImage) -> Void
+    var imageState: ImageState = .empty
+    
+    init(onImage: @escaping (UIImage) -> Void) {
+        self.onImage = onImage
+    }
+    
+    var imageSelection: PhotosPickerItem? = nil {
+        didSet {
+            if let imageSelection {
+                let progress = loadTransferable(from: imageSelection)
+                imageState = .loading(progress)
+            } else {
+                imageState = .empty
+            }
+        }
+    }
+    
+    private func loadTransferable(from imageSelection: PhotosPickerItem) -> Progress {
+        return imageSelection.loadTransferable(type: ProfileImage.self) { result in
+            DispatchQueue.main.async {
+                guard imageSelection == self.imageSelection else {
+                    print("Failed to get the selected item.")
+                    return
+                }
+                switch result {
+                case .success(let profileImage?):
+                    self.imageState = .success(profileImage.image)
+                    self.onImage(profileImage.image)
+                case .success(nil):
+                    self.imageState = .empty
+                case .failure(let error):
+                    self.imageState = .failure(error)
+                }
+            }
+        }
+    }
+}
+
+struct ProfileImageAddButton: View {
+    @State
+    private var model: ProfileImageAddModel
+    
+    init(onImage: @escaping (UIImage) -> Void) {
+        self.model = ProfileImageAddModel(onImage: onImage)
+    }
+    
+    var body: some View {
+        Rectangle()
+            .frame(width: 80, height: 80)
+            .clipShape(.rect(cornerRadius: 12))
+            .overlay {
+                switch model.imageState {
+                case .loading(_):
+                    ProgressView()
+                default:
+                    PhotosPicker(selection: $model.imageSelection,
+                                 matching: .images,
+                                 photoLibrary: .shared()) {
+                        Image(systemName: "photo.badge.plus")
+                            .font(.system(size: 40))
+                            .foregroundStyle(.white)
+                    }
+                }
+            }
+    }
+}

@@ -13,6 +13,7 @@ create table profiles (
   biographical_data jsonb not null default '{}',
   preferences jsonb not null default '{}',
   profile_photo_key varchar,
+  photo_keys jsonb not null default '[]',
   blocks jsonb not null default '[]',
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
@@ -61,7 +62,8 @@ $$ language sql;
 create or replace function get_matches()
 returns setof jsonb as $$
   select jsonb_build_object('id', m.id, 'profile', jsonb_build_object('id', p.id, 'first_name', p.first_name, 'birth_date', p.birth_date
-    , 'gender', p.gender, 'location', p.location, 'display_location', p.display_location, 'biographical_data', p.biographical_data, 'preferences', p.preferences, 'profile_photo_key', p.profile_photo_key))
+    , 'gender', p.gender, 'location', p.location, 'display_location', p.display_location, 'biographical_data', p.biographical_data, 'preferences',
+    p.preferences, 'profile_photo_key', p.profile_photo_key, 'photo_keys', p.photo_keys, 'blocks', p.blocks))
   from matches m
   join profiles p on ((p.user_id is null or p.user_id != auth.uid()) and (m.profile_id = p.id or m.matched_profile_id = p.id))
   where m.is_match = true and m.match_accepted_at is not null and (m.profile_id = (select id from profiles where user_id = auth.uid()) or m.matched_profile_id = (select id from profiles where user_id = auth.uid()));

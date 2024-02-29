@@ -90,6 +90,16 @@ struct ProfileEditView: View {
         List {
             Section("Photos") {
                 ProfileImageEditor(image: $profile.profilePhoto)
+                
+                ForEach(profile.photos, id: \.key) { photo in
+                    if let image = photo.image {
+                        ProfileImage(image: image)
+                    }
+                }
+                
+                ProfileImageAddButton { image in
+                    profile.addPhoto(image: image)
+                }
             }
             
             Section("Basics") {
@@ -109,6 +119,15 @@ struct ProfileEditView: View {
                 Text("Done")
             }
         }
+    }
+    
+    @ViewBuilder
+    func ProfileImage(image: UIImage) -> some View {
+        Image(uiImage: image)
+            .resizable()
+            .aspectRatio(contentMode: .fill)
+            .frame(width: 80, height: 80)
+            .clipShape(.rect(cornerRadius: 12))
     }
 }
 
