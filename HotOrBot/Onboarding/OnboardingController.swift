@@ -13,7 +13,7 @@ struct OnboardingController: View {
     var body: some View {
         OnboardingView() { profile in
             Task {
-                await model.upsertProfile(profile)
+                await model.insertProfile(profile)
             }
         }
     }

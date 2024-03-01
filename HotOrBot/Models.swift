@@ -70,9 +70,11 @@ class Profile: Codable {
     var biographicalData: BiographicalData = BiographicalData()
     var profilePhotoKey: String?
     var photoKeys: [String] = []
+    var availablePhotoKeys: [String]?
     
     var profilePhoto: UIImage?
     var photos: [ProfilePhoto] = []
+    var availablePhotos: [ProfilePhoto] = []
     
     struct ProfilePhoto {
         var key: String?
@@ -90,6 +92,7 @@ class Profile: Codable {
         case biographicalData
         case profilePhotoKey
         case photoKeys
+        case availablePhotoKeys
     }
     
     init() {
@@ -115,6 +118,7 @@ class Profile: Codable {
         self.profilePhotoKey = try container.decode(Optional<String>.self, forKey: .profilePhotoKey)
         self.photoKeys = try container.decode(Array<String>.self, forKey: .photoKeys)
         self.photos = self.photoKeys.map({ ProfilePhoto(key: $0) })
+        self.availablePhotoKeys = try container.decodeIfPresent(Array<String>.self, forKey: .availablePhotoKeys)
     }
     
     func encode(to encoder: Encoder) throws {
@@ -132,7 +136,10 @@ class Profile: Codable {
         try container.encode(self.displayLocation, forKey: .displayLocation)
         try container.encode(self.biographicalData, forKey: .biographicalData)
         try container.encode(self.profilePhotoKey, forKey: .profilePhotoKey)
-        try container.encode(self.photoKeys, forKey: .photoKeys)
+        // try container.encode(self.photoKeys, forKey: .photoKeys)
+        if let keys = self.availablePhotoKeys {
+            try container.encode(keys, forKey: .availablePhotoKeys)
+        }
     }
     
     func fetchProfilePhoto() async throws {
@@ -152,7 +159,7 @@ class Profile: Codable {
     }
     
     func addPhoto(image: UIImage) {
-        self.photos.append(ProfilePhoto(image: image))
+        self.availablePhotos.append(ProfilePhoto(image: image))
     }
 }
 

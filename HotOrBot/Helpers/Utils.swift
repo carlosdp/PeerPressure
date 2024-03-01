@@ -35,4 +35,9 @@ struct SimpleDate: Codable {
         }
         self.date = date
     }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(self.date)
+    }
 }

@@ -14,6 +14,7 @@ create table profiles (
   preferences jsonb not null default '{}',
   profile_photo_key varchar,
   photo_keys jsonb not null default '[]',
+  available_photo_keys jsonb not null default '[]',
   blocks jsonb not null default '[]',
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
@@ -57,6 +58,11 @@ create or replace function create_match(profile_id uuid, is_match boolean) retur
   insert into matches (profile_id, matched_profile_id, is_match)
   values ((select id from profiles where user_id = auth.uid()), profile_id, is_match);
 $$ language sql;
+
+create or replace function get_unmatched_profiles()
+returns setof profiles as $$
+  select * from profiles where (user_id != auth.uid() or user_id is null) and id not in (select matched_profile_id from matches where profile_id = (select id from profiles where user_id = auth.uid()) or matched_profile_id = (select id from profiles where user_id = auth.uid()));
+$$ language sql stable;
 
 -- function that returns jsonb of match_id and a profile field containing the matching profile for the match for the logged in user
 create or replace function get_matches()

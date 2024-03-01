@@ -30,7 +30,17 @@ class ProfileViewModel {
             do {
                 profile.userId = user.id
                 
-                self.profile = try await supabase.database.from("profiles").insert(profile).select().single().execute().value
+                print("initial insert")
+                self.profile = try await supabase.database.from("profiles").insert(profile, returning: .representation).single().execute().value
+                
+                if profile.availablePhotos.count > 1, let id = self.profile?.id {
+                    print("photos found")
+                    profile.id = id
+                    let preparedProfile = try await prepareProfile(profile)
+                    print("prepared")
+                    await self.updateProfile(preparedProfile)
+                    print("updated")
+                }
             } catch {
                 print("Error inserting profile: \(error)")
             }
@@ -45,7 +55,7 @@ class ProfileViewModel {
                 profile.userId = user.id
                 
                 guard let profileId = profile.id else {
-                    print("Profile must have ID to be inserted")
+                    print("Profile must have ID to be updated")
                     return
                 }
                 
@@ -87,16 +97,20 @@ class ProfileViewModel {
                 profile.profilePhotoKey = key
             }
             
-            let unuploadedPhotos = profile.photos.filter({ $0.key == nil })
+            let unuploadedPhotos = profile.availablePhotos.filter({ $0.key == nil })
             
             for photo in unuploadedPhotos {
-                if let imageData = photo.image?.pngData() {
+                if let imageData = photo.image?.jpegData(compressionQuality: 1.0) {
                     let imageId = UUID()
                     
-                    let key = "\(profileId)/profile/\(imageId).png"
-                    try await supabase.storage.from("photos").upload(path: key, file: imageData, options: .init(contentType: "image/png"))
+                    let key = "\(profileId)/profile/\(imageId).jpg"
+                    try await supabase.storage.from("photos").upload(path: key, file: imageData, options: .init(contentType: "image/jpeg"))
                     
-                    profile.photoKeys.append(key)
+                    if var availablePhotoKeys = profile.availablePhotoKeys {
+                        availablePhotoKeys.append(key)
+                    } else {
+                        profile.availablePhotoKeys = [key]
+                    }
                 }
             }
         }

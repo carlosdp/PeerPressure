@@ -16,12 +16,19 @@ extension CLLocationCoordinate2D: Equatable {
 }
 
 struct OnboardingStep_Name: View {
+    @Environment(OnboardingState.self)
+    var onboardingState: OnboardingState
+    
     @Binding
     var profile: Profile
+    
+    @FocusState
+    private var nameFieldFocused: Bool
     
     var body: some View {
         VStack {
             TextField("First Name", text: $profile.firstName)
+                .focused($nameFieldFocused)
             Picker("Gender", selection: $profile.gender) {
                 Text("Male")
                     .tag("male")
@@ -33,6 +40,12 @@ struct OnboardingStep_Name: View {
             .pickerStyle(.wheel)
         }
         .padding(.horizontal)
+        .onAppear {
+            nameFieldFocused = true
+        }
+        .onChange(of: onboardingState.step) {
+            nameFieldFocused = onboardingState.step == .name
+        }
     }
 }
 
@@ -139,22 +152,60 @@ struct OnboardingStep_Location: View {
     }
 }
 
-struct OnboardingView: View {
+struct OnboardingStep_Photos: View {
+    @Binding
+    var profile: Profile
+    @State
+    var selectionState: PhotoSelectionButtonState = .empty
+    
+    var body: some View {
+        VStack {
+            Grid {
+                ForEach(profile.availablePhotos, id: \.image) { photo in
+                    if let image = photo.image {
+                        Image(uiImage: image)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 50, height: 50)
+                    }
+                }
+            }
+            
+            PhotoSelectionButton(selectionState: $selectionState, maxSelectionCount: 10) {
+                Image(systemName: "photo.badge.plus")
+                    .font(.system(size: 50))
+            } onImages: { images in
+                for image in images {
+                    profile.addPhoto(image: image)
+                }
+            }
+        }
+    }
+}
+
+    
+@Observable
+class OnboardingState {
+    var step: Step = .name
+    
     enum Step: Int, Comparable {
         case name
         case birthDate
         case location
+        case photos
         
-        static func < (lhs: OnboardingView.Step, rhs: OnboardingView.Step) -> Bool {
+        static func < (lhs: OnboardingState.Step, rhs: OnboardingState.Step) -> Bool {
             return lhs.rawValue < rhs.rawValue
         }
         
     }
-    
+}
+
+struct OnboardingView: View {
     @State
     var profile: Profile = Profile()
     @State
-    var currentStep: Step = .name
+    var onboardingState = OnboardingState()
     var onSubmit: ((Profile) -> Void)?
     
     var body: some View {
@@ -162,21 +213,24 @@ struct OnboardingView: View {
             Text("Getting Started")
                 .font(.title)
             
-            TabView(selection: $currentStep) {
+            TabView(selection: $onboardingState.step) {
                 OnboardingStep_Name(profile: $profile)
-                    .tag(Step.name)
+                    .tag(OnboardingState.Step.name)
                 OnboardingStep_BirthDate(profile: $profile)
-                    .tag(Step.birthDate)
+                    .tag(OnboardingState.Step.birthDate)
                 OnboardingStep_Location(profile: $profile)
-                    .tag(Step.location)
+                    .tag(OnboardingState.Step.location)
+                OnboardingStep_Photos(profile: $profile)
+                    .tag(OnboardingState.Step.photos)
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
+            .environment(onboardingState)
             
             Spacer()
             
-            if currentStep < .location {
+            if onboardingState.step < .photos {
                 Button(action: {
-                    guard let nextStep = Step(rawValue: currentStep.rawValue + 1) else {
+                    guard let nextStep = OnboardingState.Step(rawValue: onboardingState.step.rawValue + 1) else {
                         if let submit = onSubmit {
                             submit(profile)
                         }
@@ -185,7 +239,7 @@ struct OnboardingView: View {
                     }
                     
                     withAnimation {
-                        currentStep = nextStep
+                        onboardingState.step = nextStep
                     }
                 }) {
                     Text("Next")

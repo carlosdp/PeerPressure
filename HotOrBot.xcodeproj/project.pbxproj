@@ -28,6 +28,7 @@
 		BF67C87E2B8FC51500899472 /* LikesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF67C87D2B8FC51500899472 /* LikesView.swift */; };
 		BF67C8802B8FC57700899472 /* LikeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF67C87F2B8FC57700899472 /* LikeView.swift */; };
 		BF67C8842B90349000899472 /* OffsetObservingScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF67C8832B90349000899472 /* OffsetObservingScrollView.swift */; };
+		BF67C88D2B922B2000899472 /* PhotoSelectionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF67C88C2B922B2000899472 /* PhotoSelectionButton.swift */; };
 		BF74A3A12B8A7D9E00D87E99 /* ProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF74A3A02B8A7D9E00D87E99 /* ProfileViewModel.swift */; };
 		BF74A3A32B8A7F4A00D87E99 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF74A3A22B8A7F4A00D87E99 /* OnboardingView.swift */; };
 		BF74A3A62B8AA70100D87E99 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF74A3A52B8AA70100D87E99 /* MapKit.framework */; };
@@ -70,6 +71,7 @@
 		BF67C87D2B8FC51500899472 /* LikesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LikesView.swift; sourceTree = "<group>"; };
 		BF67C87F2B8FC57700899472 /* LikeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LikeView.swift; sourceTree = "<group>"; };
 		BF67C8832B90349000899472 /* OffsetObservingScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OffsetObservingScrollView.swift; sourceTree = "<group>"; };
+		BF67C88C2B922B2000899472 /* PhotoSelectionButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoSelectionButton.swift; sourceTree = "<group>"; };
 		BF74A3A02B8A7D9E00D87E99 /* ProfileViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModel.swift; sourceTree = "<group>"; };
 		BF74A3A22B8A7F4A00D87E99 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		BF74A3A52B8AA70100D87E99 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
@@ -171,6 +173,7 @@
 			children = (
 				BF09FDC42B8D55B500F97F76 /* Utils.swift */,
 				BF67C8832B90349000899472 /* OffsetObservingScrollView.swift */,
+				BF67C88C2B922B2000899472 /* PhotoSelectionButton.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -324,6 +327,7 @@
 				BF09FDBF2B8D212100F97F76 /* ProfileController.swift in Sources */,
 				BFE41C622B87D6A5004462A4 /* Supabase.swift in Sources */,
 				BF09FDC12B8D298F00F97F76 /* ProfileEditView.swift in Sources */,
+				BF67C88D2B922B2000899472 /* PhotoSelectionButton.swift in Sources */,
 				BF67C87E2B8FC51500899472 /* LikesView.swift in Sources */,
 				BF0186D72B87FDA60051746C /* Models.swift in Sources */,
 				BF74A3A12B8A7D9E00D87E99 /* ProfileViewModel.swift in Sources */,
