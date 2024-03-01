@@ -19,25 +19,30 @@ let supabaseURL = URL(string: "https://xcwucctmjepaqcpvwasq.supabase.co")!
 let supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhjd3VjY3RtamVwYXFjcHZ3YXNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDUzNjE4NTAsImV4cCI6MjAyMDkzNzg1MH0.LhIkGuDnjl7Zo_Y-Wwufd162lXxV5zPXaxiXN3H75NM"
 #endif
 
+let encoder: JSONEncoder = {
+  let encoder = PostgrestClient.Configuration.jsonEncoder
+  encoder.keyEncodingStrategy = .convertToSnakeCase
+  return encoder
+}()
+
+let decoder: JSONDecoder = {
+  let decoder = PostgrestClient.Configuration.jsonDecoder
+  decoder.keyDecodingStrategy = .convertFromSnakeCase
+  return decoder
+}()
+
 let supabase = SupabaseClient(
     supabaseURL: supabaseURL,
-    supabaseKey: supabaseKey
+    supabaseKey: supabaseKey,
+    options: SupabaseClientOptions(
+        db: .init(encoder: encoder, decoder: decoder)
+    )
 )
 
 let supabaseF = SupabaseClient(
     supabaseURL: URL(string: "http://192.168.0.222:8000")!,
     supabaseKey: supabaseKey
 )
-
-let encoder: JSONEncoder = {
-  let encoder = PostgrestClient.Configuration.jsonEncoder
-  return encoder
-}()
-
-let decoder: JSONDecoder = {
-  let decoder = PostgrestClient.Configuration.jsonDecoder
-  return decoder
-}()
 
 @Observable
 class SupabaseAuth {

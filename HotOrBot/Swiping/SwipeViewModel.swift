@@ -14,11 +14,6 @@ class SwipeViewModel {
     struct CreateMatchParams: Encodable {
         let profileId: UUID
         let isMatch: Bool
-        
-        enum CodingKeys: String, CodingKey {
-            case profileId = "profile_id"
-            case isMatch = "is_match"
-        }
     }
     
     func queueProfiles() async {

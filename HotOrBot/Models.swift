@@ -64,7 +64,7 @@ class Profile: Codable {
     var userId: UUID?
     var firstName: String = ""
     var gender: String = "male"
-    var birthDate: Date = Date()
+    var birthDate: SimpleDate = SimpleDate()
     var location: CLLocationCoordinate2D?
     var displayLocation: String = ""
     var biographicalData: BiographicalData = BiographicalData()
@@ -81,15 +81,15 @@ class Profile: Codable {
     
     enum CodingKeys: String, CodingKey {
         case id
-        case userId = "user_id"
-        case firstName = "first_name"
+        case userId
+        case firstName
         case gender
-        case birthDate = "birth_date"
+        case birthDate
         case location
-        case displayLocation = "display_location"
-        case biographicalData = "biographical_data"
-        case profilePhotoKey = "profile_photo_key"
-        case photoKeys = "photo_keys"
+        case displayLocation
+        case biographicalData
+        case profilePhotoKey
+        case photoKeys
     }
     
     init() {
@@ -98,7 +98,7 @@ class Profile: Codable {
     init(id: UUID, firstName: String, birthDate: Date, biographicalData: BiographicalData, profilePhoto: UIImage? = nil) {
         self.id = id
         self.firstName = firstName
-        self.birthDate = birthDate
+        self.birthDate = SimpleDate(date: birthDate)
         self.biographicalData = biographicalData
         self.profilePhoto = profilePhoto
     }
@@ -109,13 +109,7 @@ class Profile: Codable {
         self.userId = try container.decodeIfPresent(UUID.self, forKey: .userId)
         self.firstName = try container.decode(String.self, forKey: .firstName)
         self.gender = try container.decode(String.self, forKey: .gender)
-        let rawBirthDate = try container.decode(String.self, forKey: .birthDate)
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-DD"
-        guard let birthDate = dateFormatter.date(from: rawBirthDate) else {
-            throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: container.codingPath, debugDescription: "Date invalid"))
-        }
-        self.birthDate = birthDate
+        self.birthDate = try container.decode(SimpleDate.self, forKey: .birthDate)
         self.displayLocation = try container.decode(String.self, forKey: .displayLocation)
         self.biographicalData = try container.decode(BiographicalData.self, forKey: .biographicalData)
         self.profilePhotoKey = try container.decode(Optional<String>.self, forKey: .profilePhotoKey)
@@ -166,7 +160,7 @@ extension Profile {
     func getAgeInYears() -> Int {
         let calendar = Calendar.current
         let currentDate = Date()
-        let ageComponents = calendar.dateComponents([.year], from: birthDate, to: currentDate)
+        let ageComponents = calendar.dateComponents([.year], from: birthDate.date, to: currentDate)
         return ageComponents.year ?? 0
     }
 }
@@ -195,14 +189,6 @@ class ChatMessage: Identifiable, Codable {
     var senderId: UUID
     var message: String
     var createdAt: Date
-    
-    enum CodingKeys: String, CodingKey {
-        case id
-        case matchId = "match_id"
-        case senderId = "sender_id"
-        case message
-        case createdAt = "created_at"
-    }
     
     init(id: UUID, matchId: UUID, senderId: UUID, message: String, createdAt: Date) {
         self.id = id

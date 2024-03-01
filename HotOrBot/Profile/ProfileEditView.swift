@@ -104,7 +104,7 @@ struct ProfileEditView: View {
             
             Section("Basics") {
                 ProfileEditItemView(icon: "person", label: "First Name", value: .string($profile.firstName))
-                ProfileEditItemView(icon: "birthday.cake", label: "Birthday", value: .date($profile.birthDate))
+                ProfileEditItemView(icon: "birthday.cake", label: "Birthday", value: .date($profile.birthDate.date))
                 ProfileEditItemView(icon: "ruler", label: "Height", value: .height($profile.biographicalData.height ?? 5.0))
             }
             

@@ -14,11 +14,6 @@ class MatchViewModel {
     struct MatchResponse: Encodable {
         let isMatch: Bool
         let matchAcceptedAt: Date
-        
-        enum CodingKeys: String, CodingKey {
-            case isMatch = "is_match"
-            case matchAcceptedAt = "match_accepted_at"
-        }
     }
     
     func fetchMatches() async {

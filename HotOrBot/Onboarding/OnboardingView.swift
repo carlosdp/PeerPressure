@@ -44,7 +44,7 @@ struct OnboardingStep_BirthDate: View {
     var profile: Profile
     
     var body: some View {
-        DatePicker("Birth Date", selection: $profile.birthDate, displayedComponents: [.date])
+        DatePicker("Birth Date", selection: $profile.birthDate.date, displayedComponents: [.date])
             .datePickerStyle(.wheel)
             .labelsHidden()
     }
