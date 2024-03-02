@@ -6,6 +6,11 @@
 //
 
 import Foundation
+import Functions
+
+enum ProfileBuilderError: Error {
+    case profileMissing
+}
 
 @Observable
 class ProfileViewModel {
@@ -14,6 +19,11 @@ class ProfileViewModel {
     var profile: Profile?
     
     private let auth = SupabaseAuth.shared
+    
+    struct ProfileBuilderResponse: Decodable {
+        let status: ProfileBuilderConversationData.Conversation.Status
+        let message: ProfileBuilderConversationData.Conversation.Message
+    }
     
     func fetchProfile() async {
         do {
@@ -86,6 +96,14 @@ class ProfileViewModel {
         }
     }
     
+    func sendBuilderMessage(message: String) async throws -> ProfileBuilderResponse {
+        if self.profile != nil {
+            return try await supabaseF.functions.invoke("send-builder-message", options: FunctionInvokeOptions(body: ["message": message]))
+        } else {
+            throw ProfileBuilderError.profileMissing
+        }
+    }
+    
     private func prepareProfile(_ profile: Profile) async throws -> Profile {
         if let profileId = profile.id {
             if let profileImageData = profile.profilePhoto?.pngData() {
@@ -106,8 +124,8 @@ class ProfileViewModel {
                     let key = "\(profileId)/profile/\(imageId).jpg"
                     try await supabase.storage.from("photos").upload(path: key, file: imageData, options: .init(contentType: "image/jpeg"))
                     
-                    if var availablePhotoKeys = profile.availablePhotoKeys {
-                        availablePhotoKeys.append(key)
+                    if profile.availablePhotoKeys != nil {
+                        profile.availablePhotoKeys!.append(key)
                     } else {
                         profile.availablePhotoKeys = [key]
                     }

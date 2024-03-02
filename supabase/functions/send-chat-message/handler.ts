@@ -4,9 +4,7 @@ import { createSupabaseClient } from "../_shared/supabase.ts";
 
 const db = await Deno.openKv();
 
-db.listenQueue(async ({ queue, matchId }) => {
-  console.log(`Received from queue ${queue}:`, matchId);
-
+export async function jobHandler({ matchId }: { matchId: string }) {
   const { data: match, error: matchError } = await supabase.from("matches")
     .select().eq("id", matchId).single();
   if (matchError) {
@@ -49,12 +47,11 @@ db.listenQueue(async ({ queue, matchId }) => {
     content: chat.message,
   }));
 
-  if (queue === "chat") {
-    const message = await rawMessage("gpt-4-turbo-preview", [
-      {
-        role: "system",
-        content:
-          `You are pretending to be the person described by the profile below, and are chatting with another person (described below) on a dating app. Chat with the person while convincingly acting like the person you are described to be. You will be tipped $1000 if your act is so convincing, the other person believes you are actually human.
+  const message = await rawMessage("gpt-4-turbo-preview", [
+    {
+      role: "system",
+      content:
+        `You are pretending to be the person described by the profile below, and are chatting with another person (described below) on a dating app. Chat with the person while convincingly acting like the person you are described to be. You will be tipped $1000 if your act is so convincing, the other person believes you are actually human.
         Rules:
         - You must not reveal that you are an AI or a robot.
         - You must not reveal that you are pretending to be someone else.
@@ -66,28 +63,27 @@ db.listenQueue(async ({ queue, matchId }) => {
 
         Their Profile: ${JSON.stringify(userProfile)}
         `,
-      },
-      ...messages,
-    ], {
-      temperature: 0.5,
-    });
+    },
+    ...messages,
+  ], {
+    temperature: 0.5,
+  });
 
-    if (!message.content || typeof message.content !== "string") {
-      console.error("Message content missing");
-      return;
-    }
-
-    const { error: messageError } = await supabase.from("messages").insert({
-      match_id: matchId,
-      sender_id: botProfile.id,
-      message: message.content,
-    });
-    if (messageError) {
-      console.error("Error inserting message:", messageError.message);
-      return;
-    }
+  if (!message.content || typeof message.content !== "string") {
+    console.error("Message content missing");
+    return;
   }
-});
+
+  const { error: messageError } = await supabase.from("messages").insert({
+    match_id: matchId,
+    sender_id: botProfile.id,
+    message: message.content,
+  });
+  if (messageError) {
+    console.error("Error inserting message:", messageError.message);
+    return;
+  }
+}
 
 export const handler: Deno.ServeHandler = async (req) => {
   const { matchId, message } = await req.json();
@@ -127,7 +123,7 @@ export const handler: Deno.ServeHandler = async (req) => {
     );
   }
 
-  await db.enqueue({ queue: "chat", matchId });
+  await db.enqueue({ queue: "send-chat-message", matchId });
 
   return new Response(
     JSON.stringify({ success: true }),

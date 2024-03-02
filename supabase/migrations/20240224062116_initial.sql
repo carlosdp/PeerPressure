@@ -16,6 +16,7 @@ create table profiles (
   photo_keys jsonb not null default '[]',
   available_photo_keys jsonb not null default '[]',
   blocks jsonb not null default '[]',
+  builder_conversation_data jsonb not null default '{}',
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );

@@ -32,6 +32,8 @@
 		BF74A3A12B8A7D9E00D87E99 /* ProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF74A3A02B8A7D9E00D87E99 /* ProfileViewModel.swift */; };
 		BF74A3A32B8A7F4A00D87E99 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF74A3A22B8A7F4A00D87E99 /* OnboardingView.swift */; };
 		BF74A3A62B8AA70100D87E99 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF74A3A52B8AA70100D87E99 /* MapKit.framework */; };
+		BF9C1CCE2B925BAD00FFBF06 /* ProfileBuilderChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF9C1CCD2B925BAD00FFBF06 /* ProfileBuilderChatView.swift */; };
+		BF9C1CD02B925F2A00FFBF06 /* ProfileBuilderController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF9C1CCF2B925F2A00FFBF06 /* ProfileBuilderController.swift */; };
 		BFE41C472B87D64C004462A4 /* HotOrBotApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE41C462B87D64C004462A4 /* HotOrBotApp.swift */; };
 		BFE41C492B87D64C004462A4 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE41C482B87D64C004462A4 /* ContentView.swift */; };
 		BFE41C4B2B87D650004462A4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BFE41C4A2B87D650004462A4 /* Assets.xcassets */; };
@@ -76,6 +78,8 @@
 		BF74A3A22B8A7F4A00D87E99 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		BF74A3A52B8AA70100D87E99 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		BF74A3A72B8AAADE00D87E99 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		BF9C1CCD2B925BAD00FFBF06 /* ProfileBuilderChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileBuilderChatView.swift; sourceTree = "<group>"; };
+		BF9C1CCF2B925F2A00FFBF06 /* ProfileBuilderController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileBuilderController.swift; sourceTree = "<group>"; };
 		BFE41C432B87D64C004462A4 /* HotOrBot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HotOrBot.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BFE41C462B87D64C004462A4 /* HotOrBotApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotOrBotApp.swift; sourceTree = "<group>"; };
 		BFE41C482B87D64C004462A4 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -186,6 +190,15 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		BF9C1CCC2B925B9000FFBF06 /* ProfileBuilder */ = {
+			isa = PBXGroup;
+			children = (
+				BF9C1CCD2B925BAD00FFBF06 /* ProfileBuilderChatView.swift */,
+				BF9C1CCF2B925F2A00FFBF06 /* ProfileBuilderController.swift */,
+			);
+			path = ProfileBuilder;
+			sourceTree = "<group>";
+		};
 		BFE41C3A2B87D64C004462A4 = {
 			isa = PBXGroup;
 			children = (
@@ -214,6 +227,7 @@
 				BF67C8872B912C6C00899472 /* Profile */,
 				BF67C8862B912C4700899472 /* Matches */,
 				BF67C8852B912C2100899472 /* Onboarding */,
+				BF9C1CCC2B925B9000FFBF06 /* ProfileBuilder */,
 				BF67C88B2B912CB700899472 /* Helpers */,
 				BF74A3A72B8AAADE00D87E99 /* Info.plist */,
 				BF0186DE2B890F3A0051746C /* HotOrBot.entitlements */,
@@ -318,6 +332,7 @@
 			files = (
 				BF67C8842B90349000899472 /* OffsetObservingScrollView.swift in Sources */,
 				BF09FDB92B8CFD0500F97F76 /* ChatView.swift in Sources */,
+				BF9C1CCE2B925BAD00FFBF06 /* ProfileBuilderChatView.swift in Sources */,
 				BF0186DD2B89056F0051746C /* SwipeController.swift in Sources */,
 				BF09FDBD2B8D052500F97F76 /* ChatController.swift in Sources */,
 				BFE41C492B87D64C004462A4 /* ContentView.swift in Sources */,
@@ -336,6 +351,7 @@
 				BF67C87C2B8FC4FD00899472 /* LikesController.swift in Sources */,
 				BF67C87A2B8E2E8F00899472 /* ProfileImageEditor.swift in Sources */,
 				BF09FDB72B8C591D00F97F76 /* MatchViewModel.swift in Sources */,
+				BF9C1CD02B925F2A00FFBF06 /* ProfileBuilderController.swift in Sources */,
 				BF09FDB52B8C58FC00F97F76 /* MatchesController.swift in Sources */,
 				BFE41C6A2B87FA4C004462A4 /* SwipeView.swift in Sources */,
 				BF09FDAF2B8BC7F200F97F76 /* OnboardingController.swift in Sources */,

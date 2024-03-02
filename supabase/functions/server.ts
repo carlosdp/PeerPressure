@@ -10,8 +10,24 @@ console.log("Setting up server function...");
 const handlers = {
   "send-chat-message": await import("./send-chat-message/handler.ts").then((
     it,
-  ) => it.handler),
-} as Record<string, Handler>;
+  ) => ({ handler: it.handler, jobHandler: it.jobHandler })),
+  "send-builder-message": await import("./send-builder-message/handler.ts")
+    .then((
+      it,
+    ) => ({ handler: it.handler, jobHandler: it.jobHandler })),
+} as Record<
+  string,
+  { handler: Handler; jobHandler: (data: any) => Promise<void> }
+>;
+
+const db = await Deno.openKv();
+db.listenQueue(async ({ queue, ...data }) => {
+  if (queue in handlers) {
+    await handlers[queue].jobHandler(data);
+  } else {
+    console.error(`Unknown queue: ${queue}`);
+  }
+});
 
 function localdevHandler(req: Request, connInfo: ConnInfo) {
   // CORS is needed if you're planning to invoke your function from a browser.
@@ -22,7 +38,7 @@ function localdevHandler(req: Request, connInfo: ConnInfo) {
   const url = new URL(req.url);
   const urlParts = url.pathname.split("/");
   const handlerName = urlParts[urlParts.length - 1];
-  const handler = handlers[handlerName];
+  const handler = handlers[handlerName].handler;
   try {
     return handler(req, connInfo);
   } catch (err) {

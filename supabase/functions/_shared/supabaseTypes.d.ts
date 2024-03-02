@@ -120,45 +120,54 @@ export interface Database {
       }
       profiles: {
         Row: {
+          available_photo_keys: Json
           biographical_data: Json
           birth_date: string
           blocks: Json
+          builder_conversation_data: Json
           created_at: string
           display_location: string
           first_name: string
           gender: Database["public"]["Enums"]["gender"]
           id: string
           location: unknown
+          photo_keys: Json
           preferences: Json
           profile_photo_key: string | null
           updated_at: string
           user_id: string | null
         }
         Insert: {
+          available_photo_keys?: Json
           biographical_data?: Json
           birth_date: string
           blocks?: Json
+          builder_conversation_data?: Json
           created_at?: string
           display_location: string
           first_name: string
           gender: Database["public"]["Enums"]["gender"]
           id?: string
           location: unknown
+          photo_keys?: Json
           preferences?: Json
           profile_photo_key?: string | null
           updated_at?: string
           user_id?: string | null
         }
         Update: {
+          available_photo_keys?: Json
           biographical_data?: Json
           birth_date?: string
           blocks?: Json
+          builder_conversation_data?: Json
           created_at?: string
           display_location?: string
           first_name?: string
           gender?: Database["public"]["Enums"]["gender"]
           id?: string
           location?: unknown
+          photo_keys?: Json
           preferences?: Json
           profile_photo_key?: string | null
           updated_at?: string
@@ -190,24 +199,6 @@ export interface Database {
         Args: Record<PropertyKey, never>
         Returns: Json[]
       }
-      get_matched_profiles: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          biographical_data: Json
-          birth_date: string
-          blocks: Json
-          created_at: string
-          display_location: string
-          first_name: string
-          gender: Database["public"]["Enums"]["gender"]
-          id: string
-          location: unknown
-          preferences: Json
-          profile_photo_key: string | null
-          updated_at: string
-          user_id: string | null
-        }[]
-      }
       get_matches: {
         Args: Record<PropertyKey, never>
         Returns: Json[]
@@ -227,15 +218,18 @@ export interface Database {
       get_profile: {
         Args: Record<PropertyKey, never>
         Returns: {
+          available_photo_keys: Json
           biographical_data: Json
           birth_date: string
           blocks: Json
+          builder_conversation_data: Json
           created_at: string
           display_location: string
           first_name: string
           gender: Database["public"]["Enums"]["gender"]
           id: string
           location: unknown
+          photo_keys: Json
           preferences: Json
           profile_photo_key: string | null
           updated_at: string
@@ -245,15 +239,18 @@ export interface Database {
       get_unmatched_profiles: {
         Args: Record<PropertyKey, never>
         Returns: {
+          available_photo_keys: Json
           biographical_data: Json
           birth_date: string
           blocks: Json
+          builder_conversation_data: Json
           created_at: string
           display_location: string
           first_name: string
           gender: Database["public"]["Enums"]["gender"]
           id: string
           location: unknown
+          photo_keys: Json
           preferences: Json
           profile_photo_key: string | null
           updated_at: string

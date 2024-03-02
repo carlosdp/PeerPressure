@@ -14,27 +14,31 @@ struct ContentView: View {
     var body: some View {
         if auth.isAuthenticated {
             Group {
-                if profileModel.profile != nil {
-                    TabView {
-                        SwipeController()
-                            .tabItem {
-                                Image(systemName: "person.2")
-                            }
-                        
-                        LikesController()
-                            .tabItem {
-                                Image(systemName: "heart")
-                            }
-                        
-                        MatchesController()
-                            .tabItem {
-                                Image(systemName: "message")
-                            }
-                        
-                        ProfileController()
-                            .tabItem {
-                                Image(systemName: "person")
-                            }
+                if let profile = profileModel.profile {
+                    if profile.builderConversationData.conversations != nil {
+                        TabView {
+                            SwipeController()
+                                .tabItem {
+                                    Image(systemName: "person.2")
+                                }
+                            
+                            LikesController()
+                                .tabItem {
+                                    Image(systemName: "heart")
+                                }
+                            
+                            MatchesController()
+                                .tabItem {
+                                    Image(systemName: "message")
+                                }
+                            
+                            ProfileController()
+                                .tabItem {
+                                    Image(systemName: "person")
+                                }
+                        }
+                    } else {
+                        ProfileBuilderController()
                     }
                 } else {
                    OnboardingController()

@@ -10,8 +10,8 @@ export const supabase = createClient<Database>(
   SUPABASE_SERVICE_ROLE_KEY,
 );
 
-export function createSupabaseClient<Database>(authHeader: string) {
-  return createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+export function createSupabaseClient(authHeader: string) {
+  return createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
     global: { headers: { Authorization: authHeader } },
   });
 }

@@ -23,9 +23,17 @@ export type OpenAIMessage =
     | { content: string; tool_calls?: null }
     | {
       content: null;
-      tool_calls: { name: string; function: { arguments: any } }[];
+      tool_calls: {
+        type: "function";
+        function: { name: string; arguments: any };
+      }[];
     } // eslint-disable-line @typescript-eslint/no-explicit-any
-    | { content: { type: "image_url"; image_url: string }[] }
+    | {
+      content: ({ type: "text"; text: string } | {
+        type: "image_url";
+        image_url: { url: string };
+      })[];
+    }
   );
 
 export type OpenAIToolDefinition = {

@@ -58,6 +58,30 @@ struct BiographicalData: Codable {
     }
 }
 
+struct ProfileBuilderConversationData: Codable {
+    var conversations: [Conversation]?
+    
+    struct Conversation: Codable {
+        var messages: [Message]
+        var state: Status
+        
+        enum Status: String, Codable {
+            case active = "active"
+            case finished = "finished"
+        }
+        
+        struct Message: Codable {
+            var role: String
+            var content: String
+        }
+    }
+}
+
+enum ProfileBlock: Codable {
+    case image(String)
+    case text(String)
+}
+
 @Observable
 class Profile: Codable {
     var id: UUID?
@@ -71,6 +95,8 @@ class Profile: Codable {
     var profilePhotoKey: String?
     var photoKeys: [String] = []
     var availablePhotoKeys: [String]?
+    var builderConversationData = ProfileBuilderConversationData()
+    var blocks: [ProfileBlock] = []
     
     var profilePhoto: UIImage?
     var photos: [ProfilePhoto] = []
@@ -93,6 +119,7 @@ class Profile: Codable {
         case profilePhotoKey
         case photoKeys
         case availablePhotoKeys
+        case blocks
     }
     
     init() {
@@ -119,6 +146,7 @@ class Profile: Codable {
         self.photoKeys = try container.decode(Array<String>.self, forKey: .photoKeys)
         self.photos = self.photoKeys.map({ ProfilePhoto(key: $0) })
         self.availablePhotoKeys = try container.decodeIfPresent(Array<String>.self, forKey: .availablePhotoKeys)
+        self.blocks = try container.decode(Array<ProfileBlock>.self, forKey: .blocks)
     }
     
     func encode(to encoder: Encoder) throws {
@@ -140,6 +168,7 @@ class Profile: Codable {
         if let keys = self.availablePhotoKeys {
             try container.encode(keys, forKey: .availablePhotoKeys)
         }
+        try container.encode(self.blocks, forKey: .blocks)
     }
     
     func fetchProfilePhoto() async throws {
