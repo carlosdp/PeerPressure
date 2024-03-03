@@ -25,8 +25,13 @@ struct ProfileBuilderController: View {
                     
                     do {
                         let newMessage = try await profileModel.sendBuilderMessage(message: message)
-                        DispatchQueue.main.async {
+                        
+                        await MainActor.run {
                             messages.append(newMessage.message)
+                        }
+                        
+                        if newMessage.status == .finished {
+                            await profileModel.fetchProfile()
                         }
                     } catch {
                         print("Could not send builder message: \(error)")

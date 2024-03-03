@@ -109,6 +109,23 @@ class Profile: Codable {
     }
     var photos: [SupabaseImage] = []
     var availablePhotos: [SupabaseImage] = []
+    var state: OnboardingState {
+        get {
+            if blocks.count > 0 {
+                OnboardingState.ready
+            } else if let convos = builderConversationData.conversations, convos.contains(where: { $0.state == .finished }) {
+                OnboardingState.building
+            } else {
+                OnboardingState.inProgress
+            }
+        }
+    }
+    
+    enum OnboardingState {
+        case inProgress
+        case building
+        case ready
+    }
     
     enum CodingKeys: String, CodingKey {
         case id

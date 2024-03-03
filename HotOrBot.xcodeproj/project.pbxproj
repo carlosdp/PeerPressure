@@ -36,6 +36,9 @@
 		BF9C1CD02B925F2A00FFBF06 /* ProfileBuilderController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF9C1CCF2B925F2A00FFBF06 /* ProfileBuilderController.swift */; };
 		BF9C1CD22B943B1100FFBF06 /* AsyncSupabaseImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF9C1CD12B943B1100FFBF06 /* AsyncSupabaseImage.swift */; };
 		BF9C1CD42B94457F00FFBF06 /* ProfileBlocksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF9C1CD32B94457F00FFBF06 /* ProfileBlocksView.swift */; };
+		BF9C1CD62B95120500FFBF06 /* WaitBuildingProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF9C1CD52B95120500FFBF06 /* WaitBuildingProfileView.swift */; };
+		BF9C1CD82B95124C00FFBF06 /* WaitBuildingProfileController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF9C1CD72B95124C00FFBF06 /* WaitBuildingProfileController.swift */; };
+		BF9C1CDA2B95154F00FFBF06 /* MultilineSubmitViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF9C1CD92B95154F00FFBF06 /* MultilineSubmitViewModifier.swift */; };
 		BFE41C472B87D64C004462A4 /* HotOrBotApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE41C462B87D64C004462A4 /* HotOrBotApp.swift */; };
 		BFE41C492B87D64C004462A4 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE41C482B87D64C004462A4 /* ContentView.swift */; };
 		BFE41C4B2B87D650004462A4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BFE41C4A2B87D650004462A4 /* Assets.xcassets */; };
@@ -84,6 +87,9 @@
 		BF9C1CCF2B925F2A00FFBF06 /* ProfileBuilderController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileBuilderController.swift; sourceTree = "<group>"; };
 		BF9C1CD12B943B1100FFBF06 /* AsyncSupabaseImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncSupabaseImage.swift; sourceTree = "<group>"; };
 		BF9C1CD32B94457F00FFBF06 /* ProfileBlocksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileBlocksView.swift; sourceTree = "<group>"; };
+		BF9C1CD52B95120500FFBF06 /* WaitBuildingProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaitBuildingProfileView.swift; sourceTree = "<group>"; };
+		BF9C1CD72B95124C00FFBF06 /* WaitBuildingProfileController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaitBuildingProfileController.swift; sourceTree = "<group>"; };
+		BF9C1CD92B95154F00FFBF06 /* MultilineSubmitViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultilineSubmitViewModifier.swift; sourceTree = "<group>"; };
 		BFE41C432B87D64C004462A4 /* HotOrBot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HotOrBot.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BFE41C462B87D64C004462A4 /* HotOrBotApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotOrBotApp.swift; sourceTree = "<group>"; };
 		BFE41C482B87D64C004462A4 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -118,6 +124,8 @@
 			children = (
 				BF74A3A22B8A7F4A00D87E99 /* OnboardingView.swift */,
 				BF09FDAE2B8BC7F200F97F76 /* OnboardingController.swift */,
+				BF9C1CD52B95120500FFBF06 /* WaitBuildingProfileView.swift */,
+				BF9C1CD72B95124C00FFBF06 /* WaitBuildingProfileController.swift */,
 			);
 			path = Onboarding;
 			sourceTree = "<group>";
@@ -184,6 +192,7 @@
 				BF67C8832B90349000899472 /* OffsetObservingScrollView.swift */,
 				BF67C88C2B922B2000899472 /* PhotoSelectionButton.swift */,
 				BF9C1CD12B943B1100FFBF06 /* AsyncSupabaseImage.swift */,
+				BF9C1CD92B95154F00FFBF06 /* MultilineSubmitViewModifier.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -349,6 +358,7 @@
 				BFE41C622B87D6A5004462A4 /* Supabase.swift in Sources */,
 				BF09FDC12B8D298F00F97F76 /* ProfileEditView.swift in Sources */,
 				BF67C88D2B922B2000899472 /* PhotoSelectionButton.swift in Sources */,
+				BF9C1CD62B95120500FFBF06 /* WaitBuildingProfileView.swift in Sources */,
 				BF9C1CD22B943B1100FFBF06 /* AsyncSupabaseImage.swift in Sources */,
 				BF67C87E2B8FC51500899472 /* LikesView.swift in Sources */,
 				BF0186D72B87FDA60051746C /* Models.swift in Sources */,
@@ -369,6 +379,8 @@
 				BF09FDB12B8C55C500F97F76 /* MatchController.swift in Sources */,
 				BF09FDBB2B8D039000F97F76 /* ChatViewModel.swift in Sources */,
 				BFE41C472B87D64C004462A4 /* HotOrBotApp.swift in Sources */,
+				BF9C1CD82B95124C00FFBF06 /* WaitBuildingProfileController.swift in Sources */,
+				BF9C1CDA2B95154F00FFBF06 /* MultilineSubmitViewModifier.swift in Sources */,
 				BF09FDC52B8D55B500F97F76 /* Utils.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

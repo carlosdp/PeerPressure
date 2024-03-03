@@ -8,49 +8,64 @@
 import SwiftUI
 
 struct ContentView: View {
-    let auth = SupabaseAuth.shared
-    let profileModel = ProfileViewModel.shared
+    @State
+    var auth = SupabaseAuth.shared
+    @State
+    var profileModel = ProfileViewModel.shared
+    @State
+    var isInitialProfileRequestComplete = false
     
     var body: some View {
-        if auth.isAuthenticated {
-            Group {
-                if let profile = profileModel.profile {
-                    if profile.builderConversationData.conversations != nil {
-                        TabView {
-                            SwipeController()
-                                .tabItem {
-                                    Image(systemName: "person.2")
+        Group {
+            if auth.isReady && isInitialProfileRequestComplete {
+                if auth.isAuthenticated {
+                    Group {
+                        if let profile = profileModel.profile {
+                            switch profile.state {
+                            case .ready:
+                                TabView {
+                                    SwipeController()
+                                        .tabItem {
+                                            Image(systemName: "person.2")
+                                        }
+                                    
+                                    LikesController()
+                                        .tabItem {
+                                            Image(systemName: "heart")
+                                        }
+                                    
+                                    MatchesController()
+                                        .tabItem {
+                                            Image(systemName: "message")
+                                        }
+                                    
+                                    ProfileController()
+                                        .tabItem {
+                                            Image(systemName: "person")
+                                        }
                                 }
-                            
-                            LikesController()
-                                .tabItem {
-                                    Image(systemName: "heart")
-                                }
-                            
-                            MatchesController()
-                                .tabItem {
-                                    Image(systemName: "message")
-                                }
-                            
-                            ProfileController()
-                                .tabItem {
-                                    Image(systemName: "person")
-                                }
+                            case .building:
+                                WaitBuildingProfileController()
+                            case .inProgress:
+                                ProfileBuilderController()
+                            }
+                        } else {
+                            OnboardingController()
                         }
-                    } else {
-                        ProfileBuilderController()
                     }
+                    .transition(.opacity)
                 } else {
-                   OnboardingController()
+                    LoginView()
                 }
+            } else {
+                ProgressView()
             }
-            .task {
-                Task {
-                    await profileModel.fetchProfile()
-                }
+        }
+        .task {
+            Task {
+                await profileModel.fetchProfile()
+                isInitialProfileRequestComplete = true
             }
-        } else {
-            LoginView()
         }
     }
 }

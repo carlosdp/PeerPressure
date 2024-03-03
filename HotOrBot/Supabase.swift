@@ -51,6 +51,7 @@ class SupabaseAuth {
     var isAuthenticated: Bool = false
     var requiresAuthentication: Bool = true
     var user: User?
+    var isReady: Bool = false
     
     @ObservationIgnored
     private var authStateTask: Task<(), Never>?
@@ -63,11 +64,13 @@ class SupabaseAuth {
                         self.user = try await supabase.auth.user()
                         self.isAuthenticated = true
                         self.requiresAuthentication = false
+                        self.isReady = true
                     } catch {
                         try? await supabase.auth.signOut()
                         self.isAuthenticated = false
                         self.requiresAuthentication = true
                         self.user = nil
+                        self.isReady = true
                     }
                 }
                 
@@ -75,6 +78,7 @@ class SupabaseAuth {
                     self.isAuthenticated = false
                     self.requiresAuthentication = true
                     self.user = user
+                    self.isReady = true
                 }
             }
         }
