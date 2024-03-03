@@ -54,17 +54,24 @@ struct ProfileBuilderChatView: View {
             Text("\(count) / \(targetMessageCount)")
                 .padding(.bottom, 10)
             
-            OffsetObservingScrollView(offset: $offset) {
-                ForEach(Array(zip(messages.indices, messages)), id: \.0) { (i, message) in
-                    ProfileBuilderChatItemView(
-                        profile: profile,
-                        message: message
-                    )
-                    .listRowSeparator(.hidden)
-                    .padding(.bottom)
+            ScrollViewReader { value in
+                OffsetObservingScrollView(offset: $offset) {
+                    ForEach(Array(zip(messages.indices, messages)), id: \.0) { (i, message) in
+                        ProfileBuilderChatItemView(
+                            profile: profile,
+                            message: message
+                        )
+                        .listRowSeparator(.hidden)
+                        .padding(.bottom)
+                    }
+                    .onChange(of: messages.count) {
+                        withAnimation {
+                            value.scrollTo(messages.count - 1)
+                        }
+                    }
                 }
+                .safeAreaPadding(.horizontal)
             }
-            .safeAreaPadding(.horizontal)
         }
     }
 }

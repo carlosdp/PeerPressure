@@ -52,169 +52,190 @@ function blobToBase64(blob: Blob): Promise<string> {
 }
 
 export async function jobHandler({ profileId }: { profileId: string }) {
-  const { data: profile, error: profileError } = await supabase.from("profiles")
-    .select().eq("id", profileId).single();
-  if (profileError) {
-    console.error("Error getting profile:", profileError.message);
-    return new Response(
-      JSON.stringify({ error: "Server Error" }),
-      { status: 500, headers: { "Content-Type": "application/json" } },
-    );
-  }
-
-  const conversationData = profile
-    .builder_conversation_data as BuilderConversationData;
-  const conversation = conversationData.conversations?.findLast((c) =>
-    c.state === "finished"
-  );
-
-  if (!conversation) {
-    console.error("No finished conversation");
+  const active = await db.get(["builder-job", profileId]);
+  if (active.value || active.value === null) {
+    console.log("Already processing");
     return;
   }
 
-  const photoKeys = profile.available_photo_keys as string[];
+  // claim job
+  await db.set(["builder-job", profileId], true);
 
-  const photos = await Promise.all(photoKeys.map(async (key) => {
-    const { data: photo, error: photoError } = await supabase.storage.from(
-      "photos",
-    ).download(key);
-    if (photoError) {
-      console.error("Error getting photo:", photoError.message);
-      throw photoError;
+  try {
+    const { data: profile, error: profileError } = await supabase.from(
+      "profiles",
+    )
+      .select().eq("id", profileId).single();
+    if (profileError) {
+      console.error("Error getting profile:", profileError.message);
+      return new Response(
+        JSON.stringify({ error: "Server Error" }),
+        { status: 500, headers: { "Content-Type": "application/json" } },
+      );
     }
 
-    const dataUrl = await blobToBase64(photo);
+    const conversationData = profile
+      .builder_conversation_data as BuilderConversationData;
+    const conversation = conversationData.conversations?.findLast((c) =>
+      c.state === "finished"
+    );
 
-    return { key, dataUrl };
-  }));
+    if (!conversation) {
+      console.error("No finished conversation");
+      return;
+    }
 
-  // Pre process user photos, since GPT-4 Vision preview does not yet support tool calls
-  const photoMessage = await rawMessage("gpt-4-vision-preview", [
-    {
-      role: "system",
-      content:
-        `The following are photos provided by a user to a dating app. Given the images provided, write a short description of the image and what the user is doing in the photo. Make sure to describe if the user is with other people in the photo, and how prominent they are in the photo, so that we can determine if it is a good representative image for people trying to figure out what the user looks like.
-        
-        Respond in the following JSON array format:
-        [{ key: "<photo key here>", description: "<description here>" }, ...]`,
-    },
-    {
-      role: "user",
-      content: photos.flatMap((photo) => [
-        {
-          type: "text",
-          text: `Key: ${photo.key}`,
-        },
-        {
-          type: "image_url",
-          image_url: { url: photo.dataUrl },
-        },
-      ]),
-    },
-    {
-      role: "system",
-      content: "Respond in pure JSON only",
-    },
-  ], {
-    maxTokens: 1000,
-    temperature: 0,
-  });
+    const photoKeys = profile.available_photo_keys as string[];
 
-  if (!photoMessage.content || typeof photoMessage.content !== "string") {
-    console.error("No photo message content");
-    return;
-  }
-  console.log("Photo message:", photoMessage.content);
+    const photos = await Promise.all(photoKeys.map(async (key) => {
+      const { data: photo, error: photoError } = await supabase.storage.from(
+        "photos",
+      ).download(key);
+      if (photoError) {
+        console.error("Error getting photo:", photoError.message);
+        throw photoError;
+      }
 
-  const constructMessage = await rawMessage("gpt-4-turbo-preview", [
-    {
-      role: "system",
-      content: CONSTRUCTION_PROMPT.replace(
-        "{profile}",
-        JSON.stringify({
-          name: profile.first_name,
-          gender: profile.gender,
-          location: profile.display_location,
-          age: new Date(profile.birth_date).getFullYear() -
-            new Date().getFullYear(),
-        }),
-      ).replace("{photos}", photoMessage.content),
-    },
-    ...conversation.messages,
-  ], {
-    temperature: 0.5,
-    maxTokens: 2000,
-    toolChoice: { type: "function", function: { name: "construct" } },
-    tools: [
+      const dataUrl = await blobToBase64(photo);
+
+      return { key, dataUrl };
+    }));
+
+    // Pre process user photos, since GPT-4 Vision preview does not yet support tool calls
+    const photoMessage = await rawMessage("gpt-4-vision-preview", [
       {
-        type: "function",
-        function: {
-          name: "construct",
-          description: "Construct the final profile blocks",
-          parameters: {
-            type: "object",
-            properties: {
-              blocks: {
-                oneOf: [
-                  {
-                    type: "object",
-                    description: "A photo from the user's collection",
-                    required: ["photo"],
-                    properties: {
-                      photo: {
-                        type: "object",
-                        required: ["key"],
-                        properties: {
-                          key: { type: "string", description: "The photo key" },
-                        },
-                      },
-                    },
-                  },
-                  {
-                    type: "object",
-                    description:
-                      "A paragraph of text telling potential suitors something exciting about the client's personality, character, or life. Should be in a fun, whimsical, approachable tone and use jokes / puns / wordplay when possible. Use of emojis is encouraged. Should be written in the third person.",
-                    required: ["gas"],
-                    properties: {
-                      gas: {
-                        type: "object",
-                        required: ["text"],
-                        properties: {
-                          text: {
-                            type: "string",
-                            description:
-                              "The text, feel free to use emojis and markdown for bolding/italics etc.",
+        role: "system",
+        content:
+          `The following are photos provided by a user to a dating app. Given the images provided, write a short description of the image and what the user is doing in the photo. Make sure to describe if the user is with other people in the photo, and how prominent they are in the photo, so that we can determine if it is a good representative image for people trying to figure out what the user looks like.
+          
+          Respond in the following JSON array format:
+          [{ key: "<photo key here>", description: "<description here>" }, ...]`,
+      },
+      {
+        role: "user",
+        content: photos.flatMap((photo) => [
+          {
+            type: "text",
+            text: `Key: ${photo.key}`,
+          },
+          {
+            type: "image_url",
+            image_url: { url: photo.dataUrl },
+          },
+        ]),
+      },
+      {
+        role: "system",
+        content: "Respond in pure JSON only",
+      },
+    ], {
+      maxTokens: 1000,
+      temperature: 0,
+    });
+
+    if (!photoMessage.content || typeof photoMessage.content !== "string") {
+      console.error("No photo message content");
+      return;
+    }
+    console.log("Photo message:", photoMessage.content);
+
+    const constructMessage = await rawMessage("gpt-4-turbo-preview", [
+      {
+        role: "system",
+        content: CONSTRUCTION_PROMPT.replace(
+          "{profile}",
+          JSON.stringify({
+            name: profile.first_name,
+            gender: profile.gender,
+            location: profile.display_location,
+            age: new Date(profile.birth_date).getFullYear() -
+              new Date().getFullYear(),
+          }),
+        ).replace("{photos}", photoMessage.content),
+      },
+      ...conversation.messages,
+    ], {
+      temperature: 0.5,
+      maxTokens: 2000,
+      toolChoice: { type: "function", function: { name: "construct" } },
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "construct",
+            description: "Construct the final profile blocks",
+            parameters: {
+              type: "object",
+              properties: {
+                blocks: {
+                  oneOf: [
+                    {
+                      type: "object",
+                      description: "A photo from the user's collection",
+                      required: ["photo"],
+                      properties: {
+                        photo: {
+                          type: "object",
+                          required: ["key"],
+                          properties: {
+                            key: {
+                              type: "string",
+                              description: "The photo key",
+                            },
                           },
                         },
                       },
                     },
-                  },
-                ],
+                    {
+                      type: "object",
+                      description:
+                        "A paragraph of text telling potential suitors something exciting about the client's personality, character, or life. Should be in a fun, whimsical, approachable tone and use jokes / puns / wordplay when possible. Use of emojis is encouraged. Should be written in the third person.",
+                      required: ["gas"],
+                      properties: {
+                        gas: {
+                          type: "object",
+                          required: ["text"],
+                          properties: {
+                            text: {
+                              type: "string",
+                              description:
+                                "The text, feel free to use emojis and markdown for bolding/italics etc.",
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
               },
             },
           },
         },
-      },
-    ],
-  });
+      ],
+    });
 
-  if (constructMessage.content || !constructMessage.tool_calls) {
-    console.error("No construct message tool call");
-    return;
+    if (constructMessage.content || !constructMessage.tool_calls) {
+      console.error("No construct message tool call");
+      return;
+    }
+
+    console.log(constructMessage.tool_calls[0].function.arguments);
+
+    const args = JSON.parse(constructMessage.tool_calls[0].function.arguments);
+
+    const { error: updateError } = await supabase.from("profiles").update({
+      blocks: args.blocks,
+    }).eq("id", profile.id);
+    if (updateError) {
+      console.error("Error updating profile:", updateError.message);
+      return;
+    }
+  } catch {
+    // release job
+    await db.set(["builder-job", profileId], false);
   }
 
-  console.log(constructMessage.tool_calls[0].function.arguments);
-
-  const args = JSON.parse(constructMessage.tool_calls[0].function.arguments);
-
-  const { error: updateError } = await supabase.from("profiles").update({
-    blocks: args.blocks,
-  }).eq("id", profile.id);
-  if (updateError) {
-    console.error("Error updating profile:", updateError.message);
-    return;
-  }
+  await db.delete(["builder-job", profileId]);
 }
 
 export const handler: Deno.ServeHandler = async (req) => {
@@ -358,7 +379,11 @@ export const handler: Deno.ServeHandler = async (req) => {
     conversation.state = "finished";
     newConversationMessage.content = "Thank you! Working on your profile...";
 
-    await db.enqueue({ queue: "send-builder-message", profileId: profile.id });
+    await db.atomic()
+      .check({ key: ["builder-job", profile.id], versionstamp: null })
+      .enqueue({ queue: "send-builder-message", profileId: profile.id })
+      .set(["builder-job", profile.id], false)
+      .commit();
   } else {
     console.error("No message content");
     return new Response(

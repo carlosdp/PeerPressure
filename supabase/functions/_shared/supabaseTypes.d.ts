@@ -133,7 +133,6 @@ export interface Database {
           location: unknown
           photo_keys: Json
           preferences: Json
-          profile_photo_key: string | null
           updated_at: string
           user_id: string | null
         }
@@ -151,7 +150,6 @@ export interface Database {
           location: unknown
           photo_keys?: Json
           preferences?: Json
-          profile_photo_key?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -169,7 +167,6 @@ export interface Database {
           location?: unknown
           photo_keys?: Json
           preferences?: Json
-          profile_photo_key?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -231,7 +228,6 @@ export interface Database {
           location: unknown
           photo_keys: Json
           preferences: Json
-          profile_photo_key: string | null
           updated_at: string
           user_id: string | null
         }
@@ -252,7 +248,6 @@ export interface Database {
           location: unknown
           photo_keys: Json
           preferences: Json
-          profile_photo_key: string | null
           updated_at: string
           user_id: string | null
         }[]

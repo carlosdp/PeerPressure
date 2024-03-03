@@ -139,9 +139,8 @@ async function generateProfile(
     "1024x1792",
     "natural",
   );
-  const imageKey = `${profile.id}/profile/${
-    Math.random().toString(36).substring(7)
-  }.png`;
+  const imageId = crypto.randomUUID();
+  const imageKey = `${profile.id}/profile/${imageId}.png`;
   console.log(imageKey);
 
   const { error: imageError } = await supabase.storage.from("photos").upload(
@@ -155,7 +154,8 @@ async function generateProfile(
   }
 
   const { error: updateError } = await supabase.from("profiles").update({
-    profile_photo_key: imageKey,
+    available_photo_keys: [imageKey],
+    blocks: [{ photo: { key: imageKey } }],
   }).eq("id", profile.id);
   if (updateError) {
     console.error("Error updating profile photo key:", updateError);

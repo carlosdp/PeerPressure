@@ -119,7 +119,6 @@ class Profile: Codable {
         case location
         case displayLocation
         case biographicalData
-        case profilePhotoKey
         case photos = "photoKeys"
         case availablePhotos = "availablePhotoKeys"
         case blocks
