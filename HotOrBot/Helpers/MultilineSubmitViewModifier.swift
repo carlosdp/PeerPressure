@@ -24,17 +24,11 @@ struct MultilineSubmitViewModifier: ViewModifier {
     private let submitLabel: SubmitLabel
     private let onSubmit: () -> Void
     
-    @FocusState
-    private var isFocused: Bool
-    
     func body(content: Content) -> some View {
         content
-            .focused($isFocused)
             .submitLabel(submitLabel)
             .onChange(of: text) {
-                guard isFocused else { return }
                 guard text.contains("\n") else { return }
-                isFocused = false
                 text = text.replacingOccurrences(of: "\n", with: "")
                 onSubmit()
             }

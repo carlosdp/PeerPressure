@@ -31,7 +31,7 @@ export type OpenAIMessage =
     | {
       content: ({ type: "text"; text: string } | {
         type: "image_url";
-        image_url: { url: string };
+        image_url: { url: string; detail?: "low" | "high" };
       })[];
     }
   );

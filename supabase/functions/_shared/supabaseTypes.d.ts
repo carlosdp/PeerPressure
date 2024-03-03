@@ -34,6 +34,141 @@ export interface Database {
   }
   public: {
     Tables: {
+      archive: {
+        Row: {
+          archivedon: string
+          completedon: string | null
+          createdon: string
+          data: Json | null
+          expirein: unknown
+          id: string
+          keepuntil: string
+          name: string
+          on_complete: boolean
+          output: Json | null
+          priority: number
+          retrybackoff: boolean
+          retrycount: number
+          retrydelay: number
+          retrylimit: number
+          singletonkey: string | null
+          singletonon: string | null
+          startafter: string
+          startedon: string | null
+          state: Database["public"]["Enums"]["job_state"]
+        }
+        Insert: {
+          archivedon?: string
+          completedon?: string | null
+          createdon: string
+          data?: Json | null
+          expirein: unknown
+          id: string
+          keepuntil: string
+          name: string
+          on_complete: boolean
+          output?: Json | null
+          priority: number
+          retrybackoff: boolean
+          retrycount: number
+          retrydelay: number
+          retrylimit: number
+          singletonkey?: string | null
+          singletonon?: string | null
+          startafter: string
+          startedon?: string | null
+          state: Database["public"]["Enums"]["job_state"]
+        }
+        Update: {
+          archivedon?: string
+          completedon?: string | null
+          createdon?: string
+          data?: Json | null
+          expirein?: unknown
+          id?: string
+          keepuntil?: string
+          name?: string
+          on_complete?: boolean
+          output?: Json | null
+          priority?: number
+          retrybackoff?: boolean
+          retrycount?: number
+          retrydelay?: number
+          retrylimit?: number
+          singletonkey?: string | null
+          singletonon?: string | null
+          startafter?: string
+          startedon?: string | null
+          state?: Database["public"]["Enums"]["job_state"]
+        }
+        Relationships: []
+      }
+      job: {
+        Row: {
+          completedon: string | null
+          createdon: string
+          data: Json | null
+          expirein: unknown
+          id: string
+          keepuntil: string
+          name: string
+          on_complete: boolean
+          output: Json | null
+          priority: number
+          retrybackoff: boolean
+          retrycount: number
+          retrydelay: number
+          retrylimit: number
+          singletonkey: string | null
+          singletonon: string | null
+          startafter: string
+          startedon: string | null
+          state: Database["public"]["Enums"]["job_state"]
+        }
+        Insert: {
+          completedon?: string | null
+          createdon?: string
+          data?: Json | null
+          expirein?: unknown
+          id?: string
+          keepuntil?: string
+          name: string
+          on_complete?: boolean
+          output?: Json | null
+          priority?: number
+          retrybackoff?: boolean
+          retrycount?: number
+          retrydelay?: number
+          retrylimit?: number
+          singletonkey?: string | null
+          singletonon?: string | null
+          startafter?: string
+          startedon?: string | null
+          state?: Database["public"]["Enums"]["job_state"]
+        }
+        Update: {
+          completedon?: string | null
+          createdon?: string
+          data?: Json | null
+          expirein?: unknown
+          id?: string
+          keepuntil?: string
+          name?: string
+          on_complete?: boolean
+          output?: Json | null
+          priority?: number
+          retrybackoff?: boolean
+          retrycount?: number
+          retrydelay?: number
+          retrylimit?: number
+          singletonkey?: string | null
+          singletonon?: string | null
+          startafter?: string
+          startedon?: string | null
+          state?: Database["public"]["Enums"]["job_state"]
+        }
+        Relationships: []
+      }
       matches: {
         Row: {
           created_at: string
@@ -180,6 +315,75 @@ export interface Database {
           }
         ]
       }
+      schedule: {
+        Row: {
+          created_on: string
+          cron: string
+          data: Json | null
+          name: string
+          options: Json | null
+          timezone: string | null
+          updated_on: string
+        }
+        Insert: {
+          created_on?: string
+          cron: string
+          data?: Json | null
+          name: string
+          options?: Json | null
+          timezone?: string | null
+          updated_on?: string
+        }
+        Update: {
+          created_on?: string
+          cron?: string
+          data?: Json | null
+          name?: string
+          options?: Json | null
+          timezone?: string | null
+          updated_on?: string
+        }
+        Relationships: []
+      }
+      subscription: {
+        Row: {
+          created_on: string
+          event: string
+          name: string
+          updated_on: string
+        }
+        Insert: {
+          created_on?: string
+          event: string
+          name: string
+          updated_on?: string
+        }
+        Update: {
+          created_on?: string
+          event?: string
+          name?: string
+          updated_on?: string
+        }
+        Relationships: []
+      }
+      version: {
+        Row: {
+          cron_on: string | null
+          maintained_on: string | null
+          version: number
+        }
+        Insert: {
+          cron_on?: string | null
+          maintained_on?: string | null
+          version: number
+        }
+        Update: {
+          cron_on?: string | null
+          maintained_on?: string | null
+          version?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -262,6 +466,14 @@ export interface Database {
     }
     Enums: {
       gender: "male" | "female" | "non-binary" | "other"
+      job_state:
+        | "created"
+        | "retry"
+        | "active"
+        | "completed"
+        | "expired"
+        | "cancelled"
+        | "failed"
     }
     CompositeTypes: {
       [_ in never]: never
