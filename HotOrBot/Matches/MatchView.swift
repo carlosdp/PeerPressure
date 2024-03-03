@@ -13,7 +13,8 @@ struct ChatCompose: View {
     var message: String = ""
     
     var body: some View {
-        TextField("Send message", text: $message)
+        TextField("Send message", text: $message, axis: .vertical)
+            .lineLimit(3)
             .onSubmit {
                 onSend(message)
                 message = ""

@@ -145,11 +145,12 @@ class SupabaseImage: Codable {
             throw SupabaseImageError.alreadyUploaded
         }
         
-        if let imageData = self.image?.jpegData(compressionQuality: 1.0) {
+        if let imageData = self.image?.jpegData(compressionQuality: 0.7) {
             let imageId = UUID()
             
             let key = "\(profileId)/profile/\(imageId).jpg"
             try await supabase.storage.from("photos").upload(path: key, file: imageData, options: .init(contentType: "image/jpeg"))
+            self.key = key
         } else {
             throw SupabaseImageError.noImageData
         }

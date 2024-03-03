@@ -25,23 +25,25 @@ struct ProfileBlocksView<Blocks>: View where Blocks: RandomAccessCollection<Prof
                     .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: 512)
                     .clipShape(.rect(cornerRadius: 20))
                 case .gas(let text):
-                    Rectangle()
-                        .fill(.white)
-                        .clipShape(.rect(cornerRadius: 20))
-                        .overlay {
-                            VStack {
-                                HStack {
-                                    Text(text)
-                                        .font(.system(size: 20))
-                                    
-                                    Spacer()
-                                }
+                    ZStack {
+                        Rectangle()
+                            .fill(.white)
+                            .clipShape(.rect(cornerRadius: 20))
+                        
+                        VStack {
+                            HStack {
+                                Text(LocalizedStringKey(text))
+                                    .font(.system(size: 20))
+                                    .fixedSize(horizontal: false, vertical: true)
                                 
                                 Spacer()
                             }
-                            .padding(20)
+                            
+                            Spacer()
                         }
-                        .frame(minWidth: 0, maxWidth: .infinity, minHeight: 100, maxHeight: .infinity)
+                        .padding(20)
+                    }
+                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: 100, maxHeight: .infinity)
                 }
             }
         }
