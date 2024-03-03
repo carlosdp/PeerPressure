@@ -13,8 +13,8 @@ struct MatchItemView: View {
     var body: some View {
         HStack(alignment: .top, spacing: 16) {
             Group {
-                if let photo = profile.profilePhoto {
-                    Image(uiImage: photo)
+                if let photo = profile.profilePhoto, let image = photo.image {
+                    Image(uiImage: image)
                         .resizable()
                         .aspectRatio(contentMode: .fill)
                 } else {

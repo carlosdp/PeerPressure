@@ -25,7 +25,10 @@ let profiles = [
             college: "Carnegie Mellon University",
             work: "CTO at Games Startup"
         ),
-        profilePhoto: UIImage(named: "profile-photo-1")
+        blocks: [
+            .photo(key: SupabaseImage(from: UIImage(named: "profile-photo-1")!)),
+            .gas(text: "Carlos is an amazing guy, like omg")
+        ]
     ),
     Profile(
         id: UUID(),
@@ -36,7 +39,10 @@ let profiles = [
             college: "Brown University",
             work: "Lawyer"
         ),
-        profilePhoto: UIImage(named: "profile-photo-1")
+        blocks: [
+            .photo(key: SupabaseImage(from: UIImage(named: "profile-photo-1")!)),
+            .gas(text: "Sarah is like an amazing girl, like omg")
+        ]
     )
 ]
 

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 @preconcurrency import Supabase
 @preconcurrency import KeychainAccess
 
@@ -81,5 +82,76 @@ class SupabaseAuth {
     
     deinit {
         authStateTask?.cancel()
+    }
+}
+
+@Observable
+class SupabaseImage: Codable {
+    var key: String?
+    var image: UIImage?
+    
+    var isLoaded: Bool {
+        get {
+            self.image != nil
+        }
+    }
+    var isUploaded: Bool {
+        get {
+            self.key != nil
+        }
+    }
+    
+    enum SupabaseImageError: Error {
+        case notUploaded
+        case noImageData
+        case alreadyUploaded
+    }
+    
+    init(from key: String) {
+        self.key = key
+    }
+    
+    init(from image: UIImage) {
+        self.image = image
+    }
+    
+    required init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        self.key = try container.decode(String.self)
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        guard let key = self.key else {
+            throw SupabaseImageError.notUploaded
+        }
+        
+        var container = encoder.singleValueContainer()
+        try container.encode(key)
+    }
+    
+    func load() async throws {
+        if self.image == nil {
+            guard let key = self.key else {
+                throw SupabaseImageError.notUploaded
+            }
+            
+            let data = try await supabase.storage.from("photos").download(path: key)
+            self.image = UIImage(data: data)
+        }
+    }
+    
+    func upload(profileId: UUID) async throws {
+        if self.key != nil {
+            throw SupabaseImageError.alreadyUploaded
+        }
+        
+        if let imageData = self.image?.jpegData(compressionQuality: 1.0) {
+            let imageId = UUID()
+            
+            let key = "\(profileId)/profile/\(imageId).jpg"
+            try await supabase.storage.from("photos").upload(path: key, file: imageData, options: .init(contentType: "image/jpeg"))
+        } else {
+            throw SupabaseImageError.noImageData
+        }
     }
 }

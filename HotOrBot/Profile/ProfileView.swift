@@ -15,7 +15,7 @@ struct ProfileView: View {
         ScrollView {
             VStack(alignment: .leading) {
                 ZStack {
-                    Image(uiImage: profile.profilePhoto ?? UIImage(named: "profile-photo-1")!)
+                    Image(uiImage: profile.profilePhoto?.image ?? UIImage(named: "profile-photo-1")!)
                         .resizable()
                         .aspectRatio(contentMode: .fill)
                         .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
@@ -53,6 +53,8 @@ struct ProfileView: View {
                     }
                 }
                 .padding(12)
+                
+                ProfileBlocksView(blocks: profile.blocks[1...])
             }
             .padding(20)
         }

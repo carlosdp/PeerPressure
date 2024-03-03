@@ -26,7 +26,7 @@ struct ProfileHeader: View {
     let minimumHeight: CGFloat = 30
     
     var body: some View {
-        Image(uiImage: profile.profilePhoto ?? UIImage(named: "profile-photo-1")!)
+        Image(uiImage: profile.profilePhoto?.image ?? UIImage(named: "profile-photo-1")!)
             .resizable()
             .aspectRatio(contentMode: .fill)
             .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)

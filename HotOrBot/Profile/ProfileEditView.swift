@@ -89,8 +89,6 @@ struct ProfileEditView: View {
     var body: some View {
         List {
             Section("Photos") {
-                ProfileImageEditor(image: $profile.profilePhoto)
-                
                 ForEach(profile.photos, id: \.key) { photo in
                     if let image = photo.image {
                         ProfileImage(image: image)

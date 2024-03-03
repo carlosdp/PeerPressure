@@ -162,7 +162,13 @@ export async function jobHandler({ profileId }: { profileId: string }) {
                     description: "A photo from the user's collection",
                     required: ["photo"],
                     properties: {
-                      photo: { type: "string", description: "The photo key" },
+                      photo: {
+                        type: "object",
+                        required: ["key"],
+                        properties: {
+                          key: { type: "string", description: "The photo key" },
+                        },
+                      },
                     },
                   },
                   {
@@ -172,9 +178,15 @@ export async function jobHandler({ profileId }: { profileId: string }) {
                     required: ["gas"],
                     properties: {
                       gas: {
-                        type: "string",
-                        description:
-                          "The text, feel free to use emojis and markdown for bolding/italics etc.",
+                        type: "object",
+                        required: ["text"],
+                        properties: {
+                          text: {
+                            type: "string",
+                            description:
+                              "The text, feel free to use emojis and markdown for bolding/italics etc.",
+                          },
+                        },
                       },
                     },
                   },

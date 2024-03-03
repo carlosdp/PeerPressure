@@ -78,8 +78,8 @@ struct ProfileBuilderConversationData: Codable {
 }
 
 enum ProfileBlock: Codable {
-    case image(String)
-    case text(String)
+    case photo(key: SupabaseImage)
+    case gas(text: String)
 }
 
 @Observable
@@ -92,20 +92,23 @@ class Profile: Codable {
     var location: CLLocationCoordinate2D?
     var displayLocation: String = ""
     var biographicalData: BiographicalData = BiographicalData()
-    var profilePhotoKey: String?
-    var photoKeys: [String] = []
-    var availablePhotoKeys: [String]?
     var builderConversationData = ProfileBuilderConversationData()
     var blocks: [ProfileBlock] = []
     
-    var profilePhoto: UIImage?
-    var photos: [ProfilePhoto] = []
-    var availablePhotos: [ProfilePhoto] = []
-    
-    struct ProfilePhoto {
-        var key: String?
-        var image: UIImage?
+    var profilePhoto: SupabaseImage? {
+        get {
+            switch self.blocks.first {
+            case .photo(let image):
+                image
+            case .gas(_):
+                nil
+            case nil:
+                nil
+            }
+        }
     }
+    var photos: [SupabaseImage] = []
+    var availablePhotos: [SupabaseImage] = []
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -117,20 +120,21 @@ class Profile: Codable {
         case displayLocation
         case biographicalData
         case profilePhotoKey
-        case photoKeys
-        case availablePhotoKeys
+        case photos = "photoKeys"
+        case availablePhotos = "availablePhotoKeys"
         case blocks
+        case builderConversationData
     }
     
     init() {
     }
     
-    init(id: UUID, firstName: String, birthDate: Date, biographicalData: BiographicalData, profilePhoto: UIImage? = nil) {
+    init(id: UUID, firstName: String, birthDate: Date, biographicalData: BiographicalData, blocks: [ProfileBlock]) {
         self.id = id
         self.firstName = firstName
         self.birthDate = SimpleDate(date: birthDate)
         self.biographicalData = biographicalData
-        self.profilePhoto = profilePhoto
+        self.blocks = blocks
     }
     
     required init(from decoder: Decoder) throws {
@@ -142,11 +146,10 @@ class Profile: Codable {
         self.birthDate = try container.decode(SimpleDate.self, forKey: .birthDate)
         self.displayLocation = try container.decode(String.self, forKey: .displayLocation)
         self.biographicalData = try container.decode(BiographicalData.self, forKey: .biographicalData)
-        self.profilePhotoKey = try container.decode(Optional<String>.self, forKey: .profilePhotoKey)
-        self.photoKeys = try container.decode(Array<String>.self, forKey: .photoKeys)
-        self.photos = self.photoKeys.map({ ProfilePhoto(key: $0) })
-        self.availablePhotoKeys = try container.decodeIfPresent(Array<String>.self, forKey: .availablePhotoKeys)
+        self.photos = try container.decode(Array<SupabaseImage>.self, forKey: .photos)
+        self.availablePhotos = try container.decode(Array<SupabaseImage>.self, forKey: .availablePhotos)
         self.blocks = try container.decode(Array<ProfileBlock>.self, forKey: .blocks)
+        self.builderConversationData = try container.decode(ProfileBuilderConversationData.self, forKey: .builderConversationData)
     }
     
     func encode(to encoder: Encoder) throws {
@@ -163,32 +166,30 @@ class Profile: Codable {
         }
         try container.encode(self.displayLocation, forKey: .displayLocation)
         try container.encode(self.biographicalData, forKey: .biographicalData)
-        try container.encode(self.profilePhotoKey, forKey: .profilePhotoKey)
         // try container.encode(self.photoKeys, forKey: .photoKeys)
-        if let keys = self.availablePhotoKeys {
-            try container.encode(keys, forKey: .availablePhotoKeys)
+        if self.id != nil {
+            // if ID isn't set, we can't upload photos yet because the key paths are dependent on profile ID
+            try container.encode(self.availablePhotos, forKey: .availablePhotos)
         }
         try container.encode(self.blocks, forKey: .blocks)
     }
     
     func fetchProfilePhoto() async throws {
-        if self.profilePhoto == nil, let key = self.profilePhotoKey {
-            let data = try await supabase.storage.from("photos").download(path: key)
-            self.profilePhoto = UIImage(data: data)
+        if let photo = self.profilePhoto, !photo.isLoaded {
+            try await photo.load()
         }
     }
     
     func fetchProfilePhotos() async throws {
-        for (i, photo) in photos.enumerated() {
-            if photo.image == nil, let key = photo.key {
-                let data = try await supabase.storage.from("photos").download(path: key)
-                photos[i].image = UIImage(data: data)
+        for photo in self.photos {
+            if !photo.isLoaded {
+                try await photo.load()
             }
         }
     }
     
     func addPhoto(image: UIImage) {
-        self.availablePhotos.append(ProfilePhoto(image: image))
+        self.availablePhotos.append(SupabaseImage(from: image))
     }
 }
 
