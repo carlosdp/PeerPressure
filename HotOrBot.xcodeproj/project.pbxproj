@@ -23,7 +23,6 @@
 		BF09FDBF2B8D212100F97F76 /* ProfileController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF09FDBE2B8D212100F97F76 /* ProfileController.swift */; };
 		BF09FDC12B8D298F00F97F76 /* ProfileEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF09FDC02B8D298F00F97F76 /* ProfileEditView.swift */; };
 		BF09FDC52B8D55B500F97F76 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF09FDC42B8D55B500F97F76 /* Utils.swift */; };
-		BF67C87A2B8E2E8F00899472 /* ProfileImageEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF67C8792B8E2E8F00899472 /* ProfileImageEditor.swift */; };
 		BF67C87C2B8FC4FD00899472 /* LikesController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF67C87B2B8FC4FD00899472 /* LikesController.swift */; };
 		BF67C87E2B8FC51500899472 /* LikesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF67C87D2B8FC51500899472 /* LikesView.swift */; };
 		BF67C8802B8FC57700899472 /* LikeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF67C87F2B8FC57700899472 /* LikeView.swift */; };
@@ -73,7 +72,6 @@
 		BF09FDBE2B8D212100F97F76 /* ProfileController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileController.swift; sourceTree = "<group>"; };
 		BF09FDC02B8D298F00F97F76 /* ProfileEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileEditView.swift; sourceTree = "<group>"; };
 		BF09FDC42B8D55B500F97F76 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
-		BF67C8792B8E2E8F00899472 /* ProfileImageEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileImageEditor.swift; sourceTree = "<group>"; };
 		BF67C87B2B8FC4FD00899472 /* LikesController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LikesController.swift; sourceTree = "<group>"; };
 		BF67C87D2B8FC51500899472 /* LikesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LikesView.swift; sourceTree = "<group>"; };
 		BF67C87F2B8FC57700899472 /* LikeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LikeView.swift; sourceTree = "<group>"; };
@@ -147,7 +145,6 @@
 			children = (
 				BF09FDBE2B8D212100F97F76 /* ProfileController.swift */,
 				BF09FDC02B8D298F00F97F76 /* ProfileEditView.swift */,
-				BF67C8792B8E2E8F00899472 /* ProfileImageEditor.swift */,
 				BF74A3A02B8A7D9E00D87E99 /* ProfileViewModel.swift */,
 				BFE41C672B87FA38004462A4 /* ProfileView.swift */,
 				BF9C1CD32B94457F00FFBF06 /* ProfileBlocksView.swift */,
@@ -193,6 +190,7 @@
 				BF67C88C2B922B2000899472 /* PhotoSelectionButton.swift */,
 				BF9C1CD12B943B1100FFBF06 /* AsyncSupabaseImage.swift */,
 				BF9C1CD92B95154F00FFBF06 /* MultilineSubmitViewModifier.swift */,
+				BFE41C612B87D6A5004462A4 /* Supabase.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -212,6 +210,22 @@
 				BF9C1CCF2B925F2A00FFBF06 /* ProfileBuilderController.swift */,
 			);
 			path = ProfileBuilder;
+			sourceTree = "<group>";
+		};
+		BF9C1CDB2B953CF700FFBF06 /* Login */ = {
+			isa = PBXGroup;
+			children = (
+				BFE41C632B87F96D004462A4 /* LoginView.swift */,
+			);
+			path = Login;
+			sourceTree = "<group>";
+		};
+		BF9C1CDC2B953D1800FFBF06 /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				BF0186D62B87FDA60051746C /* Models.swift */,
+			);
+			path = Data;
 			sourceTree = "<group>";
 		};
 		BFE41C3A2B87D64C004462A4 = {
@@ -236,6 +250,7 @@
 			children = (
 				BFE41C462B87D64C004462A4 /* HotOrBotApp.swift */,
 				BFE41C482B87D64C004462A4 /* ContentView.swift */,
+				BF9C1CDB2B953CF700FFBF06 /* Login */,
 				BF67C88A2B912CA800899472 /* Likes */,
 				BF67C8892B912C9500899472 /* Chat */,
 				BF67C8882B912C8000899472 /* Swiping */,
@@ -243,14 +258,12 @@
 				BF67C8862B912C4700899472 /* Matches */,
 				BF67C8852B912C2100899472 /* Onboarding */,
 				BF9C1CCC2B925B9000FFBF06 /* ProfileBuilder */,
+				BF9C1CDC2B953D1800FFBF06 /* Data */,
 				BF67C88B2B912CB700899472 /* Helpers */,
 				BF74A3A72B8AAADE00D87E99 /* Info.plist */,
 				BF0186DE2B890F3A0051746C /* HotOrBot.entitlements */,
 				BFE41C4A2B87D650004462A4 /* Assets.xcassets */,
 				BFE41C4C2B87D650004462A4 /* Preview Content */,
-				BFE41C612B87D6A5004462A4 /* Supabase.swift */,
-				BFE41C632B87F96D004462A4 /* LoginView.swift */,
-				BF0186D62B87FDA60051746C /* Models.swift */,
 			);
 			path = HotOrBot;
 			sourceTree = "<group>";
@@ -366,7 +379,6 @@
 				BFE41C682B87FA38004462A4 /* ProfileView.swift in Sources */,
 				BF0186D92B87FF540051746C /* PreviewData.swift in Sources */,
 				BF67C87C2B8FC4FD00899472 /* LikesController.swift in Sources */,
-				BF67C87A2B8E2E8F00899472 /* ProfileImageEditor.swift in Sources */,
 				BF09FDB72B8C591D00F97F76 /* MatchViewModel.swift in Sources */,
 				BF9C1CD02B925F2A00FFBF06 /* ProfileBuilderController.swift in Sources */,
 				BF09FDB52B8C58FC00F97F76 /* MatchesController.swift in Sources */,

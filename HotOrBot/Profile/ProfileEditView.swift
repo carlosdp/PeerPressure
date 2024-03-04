@@ -86,20 +86,46 @@ struct ProfileEditView: View {
     var profile: Profile
     var onSave: (Profile) -> Void
     
+    @State
+    private var imageSelectionState = PhotoSelectionButtonState.empty
+    @State
+    private var selectedTab = EditTab.basics
+    
+    enum EditTab: Int {
+        case basics
+        case photos
+    }
+    
     var body: some View {
-        List {
-            Section("Photos") {
-                ForEach(profile.photos, id: \.key) { photo in
-                    if let image = photo.image {
-                        ProfileImage(image: image)
-                    }
-                }
-                
-                ProfileImageAddButton { image in
-                    profile.addPhoto(image: image)
-                }
+        VStack {
+            Picker("", selection: $selectedTab) {
+                Text("Basics").tag(EditTab.basics)
+                Text("Photos").tag(EditTab.photos)
             }
+            .pickerStyle(.segmented)
+            .padding(.horizontal)
             
+            switch selectedTab {
+            case .basics:
+                basics
+                    .transition(.move(edge: selectedTab == .basics ? .leading : .trailing))
+            case .photos:
+                photos
+                    .transition(.move(edge: selectedTab.rawValue < EditTab.photos.rawValue ? .leading : .trailing))
+            }
+        }
+        .animation(.easeInOut, value: selectedTab)
+        .toolbar {
+            Button(action: {
+                onSave(profile)
+            }) {
+                Text("Done")
+            }
+        }
+    }
+    
+    var basics: some View {
+        List {
             Section("Basics") {
                 ProfileEditItemView(icon: "person", label: "First Name", value: .string($profile.firstName))
                 ProfileEditItemView(icon: "birthday.cake", label: "Birthday", value: .date($profile.birthDate.date))
@@ -110,13 +136,27 @@ struct ProfileEditView: View {
                 ProfileEditItemView(icon: "graduationcap", label: "Education", value: .string($profile.biographicalData.college ?? ""))
             }
         }
-        .toolbar {
-            Button(action: {
-                onSave(profile)
-            }) {
-                Text("Done")
+    }
+    
+    var photos: some View {
+        Grid {
+            ForEach(profile.photos, id: \.key) { photo in
+                if let image = photo.image {
+                    ProfileImage(image: image)
+                }
+            }
+            
+            PhotoSelectionButton(selectionState: $imageSelectionState) {
+                Image(systemName: "photo.badge.plus")
+                    .foregroundStyle(.black)
+                    .font(.system(size: 40))
+            } onImages: { images in
+                for image in images {
+                    profile.addPhoto(image: image)
+                }
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
     @ViewBuilder
