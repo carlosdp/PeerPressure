@@ -8,6 +8,7 @@
 import Foundation
 import CoreLocation
 import UIKit
+import Observation
 
 struct BiographicalData: Codable {
     // height in feet
@@ -108,14 +109,12 @@ class Profile: Codable {
         }
     }
     var state: OnboardingState {
-        get {
-            if blocks.count > 0 {
-                OnboardingState.ready
-            } else if let convos = builderConversationData.conversations, convos.contains(where: { $0.state == .finished }) {
-                OnboardingState.building
-            } else {
-                OnboardingState.inProgress
-            }
+        if blocks.count > 0 {
+            OnboardingState.ready
+        } else if let convos = builderConversationData.conversations, convos.contains(where: { $0.state == .finished }) {
+            OnboardingState.building
+        } else {
+            OnboardingState.inProgress
         }
     }
     

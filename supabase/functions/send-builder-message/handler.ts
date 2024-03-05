@@ -84,7 +84,7 @@ export const handler: Deno.ServeHandler = async (req) => {
 
   return new Response(
     JSON.stringify({
-      status: conversation.state,
+      status: newConversation.state,
       message: newConversation.messages[newConversation.messages.length - 1],
     }),
     { headers: { "Content-Type": "application/json" } },

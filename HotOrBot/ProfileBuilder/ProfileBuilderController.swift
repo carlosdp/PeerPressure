@@ -14,7 +14,7 @@ struct ProfileBuilderController: View {
     var messages: [ProfileBuilderConversationData.Conversation.Message] = []
     
     @State
-    private var profileModel = ProfileViewModel()
+    private var profileModel = ProfileViewModel.shared
     
     var body: some View {
         VStack {
@@ -37,7 +37,16 @@ struct ProfileBuilderController: View {
                         }
                         
                         if newMessage.status == .finished {
-                            await profileModel.fetchProfile()
+                            if var conversationData = profileModel.profile?.builderConversationData {
+                                if var conversations = conversationData.conversations {
+                                    conversations.append(ProfileBuilderConversationData.Conversation(messages: messages, state: .finished))
+                                    conversationData.conversations = conversations
+                                } else {
+                                    conversationData.conversations = [ProfileBuilderConversationData.Conversation(messages: messages, state: .finished)]
+                                }
+                                
+                                profileModel.profile?.builderConversationData = conversationData
+                            }
                         }
                     } catch {
                         print("Could not send builder message: \(error)")
