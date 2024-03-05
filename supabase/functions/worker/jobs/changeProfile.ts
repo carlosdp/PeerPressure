@@ -1,12 +1,11 @@
 import type { Job } from "npm:pg-boss@9.0.3";
 import { supabase } from "../../_shared/supabase.ts";
-import type { BuilderConversationData } from "../../send-builder-message/handler.ts";
 import { rawMessage } from "../../_shared/utils.ts";
 import logger from "../../logger.ts";
 import type { Photo } from "../../_shared/supabaseJsonTypes.d.ts";
 
 const CONSTRUCTION_PROMPT =
-  `You are an expert dating profile creator that helps clients construct a fun, whimsical dating profile that helps them attract the right person for them. Taking into account the guidelines below, construct a dating profile for the given client.
+  `You are an expert dating profile creator that helps clients construct a fun, whimsical dating profile that helps them attract the right person for them. Taking into account the guidelines below, and the current profile, edit the profile to make the changes described by the user.
 
   Guidelines:
   - Profiles are expressed as a list of "blocks" of different types, organized in a vertical profile on mobile phones
@@ -14,25 +13,19 @@ const CONSTRUCTION_PROMPT =
   - Keep in mind that basic profile information (height, education, etc.) will always be shown by the app after the first block, and the rest of the blocks will be presented after.
   - Match "gas" blocks up with relevant photos provided when possible
   - There should be about 5-7 blocks in the profile.
+  - When editing profiles, make sure the new profile at least as many images as the original profile.
 
-  Profile Information: {profile}
+  Basic Profile Information: {profile}
   Photos: {photos}
-  Conversaton:`;
+  Current Profile: {current_profile}`;
 
-export type BuildProfileJob = {
+export type ChangeProfileJob = {
   profileId: string;
+  changes: string;
 };
 
-function blobToBase64(blob: Blob): Promise<string> {
-  return new Promise((resolve, _) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result as string);
-    reader.readAsDataURL(blob);
-  });
-}
-
-async function job(job: Job<BuildProfileJob>) {
-  logger.info(`Building profile ${job.data.profileId}`);
+async function job(job: Job<ChangeProfileJob>) {
+  logger.info(`Changing profile ${job.data.profileId}: ${job.data.changes}`);
 
   const { data: profile, error: profileError } = await supabase.from(
     "profiles",
@@ -46,74 +39,7 @@ async function job(job: Job<BuildProfileJob>) {
     );
   }
 
-  const conversationData = profile
-    .builder_conversation_data as BuilderConversationData;
-  const conversation = conversationData.conversations?.findLast((c) =>
-    c.state === "finished"
-  );
-
-  if (!conversation) {
-    console.error("No finished conversation");
-    return;
-  }
-
-  const photoKeys = profile.available_photos as Photo[];
-
-  const photos = await Promise.all(photoKeys.map(async (photoKey) => {
-    const { data: photo, error: photoError } = await supabase.storage.from(
-      "photos",
-    ).download(photoKey.key);
-    if (photoError) {
-      console.error("Error getting photo:", photoError.message);
-      throw photoError;
-    }
-
-    const dataUrl = await blobToBase64(photo);
-
-    return { key: photoKey.key, dataUrl };
-  }));
-
-  // Pre process user photos, since GPT-4 Vision preview does not yet support tool calls
-  const photoMessage = await rawMessage("gpt-4-vision-preview", [
-    {
-      role: "system",
-      content:
-        `The following are photos provided by a user to a dating app. Given the images provided, write a short description of the image and what the user is doing in the photo. Make sure to describe if the user is with other people in the photo, and how prominent they are in the photo, so that we can determine if it is a good representative image for people trying to figure out what the user looks like.
-        
-        Respond in the following JSON array format:
-        [{ key: "<photo key here>", description: "<description here>" }, ...]`,
-    },
-    {
-      role: "user",
-      content: photos.flatMap((photo) => [
-        {
-          type: "text",
-          text: `Key: ${photo.key}`,
-        },
-        {
-          type: "image_url",
-          image_url: { url: photo.dataUrl, detail: "low" },
-        },
-      ]),
-    },
-    {
-      role: "system",
-      content: "Respond in pure JSON only",
-    },
-  ], {
-    maxTokens: 1000,
-    temperature: 0,
-  });
-
-  if (!photoMessage.content || typeof photoMessage.content !== "string") {
-    console.error("No photo message content");
-    return;
-  }
-  console.log("Photo message:", photoMessage.content);
-
-  const photoDescriptions = JSON.parse(
-    photoMessage.content.replaceAll("```json", "").replaceAll("```", ""),
-  );
+  const photos = profile.available_photos as Photo[];
 
   const constructMessage = await rawMessage("gpt-4-turbo-preview", [
     {
@@ -127,9 +53,15 @@ async function job(job: Job<BuildProfileJob>) {
           age: new Date(profile.birth_date).getFullYear() -
             new Date().getFullYear(),
         }),
-      ).replace("{photos}", photoMessage.content),
+      ).replace("{current_profile}", JSON.stringify(profile.blocks)).replace(
+        "{photos}",
+        JSON.stringify(photos),
+      ),
     },
-    ...conversation.messages,
+    {
+      role: "user",
+      content: job.data.changes,
+    },
   ], {
     temperature: 0.5,
     maxTokens: 2000,
@@ -207,12 +139,6 @@ async function job(job: Job<BuildProfileJob>) {
 
   const { error: updateError } = await supabase.from("profiles").update({
     blocks: args.blocks,
-    available_photos: (profile.available_photos as Photo[]).map((photo) => ({
-      key: photo.key,
-      description: photoDescriptions.find((d: { key: string }) =>
-        d.key === photo.key
-      )?.description,
-    })),
   }).eq("id", profile.id);
   if (updateError) {
     console.error("Error updating profile:", updateError.message);

@@ -78,7 +78,7 @@ struct ProfileBuilderConversationData: Codable {
 }
 
 enum ProfileBlock: Codable {
-    case photo(key: SupabaseImage)
+    case photo(image: SupabaseImage)
     case gas(text: String)
 }
 
@@ -94,7 +94,7 @@ class Profile: Codable {
     var biographicalData: BiographicalData = BiographicalData()
     var builderConversationData = ProfileBuilderConversationData()
     var blocks: [ProfileBlock] = []
-    
+    var availablePhotos: [SupabaseImage] = []
     var profilePhoto: SupabaseImage? {
         get {
             switch self.blocks.first {
@@ -107,8 +107,6 @@ class Profile: Codable {
             }
         }
     }
-    var photos: [SupabaseImage] = []
-    var availablePhotos: [SupabaseImage] = []
     var state: OnboardingState {
         get {
             if blocks.count > 0 {
@@ -136,8 +134,7 @@ class Profile: Codable {
         case location
         case displayLocation
         case biographicalData
-        case photos = "photoKeys"
-        case availablePhotos = "availablePhotoKeys"
+        case availablePhotos
         case blocks
         case builderConversationData
     }
@@ -162,7 +159,6 @@ class Profile: Codable {
         self.birthDate = try container.decode(SimpleDate.self, forKey: .birthDate)
         self.displayLocation = try container.decode(String.self, forKey: .displayLocation)
         self.biographicalData = try container.decode(BiographicalData.self, forKey: .biographicalData)
-        self.photos = try container.decode(Array<SupabaseImage>.self, forKey: .photos)
         self.availablePhotos = try container.decode(Array<SupabaseImage>.self, forKey: .availablePhotos)
         self.blocks = try container.decode(Array<ProfileBlock>.self, forKey: .blocks)
         self.builderConversationData = try container.decode(ProfileBuilderConversationData.self, forKey: .builderConversationData)
@@ -185,22 +181,13 @@ class Profile: Codable {
         // try container.encode(self.photoKeys, forKey: .photoKeys)
         if self.id != nil {
             // if ID isn't set, we can't upload photos yet because the key paths are dependent on profile ID
-            try container.encode(self.availablePhotos, forKey: .availablePhotos)
+            try container.encode(self.availablePhotos.filter({ $0.isUploaded }), forKey: .availablePhotos)
         }
-        try container.encode(self.blocks, forKey: .blocks)
     }
     
     func fetchProfilePhoto() async throws {
         if let photo = self.profilePhoto, !photo.isLoaded {
             try await photo.load()
-        }
-    }
-    
-    func fetchProfilePhotos() async throws {
-        for photo in self.photos {
-            if !photo.isLoaded {
-                try await photo.load()
-            }
         }
     }
     

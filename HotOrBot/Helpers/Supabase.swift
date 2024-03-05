@@ -94,6 +94,10 @@ class SupabaseImage: Codable {
     var key: String?
     var image: UIImage?
     
+    enum CodingKeys: String, CodingKey {
+        case key
+    }
+    
     var isLoaded: Bool {
         get {
             self.image != nil
@@ -120,8 +124,8 @@ class SupabaseImage: Codable {
     }
     
     required init(from decoder: Decoder) throws {
-        let container = try decoder.singleValueContainer()
-        self.key = try container.decode(String.self)
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.key = try container.decode(String.self, forKey: .key)
     }
     
     func encode(to encoder: Encoder) throws {
@@ -129,8 +133,8 @@ class SupabaseImage: Codable {
             throw SupabaseImageError.notUploaded
         }
         
-        var container = encoder.singleValueContainer()
-        try container.encode(key)
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(key, forKey: .key)
     }
     
     func load() async throws {

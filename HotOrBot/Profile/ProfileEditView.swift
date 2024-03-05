@@ -94,6 +94,7 @@ struct ProfileEditView: View {
     enum EditTab: Int {
         case basics
         case photos
+        case chat
     }
     
     var body: some View {
@@ -101,6 +102,7 @@ struct ProfileEditView: View {
             Picker("", selection: $selectedTab) {
                 Text("Basics").tag(EditTab.basics)
                 Text("Photos").tag(EditTab.photos)
+                Text("Chat").tag(EditTab.chat)
             }
             .pickerStyle(.segmented)
             .padding(.horizontal)
@@ -112,6 +114,9 @@ struct ProfileEditView: View {
             case .photos:
                 photos
                     .transition(.move(edge: selectedTab.rawValue < EditTab.photos.rawValue ? .leading : .trailing))
+            case .chat:
+                ProfileBuilderController(startMessage: "Do you want to work on your profile more?", startActionLabel: "Yea, let's do it")
+                    .transition(.move(edge: selectedTab.rawValue < EditTab.chat.rawValue ? .leading : .trailing))
             }
         }
         .animation(.easeInOut, value: selectedTab)
@@ -140,7 +145,7 @@ struct ProfileEditView: View {
     
     var photos: some View {
         Grid {
-            ForEach(profile.photos, id: \.key) { photo in
+            ForEach(profile.availablePhotos, id: \.key) { photo in
                 if let image = photo.image {
                     ProfileImage(image: image)
                 }

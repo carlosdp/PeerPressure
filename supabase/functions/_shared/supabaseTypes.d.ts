@@ -255,7 +255,7 @@ export interface Database {
       }
       profiles: {
         Row: {
-          available_photo_keys: Json
+          available_photos: Json
           biographical_data: Json
           birth_date: string
           blocks: Json
@@ -272,7 +272,7 @@ export interface Database {
           user_id: string | null
         }
         Insert: {
-          available_photo_keys?: Json
+          available_photos?: Json
           biographical_data?: Json
           birth_date: string
           blocks?: Json
@@ -289,7 +289,7 @@ export interface Database {
           user_id?: string | null
         }
         Update: {
-          available_photo_keys?: Json
+          available_photos?: Json
           biographical_data?: Json
           birth_date?: string
           blocks?: Json
@@ -419,7 +419,7 @@ export interface Database {
       get_profile: {
         Args: Record<PropertyKey, never>
         Returns: {
-          available_photo_keys: Json
+          available_photos: Json
           biographical_data: Json
           birth_date: string
           blocks: Json
@@ -439,7 +439,7 @@ export interface Database {
       get_unmatched_profiles: {
         Args: Record<PropertyKey, never>
         Returns: {
-          available_photo_keys: Json
+          available_photos: Json
           biographical_data: Json
           birth_date: string
           blocks: Json

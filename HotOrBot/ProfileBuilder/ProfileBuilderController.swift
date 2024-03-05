@@ -8,15 +8,21 @@
 import SwiftUI
 
 struct ProfileBuilderController: View {
-    @State
-    var profileModel = ProfileViewModel()
+    var startMessage = "Let's get started making a profile! Are you ready?"
+    var startActionLabel = "I'm ready"
     @State
     var messages: [ProfileBuilderConversationData.Conversation.Message] = []
+    
+    @State
+    private var profileModel = ProfileViewModel()
     
     var body: some View {
         VStack {
             if let profile = profileModel.profile {
                 ProfileBuilderChatView(profile: profile, messages: messages)
+            } else {
+                ProgressView()
+                    .frame(maxHeight: .infinity)
             }
             
             ChatCompose { message in
@@ -46,7 +52,7 @@ struct ProfileBuilderController: View {
                 await profileModel.fetchProfile()
                 loadMessages()
                 if messages.count < 1 {
-                    messages.append(.init(role: "assistant", content: "Let's get started making a profile! Are you ready?"))
+                    messages.append(.init(role: "assistant", content: startMessage))
                 }
             }
         }

@@ -29,7 +29,6 @@ class ProfileViewModel {
         do {
             self.profile = try await supabase.database.rpc("get_profile").select().execute().value
             try await self.profile?.fetchProfilePhoto()
-            try await self.profile?.fetchProfilePhotos()
         } catch {
             print("Error fetching profile: \(error)")
         }

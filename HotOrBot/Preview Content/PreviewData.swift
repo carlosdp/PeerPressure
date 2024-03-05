@@ -26,7 +26,7 @@ let profiles = [
             work: "CTO at Games Startup"
         ),
         blocks: [
-            .photo(key: SupabaseImage(from: UIImage(named: "profile-photo-1")!)),
+            .photo(image: SupabaseImage(from: UIImage(named: "profile-photo-1")!)),
             .gas(text: "🚀 **Meet Carlos:** A Brooklyn-based software engineer who crafts the future of entertainment one app at a time. When he's not coding the next big reality show app, you can find him mastering the art of the perfect steak or navigating the Hudson on his sailboat. 🌊🍴")
         ]
     ),
@@ -40,7 +40,7 @@ let profiles = [
             work: "Lawyer"
         ),
         blocks: [
-            .photo(key: SupabaseImage(from: UIImage(named: "profile-photo-1")!)),
+            .photo(image: SupabaseImage(from: UIImage(named: "profile-photo-1")!)),
             .gas(text: "Sarah is like an amazing girl, like omg")
         ]
     )

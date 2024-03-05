@@ -13,7 +13,7 @@ create table profiles (
   biographical_data jsonb not null default '{}',
   preferences jsonb not null default '{}',
   photo_keys jsonb not null default '[]',
-  available_photo_keys jsonb not null default '[]',
+  available_photos jsonb not null default '[]',
   blocks jsonb not null default '[]',
   builder_conversation_data jsonb not null default '{}',
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
@@ -94,3 +94,29 @@ create or replace function get_pending_bot_matches()
 returns setof matches as $$
   select m.* from matches m left join profiles p on m.matched_profile_id = p.id where p.user_id is null and m.match_accepted_at is null and m.match_rejected_at is null and m.is_match = true;
 $$ language sql stable;
+
+create or replace function sanitize_available_photos()
+returns trigger as $$
+begin
+  new.available_photos = (
+    select jsonb_agg(
+      case
+        when (new.available_photos->>((i::int) - 1))::jsonb ? 'description' then
+          (new.available_photos->>((i::int) - 1))::jsonb
+        else
+          jsonb_build_object(
+            'key', (new.available_photos->>((i::int) - 1))::jsonb->>'key',
+            'description', (old.available_photos->>((i::int) - 1))::jsonb->>'description'
+          )
+      end
+    )
+    from jsonb_array_elements(new.available_photos) with ordinality as arr(elem, i)
+  );
+  return new;
+end;
+$$ language plpgsql;
+
+create trigger update_profiles_available_photos_trigger
+before update on profiles
+for each row
+execute function sanitize_available_photos();
