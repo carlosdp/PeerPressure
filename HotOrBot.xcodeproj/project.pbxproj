@@ -38,6 +38,9 @@
 		BF9C1CD62B95120500FFBF06 /* WaitBuildingProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF9C1CD52B95120500FFBF06 /* WaitBuildingProfileView.swift */; };
 		BF9C1CD82B95124C00FFBF06 /* WaitBuildingProfileController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF9C1CD72B95124C00FFBF06 /* WaitBuildingProfileController.swift */; };
 		BF9C1CDA2B95154F00FFBF06 /* MultilineSubmitViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF9C1CD92B95154F00FFBF06 /* MultilineSubmitViewModifier.swift */; };
+		BFE0D2CF2B97F0F900D76608 /* RiveRuntime in Frameworks */ = {isa = PBXBuildFile; productRef = BFE0D2CE2B97F0F900D76608 /* RiveRuntime */; };
+		BFE0D2D12B97F19200D76608 /* HeightField.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE0D2D02B97F19200D76608 /* HeightField.swift */; };
+		BFE0D2DA2B98190700D76608 /* height-man.riv in Resources */ = {isa = PBXBuildFile; fileRef = BFE0D2D92B98190700D76608 /* height-man.riv */; };
 		BFE41C472B87D64C004462A4 /* HotOrBotApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE41C462B87D64C004462A4 /* HotOrBotApp.swift */; };
 		BFE41C492B87D64C004462A4 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE41C482B87D64C004462A4 /* ContentView.swift */; };
 		BFE41C4B2B87D650004462A4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BFE41C4A2B87D650004462A4 /* Assets.xcassets */; };
@@ -88,6 +91,8 @@
 		BF9C1CD52B95120500FFBF06 /* WaitBuildingProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaitBuildingProfileView.swift; sourceTree = "<group>"; };
 		BF9C1CD72B95124C00FFBF06 /* WaitBuildingProfileController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaitBuildingProfileController.swift; sourceTree = "<group>"; };
 		BF9C1CD92B95154F00FFBF06 /* MultilineSubmitViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultilineSubmitViewModifier.swift; sourceTree = "<group>"; };
+		BFE0D2D02B97F19200D76608 /* HeightField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeightField.swift; sourceTree = "<group>"; };
+		BFE0D2D92B98190700D76608 /* height-man.riv */ = {isa = PBXFileReference; lastKnownFileType = file; path = "height-man.riv"; sourceTree = "<group>"; };
 		BFE41C432B87D64C004462A4 /* HotOrBot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HotOrBot.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BFE41C462B87D64C004462A4 /* HotOrBotApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotOrBotApp.swift; sourceTree = "<group>"; };
 		BFE41C482B87D64C004462A4 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -109,6 +114,7 @@
 				BFE41C602B87D690004462A4 /* Supabase in Frameworks */,
 				BFE41C562B87D690004462A4 /* Auth in Frameworks */,
 				BF74A3A62B8AA70100D87E99 /* MapKit.framework in Frameworks */,
+				BFE0D2CF2B97F0F900D76608 /* RiveRuntime in Frameworks */,
 				BFE41C5E2B87D690004462A4 /* Storage in Frameworks */,
 				BFE41C5C2B87D690004462A4 /* Realtime in Frameworks */,
 			);
@@ -191,6 +197,7 @@
 				BF9C1CD12B943B1100FFBF06 /* AsyncSupabaseImage.swift */,
 				BF9C1CD92B95154F00FFBF06 /* MultilineSubmitViewModifier.swift */,
 				BFE41C612B87D6A5004462A4 /* Supabase.swift */,
+				BFE0D2D02B97F19200D76608 /* HeightField.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -228,6 +235,14 @@
 			path = Data;
 			sourceTree = "<group>";
 		};
+		BFE0D2D22B97F31100D76608 /* RiveAssets */ = {
+			isa = PBXGroup;
+			children = (
+				BFE0D2D92B98190700D76608 /* height-man.riv */,
+			);
+			path = RiveAssets;
+			sourceTree = "<group>";
+		};
 		BFE41C3A2B87D64C004462A4 = {
 			isa = PBXGroup;
 			children = (
@@ -260,6 +275,7 @@
 				BF9C1CCC2B925B9000FFBF06 /* ProfileBuilder */,
 				BF9C1CDC2B953D1800FFBF06 /* Data */,
 				BF67C88B2B912CB700899472 /* Helpers */,
+				BFE0D2D22B97F31100D76608 /* RiveAssets */,
 				BF74A3A72B8AAADE00D87E99 /* Info.plist */,
 				BF0186DE2B890F3A0051746C /* HotOrBot.entitlements */,
 				BFE41C4A2B87D650004462A4 /* Assets.xcassets */,
@@ -300,6 +316,7 @@
 				BFE41C5B2B87D690004462A4 /* Realtime */,
 				BFE41C5D2B87D690004462A4 /* Storage */,
 				BFE41C5F2B87D690004462A4 /* Supabase */,
+				BFE0D2CE2B97F0F900D76608 /* RiveRuntime */,
 			);
 			productName = HotOrBot;
 			productReference = BFE41C432B87D64C004462A4 /* HotOrBot.app */;
@@ -331,6 +348,7 @@
 			mainGroup = BFE41C3A2B87D64C004462A4;
 			packageReferences = (
 				BFE41C542B87D690004462A4 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+				BFE0D2CD2B97F0F900D76608 /* XCRemoteSwiftPackageReference "rive-ios" */,
 			);
 			productRefGroup = BFE41C442B87D64C004462A4 /* Products */;
 			projectDirPath = "";
@@ -347,6 +365,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BFE41C4E2B87D650004462A4 /* Preview Assets.xcassets in Resources */,
+				BFE0D2DA2B98190700D76608 /* height-man.riv in Resources */,
 				BFE41C4B2B87D650004462A4 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -386,6 +405,7 @@
 				BFE41C6A2B87FA4C004462A4 /* SwipeView.swift in Sources */,
 				BF09FDAF2B8BC7F200F97F76 /* OnboardingController.swift in Sources */,
 				BF67C8802B8FC57700899472 /* LikeView.swift in Sources */,
+				BFE0D2D12B97F19200D76608 /* HeightField.swift in Sources */,
 				BFE41C642B87F96D004462A4 /* LoginView.swift in Sources */,
 				BF74A3A32B8A7F4A00D87E99 /* OnboardingView.swift in Sources */,
 				BF09FDB12B8C55C500F97F76 /* MatchController.swift in Sources */,
@@ -615,6 +635,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		BFE0D2CD2B97F0F900D76608 /* XCRemoteSwiftPackageReference "rive-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/rive-app/rive-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.9.1;
+			};
+		};
 		BFE41C542B87D690004462A4 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/supabase-community/supabase-swift.git";
@@ -626,6 +654,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		BFE0D2CE2B97F0F900D76608 /* RiveRuntime */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BFE0D2CD2B97F0F900D76608 /* XCRemoteSwiftPackageReference "rive-ios" */;
+			productName = RiveRuntime;
+		};
 		BFE41C552B87D690004462A4 /* Auth */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = BFE41C542B87D690004462A4 /* XCRemoteSwiftPackageReference "supabase-swift" */;
