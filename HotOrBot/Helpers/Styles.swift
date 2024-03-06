@@ -23,6 +23,7 @@ struct PrimaryButtonStyle: ButtonStyle {
             .clipShape(.rect(cornerRadius: 20))
             .scaleEffect(configuration.isPressed ? 0.95 : 1)
             .animation(.easeInOut(duration: 0.08), value: configuration.isPressed)
+            .sensoryFeedback(.success, trigger: configuration.isPressed, condition: { (old, new) in old && !new })
     }
 }
 
