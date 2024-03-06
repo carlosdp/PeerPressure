@@ -90,12 +90,21 @@ class SupabaseAuth {
 }
 
 @Observable
-class SupabaseImage: Codable {
+class SupabaseImage: Codable, Equatable, Hashable {
     var key: String?
     var image: UIImage?
     
     enum CodingKeys: String, CodingKey {
         case key
+    }
+    
+    static func == (lhs: SupabaseImage, rhs: SupabaseImage) -> Bool {
+        (lhs.key != nil && rhs.key != nil && lhs.key == rhs.key) || (lhs.image != nil && rhs.image != nil && lhs.image == rhs.image)
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(key)
+        hasher.combine(image)
     }
     
     var isLoaded: Bool {

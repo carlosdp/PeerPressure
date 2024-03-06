@@ -44,7 +44,7 @@ struct HeightField: View {
                     rvm.setInput("Height", value: heightPerc)
                 }
                 .onChange(of: heightPercDelta) {
-                    if abs(heightPercDelta - lastHapticDelta) >= 5 {
+                    if abs(heightPercDelta - lastHapticDelta) >= max(1, 8 - (((heightPerc + heightPercDelta) / 100) * 8)) {
                         heightChange(by: heightPercDelta)
                         lastHapticDelta = heightPercDelta
                     }

@@ -168,6 +168,13 @@ struct OnboardingStep_Location: View {
     
     var body: some View {
         VStack(spacing: 20) {
+            HStack {
+                Text("Location")
+                    .font(.system(size: 24))
+                    .bold()
+                    .foregroundStyle(AppColor.primary)
+                Spacer()
+            }
             Map(position: $position) {
                 if let pin = manager.pin {
                     Marker("Your Location", coordinate: pin)
@@ -201,24 +208,20 @@ struct OnboardingStep_Photos: View {
     
     var body: some View {
         VStack {
-            Grid {
-                ForEach(profile.availablePhotos, id: \.image) { photo in
-                    if let image = photo.image {
-                        Image(uiImage: image)
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: 50, height: 50)
-                    }
-                }
+            HStack {
+                Text("Photos")
+                    .font(.system(size: 24))
+                    .bold()
+                    .foregroundStyle(AppColor.primary)
+                Spacer()
             }
             
-            PhotoSelectionButton(selectionState: $selectionState, maxSelectionCount: 10) {
-                Image(systemName: "photo.badge.plus")
-                    .font(.system(size: 50))
-            } onImages: { images in
+            PhotoCloud(images: profile.availablePhotos) { images in
                 for image in images {
                     profile.addPhoto(image: image)
                 }
+            } onRemove: { image in
+                profile.availablePhotos.removeAll(where: { $0 == image })
             }
         }
     }
