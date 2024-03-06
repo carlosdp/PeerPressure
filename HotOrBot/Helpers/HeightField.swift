@@ -7,6 +7,7 @@
 
 import SwiftUI
 import RiveRuntime
+import CoreHaptics
 
 struct HeightField: View {
     @Binding
@@ -18,11 +19,15 @@ struct HeightField: View {
     @StateObject
     private var rvm = RiveViewModel(fileName: "height-man")
     @State
+    private var hapticEngine: CHHapticEngine?
+    @State
     private var currentHeight = 0.0
     @State
     private var heightPerc = 40.0
     @State
     private var heightPercDelta = 0.0
+    @State
+    private var lastHapticDelta = 0.0
     
     var body: some View {
         VStack {
@@ -39,6 +44,10 @@ struct HeightField: View {
                     rvm.setInput("Height", value: heightPerc)
                 }
                 .onChange(of: heightPercDelta) {
+                    if abs(heightPercDelta - lastHapticDelta) >= 5 {
+                        heightChange(by: heightPercDelta)
+                        lastHapticDelta = heightPercDelta
+                    }
                     rvm.setInput("Height", value: max(0, min(heightPerc + heightPercDelta, 100.0)))
                     
                     withAnimation(.spring) {
@@ -51,8 +60,12 @@ struct HeightField: View {
             
             Text("\(feet)' \(inches)\"")
                 .font(.system(size: 36))
-                .foregroundStyle(.white)
+                .foregroundStyle(AppColor.primary)
+                .bold()
                 .contentTransition(.numericText())
+        }
+        .onAppear {
+            prepareHaptics()
         }
     }
     
@@ -68,11 +81,43 @@ struct HeightField: View {
                 heightPerc = heightPerc + delta
             })
     }
+    
+    func prepareHaptics() {
+        guard CHHapticEngine.capabilitiesForHardware().supportsHaptics else { return }
+        
+        do {
+            hapticEngine = try CHHapticEngine()
+            try hapticEngine?.start()
+        } catch {
+            print("Error initializing haptic engine: \(error.localizedDescription)")
+        }
+    }
+    
+    func heightChange(by delta: Double) {
+        // make sure that the device supports haptics
+        guard CHHapticEngine.capabilitiesForHardware().supportsHaptics else { return }
+        var events = [CHHapticEvent]()
+
+        // create one intense, sharp tap
+        let intensity = CHHapticEventParameter(parameterID: .hapticIntensity, value: max(0.5, Float((heightPerc + delta) / 100)))
+        let sharpness = CHHapticEventParameter(parameterID: .hapticSharpness, value: delta < 0 ? 0.5 : 0.8)
+        
+        let event = CHHapticEvent(eventType: .hapticTransient, parameters: [intensity, sharpness], relativeTime: 0)
+        events.append(event)
+
+        // convert those events into a pattern and play it immediately
+        do {
+            let pattern = try CHHapticPattern(events: events, parameters: [])
+            let player = try hapticEngine?.makePlayer(with: pattern)
+            try player?.start(atTime: 0)
+        } catch {
+            print("Failed to play pattern: \(error.localizedDescription).")
+        }
+    }
 }
 
 #Preview {
     var height = 5.0*12.0
     
     return HeightField(heightInInches: .init(get: { height }, set: { height = $0 }))
-        .background(.black)
 }

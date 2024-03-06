@@ -11,7 +11,7 @@ import UIKit
 import Observation
 
 struct BiographicalData: Codable {
-    // height in feet
+    // height in inches
     var height: Double?
     var college: String?
     var work: String?

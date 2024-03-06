@@ -27,15 +27,36 @@ struct OnboardingStep_Name: View {
     
     var body: some View {
         VStack {
-            TextField("First Name", text: $profile.firstName)
-                .focused($nameFieldFocused)
+            VStack(alignment: .leading) {
+                Text("Name")
+                    .font(.system(size: 24))
+                    .bold()
+                    .foregroundStyle(AppColor.primary)
+                    .opacity(profile.firstName == "" ? 0 : 1)
+                    .animation(.easeInOut(duration: 0.3), value: profile.firstName)
+                
+                TextField("First Name", text: $profile.firstName)
+                    .focused($nameFieldFocused)
+                    .font(.system(size: 40))
+                    .bold()
+            }
+            
             Picker("Gender", selection: $profile.gender) {
-                Text("Male")
-                    .tag("male")
-                Text("Female")
-                    .tag("female")
-                Text("Non-Binary")
-                    .tag("non-binary")
+                HStack {
+                    Text("♂")
+                    Text("Male")
+                }
+                .tag("male")
+                HStack {
+                    Text("♀")
+                    Text("Female")
+                }
+                .tag("female")
+                HStack {
+                    Text("⚥")
+                    Text("Non-Binary")
+                }
+                .tag("non-binary")
             }
             .pickerStyle(.wheel)
         }
@@ -57,9 +78,25 @@ struct OnboardingStep_BirthDate: View {
     var profile: Profile
     
     var body: some View {
-        DatePicker("Birth Date", selection: $profile.birthDate.date, displayedComponents: [.date])
-            .datePickerStyle(.wheel)
-            .labelsHidden()
+        VStack(alignment: .leading) {
+            Text("Birthday")
+                .font(.system(size: 24))
+                .bold()
+                .foregroundStyle(AppColor.primary)
+            
+            DatePicker("Birth Date", selection: $profile.birthDate.date, displayedComponents: [.date])
+                .datePickerStyle(.wheel)
+                .labelsHidden()
+        }
+    }
+}
+
+struct OnboardingStep_Height: View {
+    @Binding
+    var profile: Profile
+    
+    var body: some View {
+        HeightField(heightInInches: $profile.biographicalData.height ?? 5.0 * 12.0)
     }
 }
 
@@ -125,15 +162,15 @@ struct OnboardingStep_Location: View {
     @Binding
     var profile: Profile
     @State
-    var bounds = MapCameraBounds()
+    var position = MapCameraPosition.automatic
     @State
     private var manager = LocationManager()
     
     var body: some View {
-        VStack {
-            Map(bounds: bounds) {
+        VStack(spacing: 20) {
+            Map(position: $position) {
                 if let pin = manager.pin {
-                    Marker("User", coordinate: pin)
+                    Marker("Your Location", coordinate: pin)
                 }
             }
             .mapControls {
@@ -143,11 +180,15 @@ struct OnboardingStep_Location: View {
                 manager.requestLocation() { (coord, neighborhood) in
                     profile.location = coord
                     profile.displayLocation = neighborhood
-                    bounds = MapCameraBounds(centerCoordinateBounds: MKCoordinateRegion(center: coord, span: MKCoordinateSpan(latitudeDelta: 25.0, longitudeDelta: 25.0)))
+                    position = MapCameraPosition.region(MKCoordinateRegion(center: coord, latitudinalMeters: 5000, longitudinalMeters: 5000))
                 }
             }
+            .clipShape(.rect(cornerRadius: 8))
+            .frame(maxHeight: 400)
             
             Text(manager.neighborhood ?? "None")
+                .font(.system(size: 24))
+                .foregroundStyle(AppColor.primary)
         }
     }
 }
@@ -191,6 +232,7 @@ class OnboardingState {
     enum Step: Int, Comparable {
         case name
         case birthDate
+        case height
         case location
         case photos
         
@@ -210,7 +252,7 @@ struct OnboardingView: View {
     
     var body: some View {
         VStack {
-            Text("Getting Started")
+            Text("Hot or Bot")
                 .font(.title)
             
             TabView(selection: $onboardingState.step) {
@@ -218,6 +260,8 @@ struct OnboardingView: View {
                     .tag(OnboardingState.Step.name)
                 OnboardingStep_BirthDate(profile: $profile)
                     .tag(OnboardingState.Step.birthDate)
+                OnboardingStep_Height(profile: $profile)
+                    .tag(OnboardingState.Step.height)
                 OnboardingStep_Location(profile: $profile)
                     .tag(OnboardingState.Step.location)
                 OnboardingStep_Photos(profile: $profile)
@@ -244,6 +288,7 @@ struct OnboardingView: View {
                 }) {
                     Text("Next")
                 }
+                .buttonStyle(PrimaryButtonStyle())
             } else {
                 Button(action: {
                     if let submit = onSubmit {
@@ -252,11 +297,29 @@ struct OnboardingView: View {
                 }) {
                     Text("Done")
                 }
+                .buttonStyle(PrimaryButtonStyle())
             }
         }
+        .padding(.horizontal)
     }
 }
 
 #Preview {
     OnboardingView()
+}
+
+#Preview("Birthdate") {
+    OnboardingStep_BirthDate(profile: .constant(profiles[0]))
+}
+
+#Preview("Height") {
+    OnboardingStep_Height(profile: .constant(profiles[0]))
+}
+
+#Preview("Location") {
+    OnboardingStep_Location(profile: .constant(profiles[0]))
+}
+
+#Preview("Photos") {
+    OnboardingStep_Photos(profile: .constant(profiles[0]))
 }
