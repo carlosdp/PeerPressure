@@ -15,6 +15,8 @@ struct HeightField: View {
     var dragMultiplier = 1.5
     var minHeight = 4.0 * 12.0
     var maxHeight = 7.0 * 12.0
+    var shortThreshold = 5.0 * 12.0
+    var tallThreshold = 6.4 * 12.0
     
     @StateObject
     private var rvm = RiveViewModel(fileName: "height-man")
@@ -50,8 +52,13 @@ struct HeightField: View {
                     }
                     rvm.setInput("Height", value: max(0, min(heightPerc + heightPercDelta, 100.0)))
                     
+                    let newHeight = minHeight + ((max(0, min(heightPerc + heightPercDelta, 100.0)) / 100) * (maxHeight - minHeight))
+                    
+                    rvm.setInput("ShortKing", value: newHeight < shortThreshold)
+                    rvm.setInput("TallGiant", value: newHeight > tallThreshold)
+                    
                     withAnimation(.spring) {
-                        currentHeight = minHeight + ((max(0, min(heightPerc + heightPercDelta, 100.0)) / 100) * (maxHeight - minHeight))
+                        currentHeight = newHeight
                     }
                 }
             
