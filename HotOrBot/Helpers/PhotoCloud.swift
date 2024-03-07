@@ -14,6 +14,7 @@ struct PhotoCloudItem: View {
     
     @State private var offset: CGSize = .zero
     @State private var rotation: Double = 0
+    @State private var isPressed = false
     @State private var isDragging = false
     @State private var dragAmount: CGSize = .zero
 
@@ -34,13 +35,16 @@ struct PhotoCloudItem: View {
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .rotationEffect(.degrees(rotation))
         .offset(x: offset.width + dragAmount.width, y: offset.height + dragAmount.height)
+        .scaleEffect(isDragging ? 1.2 : 1.0)
         .onAppear {
             startAnimation()
         }
         .gesture(
             DragGesture()
                 .onChanged { gesture in
-                    self.isDragging = true
+                    withAnimation {
+                        self.isDragging = true
+                    }
                     self.dragAmount = gesture.translation
                 }
                 .onEnded { gesture in
@@ -55,7 +59,10 @@ struct PhotoCloudItem: View {
                             self.dragAmount = .zero
                         }
                     }
-                    self.isDragging = false
+                    
+                    withAnimation {
+                        self.isDragging = false
+                    }
                 }
         )
     }
