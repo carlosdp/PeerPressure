@@ -9,7 +9,21 @@ import SwiftUI
 
 struct WaitBuildingProfileView: View {
     var body: some View {
-        Text("Working on your profile...")
+        ZStack {
+            AppColor.primary
+                .ignoresSafeArea()
+            
+            VStack(spacing: 20) {
+                Text("Working on your profile...")
+                    .font(.system(size: 36))
+                    .foregroundStyle(.white)
+                    .padding(12)
+                
+                ProgressView()
+                    .tint(.white)
+                    .scaleEffect(2.0)
+            }
+        }
     }
 }
 
