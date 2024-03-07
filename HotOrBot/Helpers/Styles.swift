@@ -11,6 +11,8 @@ import SwiftUI
 struct AppColor {
     static let primary = Color("PrimaryColor")
     static let accent = Color.accentColor
+    static let chatReceiver = Color(red: 216/255, green: 216/255, blue: 216/255)
+    static let chatSender = Color(red: 110/255, green: 185/255, blue: 1.0)
 }
 
 struct PrimaryButtonStyle: ButtonStyle {

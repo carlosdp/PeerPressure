@@ -31,7 +31,6 @@
 		BF74A3A12B8A7D9E00D87E99 /* ProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF74A3A02B8A7D9E00D87E99 /* ProfileViewModel.swift */; };
 		BF74A3A32B8A7F4A00D87E99 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF74A3A22B8A7F4A00D87E99 /* OnboardingView.swift */; };
 		BF74A3A62B8AA70100D87E99 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF74A3A52B8AA70100D87E99 /* MapKit.framework */; };
-		BF9C1CCE2B925BAD00FFBF06 /* ProfileBuilderChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF9C1CCD2B925BAD00FFBF06 /* ProfileBuilderChatView.swift */; };
 		BF9C1CD02B925F2A00FFBF06 /* ProfileBuilderController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF9C1CCF2B925F2A00FFBF06 /* ProfileBuilderController.swift */; };
 		BF9C1CD22B943B1100FFBF06 /* AsyncSupabaseImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF9C1CD12B943B1100FFBF06 /* AsyncSupabaseImage.swift */; };
 		BF9C1CD42B94457F00FFBF06 /* ProfileBlocksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF9C1CD32B94457F00FFBF06 /* ProfileBlocksView.swift */; };
@@ -43,6 +42,7 @@
 		BFE0D2DE2B98D1D600D76608 /* Styles.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE0D2DD2B98D1D600D76608 /* Styles.swift */; };
 		BFE0D2E02B98F73400D76608 /* PhotoCloud.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE0D2DF2B98F73400D76608 /* PhotoCloud.swift */; };
 		BFE0D2E42B99356200D76608 /* height-man.riv in Resources */ = {isa = PBXBuildFile; fileRef = BFE0D2E32B99356200D76608 /* height-man.riv */; };
+		BFE0D2E62B99370000D76608 /* UnifiedChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE0D2E52B99370000D76608 /* UnifiedChatView.swift */; };
 		BFE41C472B87D64C004462A4 /* HotOrBotApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE41C462B87D64C004462A4 /* HotOrBotApp.swift */; };
 		BFE41C492B87D64C004462A4 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE41C482B87D64C004462A4 /* ContentView.swift */; };
 		BFE41C4B2B87D650004462A4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BFE41C4A2B87D650004462A4 /* Assets.xcassets */; };
@@ -86,7 +86,6 @@
 		BF74A3A22B8A7F4A00D87E99 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		BF74A3A52B8AA70100D87E99 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		BF74A3A72B8AAADE00D87E99 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		BF9C1CCD2B925BAD00FFBF06 /* ProfileBuilderChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileBuilderChatView.swift; sourceTree = "<group>"; };
 		BF9C1CCF2B925F2A00FFBF06 /* ProfileBuilderController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileBuilderController.swift; sourceTree = "<group>"; };
 		BF9C1CD12B943B1100FFBF06 /* AsyncSupabaseImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncSupabaseImage.swift; sourceTree = "<group>"; };
 		BF9C1CD32B94457F00FFBF06 /* ProfileBlocksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileBlocksView.swift; sourceTree = "<group>"; };
@@ -97,6 +96,7 @@
 		BFE0D2DD2B98D1D600D76608 /* Styles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Styles.swift; sourceTree = "<group>"; };
 		BFE0D2DF2B98F73400D76608 /* PhotoCloud.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCloud.swift; sourceTree = "<group>"; };
 		BFE0D2E32B99356200D76608 /* height-man.riv */ = {isa = PBXFileReference; lastKnownFileType = file; path = "height-man.riv"; sourceTree = "<group>"; };
+		BFE0D2E52B99370000D76608 /* UnifiedChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnifiedChatView.swift; sourceTree = "<group>"; };
 		BFE41C432B87D64C004462A4 /* HotOrBot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HotOrBot.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BFE41C462B87D64C004462A4 /* HotOrBotApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotOrBotApp.swift; sourceTree = "<group>"; };
 		BFE41C482B87D64C004462A4 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -204,6 +204,7 @@
 				BFE0D2D02B97F19200D76608 /* HeightField.swift */,
 				BFE0D2DD2B98D1D600D76608 /* Styles.swift */,
 				BFE0D2DF2B98F73400D76608 /* PhotoCloud.swift */,
+				BFE0D2E52B99370000D76608 /* UnifiedChatView.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -219,7 +220,6 @@
 		BF9C1CCC2B925B9000FFBF06 /* ProfileBuilder */ = {
 			isa = PBXGroup;
 			children = (
-				BF9C1CCD2B925BAD00FFBF06 /* ProfileBuilderChatView.swift */,
 				BF9C1CCF2B925F2A00FFBF06 /* ProfileBuilderController.swift */,
 			);
 			path = ProfileBuilder;
@@ -385,7 +385,6 @@
 			files = (
 				BF67C8842B90349000899472 /* OffsetObservingScrollView.swift in Sources */,
 				BF09FDB92B8CFD0500F97F76 /* ChatView.swift in Sources */,
-				BF9C1CCE2B925BAD00FFBF06 /* ProfileBuilderChatView.swift in Sources */,
 				BF0186DD2B89056F0051746C /* SwipeController.swift in Sources */,
 				BF09FDBD2B8D052500F97F76 /* ChatController.swift in Sources */,
 				BFE41C492B87D64C004462A4 /* ContentView.swift in Sources */,
@@ -422,6 +421,7 @@
 				BF9C1CD82B95124C00FFBF06 /* WaitBuildingProfileController.swift in Sources */,
 				BF9C1CDA2B95154F00FFBF06 /* MultilineSubmitViewModifier.swift in Sources */,
 				BF09FDC52B8D55B500F97F76 /* Utils.swift in Sources */,
+				BFE0D2E62B99370000D76608 /* UnifiedChatView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

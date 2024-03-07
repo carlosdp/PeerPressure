@@ -19,7 +19,11 @@ struct ProfileBuilderController: View {
     var body: some View {
         VStack {
             if let profile = profileModel.profile {
-                ProfileBuilderChatView(profile: profile, messages: messages)
+                UnifiedChatView(messages: messages.map {
+                    .init(identity: $0.role == "user" ? .profile(profile) : .custom(name: "Bot"),
+                          isSender: $0.role == "user",
+                          content: $0.content)
+                })
             } else {
                 ProgressView()
                     .frame(maxHeight: .infinity)

@@ -89,7 +89,7 @@ struct PhotoCloud: View {
             
             ZStack {
                 Circle()
-                    .fill(Color(red: 246/256, green: 254/256, blue: 1.0))
+                    .fill(Color(red: 246/255, green: 254/255, blue: 1.0))
                 
                 ZStack {
                     ForEach(Array(zip(cloudImages.indices, cloudImages)), id: \.1.image) { (i, image) in
