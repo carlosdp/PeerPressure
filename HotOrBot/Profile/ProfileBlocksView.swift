@@ -7,14 +7,21 @@
 
 import SwiftUI
 
-struct ProfileBlocksView<Blocks>: View where Blocks: RandomAccessCollection<ProfileBlock>, Blocks.Index: Hashable {
-    var blocks: Blocks
+struct ProfileBlocks_Photo: View {
+    var images: [SupabaseImage]
+    
+    @State
+    private var photoPositions: [PhotoPositioning] = []
+    
+    struct PhotoPositioning {
+        let rotation: CGFloat
+        let scaleOffset: CGFloat
+    }
     
     var body: some View {
-        VStack {
-            ForEach(Array(zip(blocks.indices, blocks)), id: \.0) { (i, block) in
-                switch block {
-                case .photo(let image):
+        HStack {
+            if photoPositions.count >= images.count {
+                ForEach(Array(zip(images.indices, images)), id: \.1.image) { (i, image) in
                     AsyncSupabaseImage(image: image) { image in
                         image
                             .resizable()
@@ -24,11 +31,39 @@ struct ProfileBlocksView<Blocks>: View where Blocks: RandomAccessCollection<Prof
                     }
                     .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: 512)
                     .clipShape(.rect(cornerRadius: 20))
+                    .scaleEffect(images.count > 1 ? 0.75 + photoPositions[i].scaleOffset : 1.0)
+                    .rotationEffect(.degrees(photoPositions[i].rotation))
+                }
+            }
+        }
+        .onAppear(perform: generatePhotoPositions)
+    }
+    
+    func generatePhotoPositions() {
+        for i in 0...images.count - 1 {
+            if images.count > 1 {
+                photoPositions.insert(PhotoPositioning(rotation: CGFloat.random(in: -5.0...5.0), scaleOffset: CGFloat.random(in: 0...0.1)), at: i)
+            } else {
+                photoPositions.insert(PhotoPositioning(rotation: 0, scaleOffset: 0), at: i)
+            }
+        }
+    }
+}
+
+struct ProfileBlocksView<Blocks>: View where Blocks: RandomAccessCollection<ProfileBlock>, Blocks.Index: Hashable {
+    var blocks: Blocks
+    
+    var body: some View {
+        VStack(spacing: 40) {
+            ForEach(Array(zip(blocks.indices, blocks)), id: \.0) { (i, block) in
+                switch block {
+                case .photo(let images):
+                    ProfileBlocks_Photo(images: images)
                 case .gas(let text):
                     ZStack {
-                        Rectangle()
+                        RoundedRectangle(cornerRadius: 20)
                             .fill(.white)
-                            .clipShape(.rect(cornerRadius: 20))
+                            .stroke(.black, lineWidth: 3)
                         
                         VStack {
                             HStack {
@@ -54,5 +89,5 @@ struct ProfileBlocksView<Blocks>: View where Blocks: RandomAccessCollection<Prof
     ScrollView {
         ProfileBlocksView(blocks: profiles[0].blocks)
     }
-    .background(Color.gray)
+    .background(.white)
 }

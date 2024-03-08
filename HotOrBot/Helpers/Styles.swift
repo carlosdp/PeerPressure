@@ -13,6 +13,7 @@ struct AppColor {
     static let accent = Color.accentColor
     static let chatReceiver = Color(red: 216/255, green: 216/255, blue: 216/255)
     static let chatSender = Color(red: 110/255, green: 185/255, blue: 1.0)
+    static let brightBlue = Color(red: 0, green: 240/256, blue: 255/256)
 }
 
 struct PrimaryButtonStyle: ButtonStyle {

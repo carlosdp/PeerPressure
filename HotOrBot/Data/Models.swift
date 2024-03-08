@@ -79,7 +79,7 @@ struct ProfileBuilderConversationData: Codable {
 }
 
 enum ProfileBlock: Codable {
-    case photo(image: SupabaseImage)
+    case photo(images: [SupabaseImage])
     case gas(text: String)
 }
 
@@ -99,8 +99,8 @@ class Profile: Codable {
     var profilePhoto: SupabaseImage? {
         get {
             switch self.blocks.first {
-            case .photo(let image):
-                image
+            case .photo(let images):
+                images.first
             case .gas(_):
                 nil
             case nil:

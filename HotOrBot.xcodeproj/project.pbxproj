@@ -43,6 +43,7 @@
 		BFE0D2E02B98F73400D76608 /* PhotoCloud.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE0D2DF2B98F73400D76608 /* PhotoCloud.swift */; };
 		BFE0D2E42B99356200D76608 /* height-man.riv in Resources */ = {isa = PBXBuildFile; fileRef = BFE0D2E32B99356200D76608 /* height-man.riv */; };
 		BFE0D2E62B99370000D76608 /* UnifiedChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE0D2E52B99370000D76608 /* UnifiedChatView.swift */; };
+		BFE0D2E82B9B741C00D76608 /* CompatibilityBlockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE0D2E72B9B741C00D76608 /* CompatibilityBlockView.swift */; };
 		BFE41C472B87D64C004462A4 /* HotOrBotApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE41C462B87D64C004462A4 /* HotOrBotApp.swift */; };
 		BFE41C492B87D64C004462A4 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE41C482B87D64C004462A4 /* ContentView.swift */; };
 		BFE41C4B2B87D650004462A4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BFE41C4A2B87D650004462A4 /* Assets.xcassets */; };
@@ -97,6 +98,7 @@
 		BFE0D2DF2B98F73400D76608 /* PhotoCloud.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCloud.swift; sourceTree = "<group>"; };
 		BFE0D2E32B99356200D76608 /* height-man.riv */ = {isa = PBXFileReference; lastKnownFileType = file; path = "height-man.riv"; sourceTree = "<group>"; };
 		BFE0D2E52B99370000D76608 /* UnifiedChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnifiedChatView.swift; sourceTree = "<group>"; };
+		BFE0D2E72B9B741C00D76608 /* CompatibilityBlockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompatibilityBlockView.swift; sourceTree = "<group>"; };
 		BFE41C432B87D64C004462A4 /* HotOrBot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HotOrBot.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BFE41C462B87D64C004462A4 /* HotOrBotApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotOrBotApp.swift; sourceTree = "<group>"; };
 		BFE41C482B87D64C004462A4 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -158,6 +160,7 @@
 				BF74A3A02B8A7D9E00D87E99 /* ProfileViewModel.swift */,
 				BFE41C672B87FA38004462A4 /* ProfileView.swift */,
 				BF9C1CD32B94457F00FFBF06 /* ProfileBlocksView.swift */,
+				BFE0D2E72B9B741C00D76608 /* CompatibilityBlockView.swift */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -399,6 +402,7 @@
 				BF9C1CD22B943B1100FFBF06 /* AsyncSupabaseImage.swift in Sources */,
 				BF67C87E2B8FC51500899472 /* LikesView.swift in Sources */,
 				BF0186D72B87FDA60051746C /* Models.swift in Sources */,
+				BFE0D2E82B9B741C00D76608 /* CompatibilityBlockView.swift in Sources */,
 				BF74A3A12B8A7D9E00D87E99 /* ProfileViewModel.swift in Sources */,
 				BFE41C682B87FA38004462A4 /* ProfileView.swift in Sources */,
 				BF0186D92B87FF540051746C /* PreviewData.swift in Sources */,

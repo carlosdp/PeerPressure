@@ -13,7 +13,7 @@ struct ProfileView: View {
     
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 40) {
                 ZStack {
                     Image(uiImage: profile.profilePhoto?.image ?? UIImage(named: "profile-photo-1")!)
                         .resizable()
@@ -40,19 +40,7 @@ struct ProfileView: View {
                 }
                 .frame(maxHeight: 512)
                 
-                VStack {
-                    Grid(alignment: .leading, horizontalSpacing: 12) {
-                        ForEach(profile.biographicalData.displayPairs()) { pair in
-                            GridRow {
-                                Image(systemName: pair.icon)
-                                    .padding(5)
-                                Text(pair.value)
-                                    .font(.system(size: 20))
-                            }
-                        }
-                    }
-                }
-                .padding(12)
+                BiographicalCard(profile.biographicalData.displayPairs())
                 
                 ProfileBlocksView(blocks: profile.blocks[1...])
             }
@@ -64,6 +52,33 @@ struct ProfileView: View {
                     Text("Edit")
                 }
             }
+        }
+    }
+    
+    @ViewBuilder
+    func BiographicalCard(_ pairs: [BiographicalData.DisplayPair]) -> some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 20)
+                .shadow(color: AppColor.brightBlue, radius: 0, x: 5, y: 5)
+            
+            RoundedRectangle(cornerRadius: 20)
+                .fill(.white)
+                .stroke(.black, lineWidth: 3)
+            
+            Grid(alignment: .leading, horizontalSpacing: 12, verticalSpacing: 14) {
+                ForEach(pairs) { pair in
+                    GridRow {
+                        Image(systemName: pair.icon)
+                            .padding(5)
+                            .bold()
+                        
+                        Text(pair.value)
+                            .font(.system(size: 20))
+                            .bold()
+                    }
+                }
+            }
+            .padding(20)
         }
     }
 }

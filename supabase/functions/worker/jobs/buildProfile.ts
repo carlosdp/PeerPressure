@@ -146,21 +146,24 @@ async function job(job: Job<BuildProfileJob>) {
               blocks: {
                 oneOf: [
                   {
-                    type: "object",
-                    description: "A photo from the user's collection",
-                    required: ["photo"],
-                    properties: {
-                      photo: {
-                        type: "object",
-                        required: ["image"],
-                        properties: {
-                          image: {
-                            type: "object",
-                            required: ["key"],
-                            properties: {
-                              key: {
-                                type: "string",
-                                description: "The photo key",
+                    type: "array",
+                    description: "A set of photos from the user's collection",
+                    items: {
+                      type: "object",
+                      required: ["photo"],
+                      properties: {
+                        photo: {
+                          type: "object",
+                          required: ["image"],
+                          properties: {
+                            image: {
+                              type: "object",
+                              required: ["key"],
+                              properties: {
+                                key: {
+                                  type: "string",
+                                  description: "The photo key",
+                                },
                               },
                             },
                           },

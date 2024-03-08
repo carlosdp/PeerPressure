@@ -26,8 +26,12 @@ let profiles = [
             work: "CTO at Games Startup"
         ),
         blocks: [
-            .photo(image: SupabaseImage(from: UIImage(named: "profile-photo-1")!)),
-            .gas(text: "🚀 **Meet Carlos:** A Brooklyn-based software engineer who crafts the future of entertainment one app at a time. When he's not coding the next big reality show app, you can find him mastering the art of the perfect steak or navigating the Hudson on his sailboat. 🌊🍴")
+            .photo(images: [SupabaseImage(from: UIImage(named: "profile-photo-1")!)]),
+            .gas(text: "🚀 **Meet Carlos:** A Brooklyn-based software engineer who crafts the future of entertainment one app at a time. When he's not coding the next big reality show app, you can find him mastering the art of the perfect steak or navigating the Hudson on his sailboat. 🌊🍴"),
+            .photo(images: [
+                SupabaseImage(from: UIImage(named: "profile-photo-2")!),
+                SupabaseImage(from: UIImage(named: "profile-photo-3")!)
+            ]),
         ]
     ),
     Profile(
@@ -40,7 +44,7 @@ let profiles = [
             work: "Lawyer"
         ),
         blocks: [
-            .photo(image: SupabaseImage(from: UIImage(named: "profile-photo-1")!)),
+            .photo(images: [SupabaseImage(from: UIImage(named: "profile-photo-1")!)]),
             .gas(text: "Sarah is like an amazing girl, like omg")
         ]
     )
