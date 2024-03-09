@@ -75,6 +75,8 @@ struct ProfileView: View {
                         Text(pair.value)
                             .font(.system(size: 20))
                             .bold()
+                        
+                        Spacer()
                     }
                 }
             }

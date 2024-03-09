@@ -44,7 +44,7 @@ struct BiographicalData: Codable {
         var pairs: [DisplayPair] = []
         
         if let h = self.height {
-            pairs.append(DisplayPair(icon: "ruler", label: "Height", value: String(h)))
+            pairs.append(DisplayPair(icon: "ruler", label: "Height", value: self.formatHeight(inches: h)))
         }
         
         if let c = self.college {
@@ -56,6 +56,12 @@ struct BiographicalData: Codable {
         }
         
         return pairs
+    }
+    
+    func formatHeight(inches: Double) -> String {
+        let feet = Int(inches / 12)
+        let remainingInches = Int(inches.truncatingRemainder(dividingBy: 12))
+        return "\(feet)' \(remainingInches)\""
     }
 }
 

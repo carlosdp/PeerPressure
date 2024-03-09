@@ -79,7 +79,7 @@ struct ProfileEditView: View {
                 photos
                     .transition(.move(edge: selectedTab.rawValue < EditTab.photos.rawValue ? .leading : .trailing))
             case .chat:
-                ProfileBuilderController(startMessage: "Do you want to work on your profile more?", startActionLabel: "Yea, let's do it")
+                ProfileBuilderController(startMessage: "Do you want to work on your profile more?", startActions: [.letsDoIt])
                     .transition(.move(edge: selectedTab.rawValue < EditTab.chat.rawValue ? .leading : .trailing))
             }
         }

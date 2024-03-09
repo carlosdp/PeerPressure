@@ -303,7 +303,7 @@ struct OnboardingView: View {
                 .buttonStyle(PrimaryButtonStyle())
             }
         }
-        .padding(.horizontal)
+        .padding([.horizontal, .bottom])
     }
 }
 

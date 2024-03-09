@@ -68,12 +68,12 @@ export async function generateProfile(
                     required: ["photo"],
                     properties: {
                       photo: {
-                        type: "array",
-                        items: {
-                          type: "object",
-                          required: ["images"],
-                          properties: {
-                            image: {
+                        type: "object",
+                        required: ["images"],
+                        properties: {
+                          images: {
+                            type: "array",
+                            items: {
                               type: "object",
                               required: ["key"],
                               properties: {
@@ -123,5 +123,7 @@ export async function generateProfile(
 
   console.log(constructMessage.tool_calls[0].function.arguments);
 
-  return JSON.parse(constructMessage.tool_calls[0].function.arguments);
+  const args = JSON.parse(constructMessage.tool_calls[0].function.arguments);
+
+  return args.blocks;
 }

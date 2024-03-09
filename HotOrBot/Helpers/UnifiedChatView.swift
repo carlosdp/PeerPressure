@@ -94,41 +94,86 @@ struct UnifiedChatItemView: View {
     }
 }
 
-struct UnifiedChatView: View {
+protocol ChatStartActionLabel {
+    func chatStartActionLabel() -> String
+}
+
+extension String: ChatStartActionLabel {
+    func chatStartActionLabel() -> String {
+        self
+    }
+}
+
+extension NSObject: ChatStartActionLabel {
+    func chatStartActionLabel() -> String {
+        "nsobject"
+    }
+}
+
+struct UnifiedChatView<A>: View where A: ChatStartActionLabel, A: Hashable {
     var messages: [UnifiedChatItemView.Message]
     var targetMessageCount = 10
+    var startActions: [A] = []
     @Binding
     var offset: CGPoint
+    var onStartAction: ((A) -> Void)?
     
-    init(messages: [UnifiedChatItemView.Message], targetMessageCount: Int = 10, offset: Binding<CGPoint> = .constant(CGPoint.zero)) {
+    init(messages: [UnifiedChatItemView.Message], targetMessageCount: Int = 10, startActions: [A] = [], onStartAction: ((A) -> Void)? = nil, offset: Binding<CGPoint> = .constant(CGPoint.zero)) {
         self.messages = messages
         self.targetMessageCount = targetMessageCount
+        self.startActions = startActions
+        self.onStartAction = onStartAction
         _offset = offset
     }
     
     var body: some View {
-        VStack {
-            let count = messages.filter({ $0.isSender }).count
-            
-            Text("\(count) / \(targetMessageCount)")
-                .padding(.bottom, 10)
-            
-            ScrollViewReader { value in
-                OffsetObservingScrollView(offset: $offset) {
-                    ForEach(Array(zip(messages.indices, messages)), id: \.0) { (i, message) in
-                        UnifiedChatItemView(message: message)
-                            .listRowSeparator(.hidden)
-                            .padding(.bottom)
-                    }
-                    .onChange(of: messages.count) {
-                        withAnimation {
-                            value.scrollTo(messages.count - 1)
+        ZStack {
+            VStack {
+                let count = messages.filter({ $0.isSender }).count
+                
+                Text("\(count) / \(targetMessageCount)")
+                    .padding(.bottom, 10)
+                
+                ScrollViewReader { value in
+                    OffsetObservingScrollView(offset: $offset) {
+                        ForEach(Array(zip(messages.indices, messages)), id: \.0) { (i, message) in
+                            UnifiedChatItemView(message: message)
+                                .listRowSeparator(.hidden)
+                                .padding(.bottom)
+                        }
+                        .onChange(of: messages.count) {
+                            withAnimation {
+                                value.scrollTo(messages.count - 1)
+                            }
                         }
                     }
+                    .safeAreaPadding(.horizontal)
                 }
-                .safeAreaPadding(.horizontal)
+            }
+            
+            if startActions.count > 0, messages.count < 2, let startAction = onStartAction {
+                HStack {
+                    ForEach(startActions, id: \.self) { action in
+                        Button(action: {
+                            startAction(action)
+                        }) {
+                            Text(action.chatStartActionLabel())
+                        }
+                        .buttonStyle(PrimaryButtonStyle())
+                        .frame(maxWidth: 200)
+                    }
+                }
+                .padding(.horizontal)
+                .transition(.opacity)
             }
         }
+        .animation(.easeInOut, value: messages.count)
+    }
+}
+
+extension UnifiedChatView where A == NSObject {
+    init(messages: [UnifiedChatItemView.Message], targetMessageCount: Int = 10, offset: Binding<CGPoint> = .constant(CGPoint.zero)) {
+        self.init(messages: messages, targetMessageCount: targetMessageCount, startActions: [], offset: offset)
     }
 }
 
@@ -139,4 +184,15 @@ struct UnifiedChatView: View {
             .init(identity: .profile(profiles[0]), isSender: true, content: "Hello there, how are you?"),
         ]
     )
+}
+
+#Preview("with Start Action") {
+    UnifiedChatView(
+        messages: [
+            .init(identity: .custom(name: "Bot"), isSender: false, content: "Are you ready to begin?"),
+        ],
+        startActions: ["I'm ready!"]
+    ) { action in
+        print("start action triggered: \(action)")
+    }
 }
