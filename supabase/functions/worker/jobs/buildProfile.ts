@@ -4,20 +4,7 @@ import type { BuilderConversationData } from "../../send-builder-message/handler
 import { rawMessage } from "../../_shared/utils.ts";
 import logger from "../../logger.ts";
 import type { Photo } from "../../_shared/supabaseJsonTypes.d.ts";
-
-const CONSTRUCTION_PROMPT =
-  `You are an expert dating profile creator that helps clients construct a fun, whimsical dating profile that helps them attract the right person for them. Taking into account the guidelines below, construct a dating profile for the given client.
-
-  Guidelines:
-  - Profiles are expressed as a list of "blocks" of different types, organized in a vertical profile on mobile phones
-  - The first block should always be a profile photo. Profile photos should always be the best photo that makes the client look attractive and approachable. Ideally, profile photos show only the client, or they take up most of the frame, so suitors know which person they are in the photo easily.
-  - Keep in mind that basic profile information (height, education, etc.) will always be shown by the app after the first block, and the rest of the blocks will be presented after.
-  - Match "gas" blocks up with relevant photos provided when possible
-  - There should be about 5-7 blocks in the profile.
-
-  Profile Information: {profile}
-  Photos: {photos}
-  Conversaton:`;
+import { generateProfile } from "./generateProfile.ts";
 
 export type BuildProfileJob = {
   profileId: string;
@@ -114,108 +101,32 @@ async function job(job: Job<BuildProfileJob>) {
   const photoDescriptions = JSON.parse(
     photoMessage.content.replaceAll("```json", "").replaceAll("```", ""),
   );
+  const photosWithDescriptions = (profile.available_photos as Photo[]).map((
+    photo,
+  ) => ({
+    key: photo.key,
+    description: photoDescriptions.find((d: { key: string }) =>
+      d.key === photo.key
+    )?.description,
+  }));
 
-  const constructMessage = await rawMessage("gpt-4-turbo-preview", [
+  const messages = [
     {
       role: "system",
-      content: CONSTRUCTION_PROMPT.replace(
-        "{profile}",
-        JSON.stringify({
-          name: profile.first_name,
-          gender: profile.gender,
-          location: profile.display_location,
-          age: new Date(profile.birth_date).getFullYear() -
-            new Date().getFullYear(),
-        }),
-      ).replace("{photos}", photoMessage.content),
+      content: "Construct a profile using the following conversation:",
     },
     ...conversation.messages,
-  ], {
-    temperature: 0.5,
-    maxTokens: 2000,
-    toolChoice: { type: "function", function: { name: "construct" } },
-    tools: [
-      {
-        type: "function",
-        function: {
-          name: "construct",
-          description: "Construct the final profile blocks",
-          parameters: {
-            type: "object",
-            properties: {
-              blocks: {
-                oneOf: [
-                  {
-                    type: "array",
-                    description: "A set of photos from the user's collection",
-                    items: {
-                      type: "object",
-                      required: ["photo"],
-                      properties: {
-                        photo: {
-                          type: "object",
-                          required: ["image"],
-                          properties: {
-                            image: {
-                              type: "object",
-                              required: ["key"],
-                              properties: {
-                                key: {
-                                  type: "string",
-                                  description: "The photo key",
-                                },
-                              },
-                            },
-                          },
-                        },
-                      },
-                    },
-                  },
-                  {
-                    type: "object",
-                    description:
-                      "A paragraph of text telling potential suitors something exciting about the client's personality, character, or life. Should be in a fun, whimsical, approachable tone and use jokes / puns / wordplay when possible. Use of emojis is encouraged. Should be written in the third person.",
-                    required: ["gas"],
-                    properties: {
-                      gas: {
-                        type: "object",
-                        required: ["text"],
-                        properties: {
-                          text: {
-                            type: "string",
-                            description:
-                              "The text, feel free to use emojis and markdown for bolding/italics etc.",
-                          },
-                        },
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-          },
-        },
-      },
-    ],
-  });
+  ];
 
-  if (constructMessage.content || !constructMessage.tool_calls) {
-    console.error("No construct message tool call");
-    return;
-  }
-
-  console.log(constructMessage.tool_calls[0].function.arguments);
-
-  const args = JSON.parse(constructMessage.tool_calls[0].function.arguments);
+  const blocks = await generateProfile(
+    profile,
+    photosWithDescriptions,
+    messages,
+  );
 
   const { error: updateError } = await supabase.from("profiles").update({
-    blocks: args.blocks,
-    available_photos: (profile.available_photos as Photo[]).map((photo) => ({
-      key: photo.key,
-      description: photoDescriptions.find((d: { key: string }) =>
-        d.key === photo.key
-      )?.description,
-    })),
+    blocks,
+    available_photos: photosWithDescriptions,
   }).eq("id", profile.id);
   if (updateError) {
     console.error("Error updating profile:", updateError.message);
