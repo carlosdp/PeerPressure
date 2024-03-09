@@ -29,10 +29,10 @@ struct ProfileBuilderController: View {
         VStack {
             if let profile = profileModel.profile {
                 UnifiedChatView(messages: messages.map {
-                    .init(identity: $0.role == "user" ? .profile(profile) : .custom(name: "Bot"),
+                    .init(identity: $0.role == "user" ? .profile(profile) : .custom(name: "Bot", avatar: .emoji("🤖")),
                           isSender: $0.role == "user",
                           content: $0.content)
-                }, startActions: startActions) { action in
+                }, targetMessageCount: 10, startActions: startActions) { action in
                     Task {
                         await sendMessage(action.rawValue)
                     }
