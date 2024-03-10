@@ -40,9 +40,9 @@ class ProfileViewModel {
                 profile.userId = user.id
                 
                 print("initial insert")
-                self.profile = try await supabase.database.from("profiles").insert(profile, returning: .representation).single().execute().value
+                let savedProfile: Profile = try await supabase.database.from("profiles").insert(profile, returning: .representation).single().execute().value
                 
-                if profile.availablePhotos.count > 1, let id = self.profile?.id {
+                if profile.availablePhotos.count > 1, let id = savedProfile.id {
                     print("photos found")
                     profile.id = id
                     let preparedProfile = try await prepareProfile(profile)
@@ -50,6 +50,8 @@ class ProfileViewModel {
                     await self.updateProfile(preparedProfile)
                     print("updated")
                 }
+                
+                self.profile = savedProfile
             } catch {
                 print("Error inserting profile: \(error)")
             }

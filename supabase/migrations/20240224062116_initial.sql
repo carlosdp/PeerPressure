@@ -112,6 +112,16 @@ begin
     )
     from jsonb_array_elements(new.available_photos) with ordinality as arr(elem, i)
   );
+
+  if exists (
+    select 1
+    from jsonb_array_elements(new.available_photos) as photo
+    where photo->>'description' is null
+  ) then
+    insert into job (name, data)
+      values ('processPhotos', jsonb_build_object('profileId', new.id));
+  end if;
+
   return new;
 end;
 $$ language plpgsql;
