@@ -21,7 +21,7 @@ struct ProfileBlocks_Photo: View {
     var body: some View {
         HStack {
             if photoPositions.count >= images.count {
-                ForEach(Array(zip(images.indices, images)), id: \.1.image) { (i, image) in
+                ForEach(Array(zip(images.indices, images)), id: \.0) { (i, image) in
                     AsyncSupabaseImage(image: image) { image in
                         image
                             .resizable()

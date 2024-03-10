@@ -7,6 +7,10 @@ const apiUrls = {
     url: "https://api.together.xyz/v1",
     keyEnv: "TOGETHER_API_KEY",
   },
+  fal: {
+    url: "https://fal.run",
+    keyEnv: "FAL_API_KEY",
+  },
 } as const;
 
 export type ApiModel = `${keyof typeof apiUrls}/${string}`;
@@ -172,4 +176,44 @@ export const generateImage = async (
   const imageRes = await fetch(url).then((r) => r.arrayBuffer());
 
   return imageRes;
+};
+
+export const visualizeImage = async (
+  model: string,
+  image_url: string,
+  prompt: string,
+  options?: RawMessageOptions,
+): Promise<string> => {
+  try {
+    const parts = model.split("/");
+    const api = parts[0] as keyof typeof apiUrls;
+    const modelName = parts.slice(1).join("/");
+
+    const res = await client.post(
+      api,
+      modelName,
+      {
+        image_url,
+        prompt,
+        temperature: options?.temperature || 0.2,
+        max_tokens: options?.maxTokens,
+      },
+      {
+        headers: {
+          Authorization: `Key ${Deno.env.get(apiUrls[api].keyEnv)}`,
+        },
+      },
+    );
+
+    if (res.status !== 200) {
+      throw new Error(
+        `Vision API error: ${res.statusText} ${JSON.stringify(res.data)}`,
+      );
+    }
+
+    return res.data.output;
+  } catch (error) {
+    console.error(JSON.stringify(error.response?.data));
+    throw error;
+  }
 };

@@ -162,7 +162,15 @@ class SupabaseImage: Codable, Equatable, Hashable {
             throw SupabaseImageError.alreadyUploaded
         }
         
-        if let imageData = self.image?.jpegData(compressionQuality: 0.7) {
+        guard let image = self.image else {
+            throw SupabaseImageError.noImageData
+        }
+        
+        guard let resizedImage = await image.byPreparingThumbnail(ofSize: CGSize(width: 1920 * (image.size.width / image.size.height), height: 1920)) else {
+            throw SupabaseImageError.noImageData
+        }
+        
+        if let imageData = resizedImage.jpegData(compressionQuality: 0.5) {
             let imageId = UUID()
             
             let key = "\(profileId)/profile/\(imageId).jpg"
