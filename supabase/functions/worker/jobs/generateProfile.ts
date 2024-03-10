@@ -32,7 +32,7 @@ export async function generateProfile(
   photos: Photo[],
   messages: OpenAIMessage[],
 ) {
-  const constructMessage = await rawMessage("gpt-4-turbo-preview", [
+  const constructMessage = await rawMessage("openai/gpt-4-turbo-preview", [
     {
       role: "system",
       content: CONSTRUCTION_PROMPT.replace(

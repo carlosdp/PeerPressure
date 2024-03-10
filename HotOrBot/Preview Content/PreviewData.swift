@@ -21,7 +21,7 @@ let profiles = [
         firstName: "Carlos",
         birthDate: dateFromString(from: "19920720"),
         biographicalData: BiographicalData(
-            height: 6.2 * 12.0,
+            height: Int(6.2 * 12),
             college: "Carnegie Mellon University",
             work: "CTO at Games Startup"
         ),
@@ -39,7 +39,7 @@ let profiles = [
         firstName: "Sarah",
         birthDate: dateFromString(from: "19940320"),
         biographicalData: BiographicalData(
-            height: 5.5,
+            height: Int(5.5 * 12),
             college: "Brown University",
             work: "Lawyer"
         ),

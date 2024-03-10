@@ -96,7 +96,7 @@ struct OnboardingStep_Height: View {
     var profile: Profile
     
     var body: some View {
-        HeightField(heightInInches: $profile.biographicalData.height ?? 5.0 * 12.0)
+        HeightField(heightInInches: $profile.biographicalData.height ?? 5 * 12)
     }
 }
 

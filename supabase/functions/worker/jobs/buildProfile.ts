@@ -61,7 +61,7 @@ async function job(job: Job<BuildProfileJob>) {
   }));
 
   // Pre process user photos, since GPT-4 Vision preview does not yet support tool calls
-  const photoMessage = await rawMessage("gpt-4-vision-preview", [
+  const photoMessage = await rawMessage("openai/gpt-4-vision-preview", [
     {
       role: "system",
       content:

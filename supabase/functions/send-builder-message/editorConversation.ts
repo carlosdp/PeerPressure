@@ -61,7 +61,7 @@ export async function generateEditorConversationMessage(
     JSON.stringify(availablePhotos),
   );
 
-  const directionMessage = await rawMessage("gpt-4-turbo-preview", [
+  const directionMessage = await rawMessage("openai/gpt-4-turbo-preview", [
     {
       role: "system",
       content: finalPrompt,
@@ -86,7 +86,7 @@ export async function generateEditorConversationMessage(
 
   console.log("Direction message:", directionMessage.content);
 
-  const newMessage = await rawMessage("gpt-4-turbo-preview", [
+  const newMessage = await rawMessage("openai/gpt-4-turbo-preview", [
     {
       role: "system",
       content: finalPrompt,

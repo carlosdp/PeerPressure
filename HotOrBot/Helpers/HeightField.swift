@@ -11,8 +11,8 @@ import CoreHaptics
 
 struct HeightField: View {
     @Binding
-    var heightInInches: Double
-    var dragMultiplier = 1.5
+    var heightInInches: Int
+    var dragMultiplier = 1.2
     var minHeight = 4.0 * 12.0
     var maxHeight = 7.0 * 12.0
     var shortThreshold = 5.0 * 12.0
@@ -36,13 +36,13 @@ struct HeightField: View {
             rvm.view()
                 .gesture(drag)
                 .onAppear {
-                    currentHeight = heightInInches
+                    currentHeight = Double(heightInInches)
                     heightPerc = ((currentHeight - minHeight) / (maxHeight - minHeight)) * 100
                     rvm.setInput("Height", value: heightPerc)
                 }
                 .onChange(of: heightPerc) {
                     currentHeight = minHeight + ((heightPerc / 100) * (maxHeight - minHeight))
-                    heightInInches = currentHeight
+                    heightInInches = Int(currentHeight.rounded())
                     rvm.setInput("Height", value: heightPerc)
                 }
                 .onChange(of: heightPercDelta) {
@@ -124,7 +124,7 @@ struct HeightField: View {
 }
 
 #Preview {
-    var height = 5.0*12.0
+    var height = 5*12
     
     return HeightField(heightInInches: .init(get: { height }, set: { height = $0 }))
 }

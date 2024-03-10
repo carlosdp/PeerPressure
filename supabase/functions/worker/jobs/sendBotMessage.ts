@@ -51,7 +51,7 @@ async function job(job: Job<SendBotMessageJob>) {
     content: chat.message,
   }));
 
-  const message = await rawMessage("gpt-4-turbo-preview", [
+  const message = await rawMessage("openai/gpt-4-turbo-preview", [
     {
       role: "system",
       content:

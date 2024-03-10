@@ -11,7 +11,7 @@ import PhotosUI
 enum ProfileFieldValue {
     case string(Binding<String>)
     case date(Binding<Date>)
-    case height(Binding<Double>)
+    case height(Binding<Int>)
 }
 
 struct ProfileEditItemView: View {
@@ -98,7 +98,7 @@ struct ProfileEditView: View {
             Section("Basics") {
                 ProfileEditItemView(icon: "person", label: "First Name", value: .string($profile.firstName))
                 ProfileEditItemView(icon: "birthday.cake", label: "Birthday", value: .date($profile.birthDate.date))
-                ProfileEditItemView(icon: "ruler", label: "Height", value: .height($profile.biographicalData.height ?? 5.0))
+                ProfileEditItemView(icon: "ruler", label: "Height", value: .height($profile.biographicalData.height ?? 5))
             }
             
             Section("Background") {

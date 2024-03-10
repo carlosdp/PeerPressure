@@ -12,7 +12,7 @@ import Observation
 
 struct BiographicalData: Codable {
     // height in inches
-    var height: Double?
+    var height: Int?
     var college: String?
     var work: String?
     
@@ -22,7 +22,7 @@ struct BiographicalData: Codable {
         self.work = nil
     }
     
-    public init(height: Double?, college: String?, work: String?) {
+    public init(height: Int?, college: String?, work: String?) {
         self.height = height
         self.college = college
         self.work = work
@@ -44,7 +44,7 @@ struct BiographicalData: Codable {
         var pairs: [DisplayPair] = []
         
         if let h = self.height {
-            pairs.append(DisplayPair(icon: "ruler", label: "Height", value: self.formatHeight(inches: h)))
+            pairs.append(DisplayPair(icon: "ruler", label: "Height", value: self.formatHeight(inches: Double(h))))
         }
         
         if let c = self.college {

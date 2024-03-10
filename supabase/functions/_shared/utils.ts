@@ -1,10 +1,29 @@
+const apiUrls = {
+  openai: {
+    url: "https://api.openai.com/v1",
+    keyEnv: "OPENAI_API_KEY",
+  },
+  together: {
+    url: "https://api.together.xyz/v1",
+    keyEnv: "TOGETHER_API_KEY",
+  },
+} as const;
+
+export type ApiModel = `${keyof typeof apiUrls}/${string}`;
+
 const client = {
-  post: async (endpoint: string, data: any, headers: any) => {
-    const res = await fetch(`https://api.openai.com/v1/${endpoint}`, {
+  post: async (
+    api: keyof typeof apiUrls,
+    endpoint: string,
+    data: any,
+    headers?: any,
+  ) => {
+    const res = await fetch(`${apiUrls[api].url}/${endpoint}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        ...headers.headers,
+        Authorization: `Bearer ${Deno.env.get(apiUrls[api].keyEnv)}`,
+        ...headers?.headers ?? {},
       },
       body: JSON.stringify(data),
     });
@@ -45,36 +64,6 @@ export type OpenAIToolDefinition = {
   };
 };
 
-export const message = async (
-  model: string,
-  messages: OpenAIMessage[],
-  maxTokens: number,
-  temperature?: number,
-) => {
-  const data = {
-    model,
-    messages,
-    temperature: temperature || 0,
-    max_tokens: maxTokens,
-  };
-  try {
-    const res = await client.post("/chat/completions", data, {
-      headers: {
-        Authorization: `Bearer ${Deno.env.get("OPENAI_API_KEY")}`,
-      },
-    });
-
-    if (res.status !== 200) {
-      throw new Error(`OpenAI API error: ${res.statusText}`);
-    }
-
-    return res.data.choices[0].message.content.trim();
-  } catch (error) {
-    console.error(JSON.stringify(error.response?.data));
-    throw error;
-  }
-};
-
 export type RawMessageOptions = {
   maxTokens?: number;
   temperature?: number;
@@ -83,30 +72,32 @@ export type RawMessageOptions = {
 };
 
 export const rawMessage = async (
-  model: string,
+  model: ApiModel,
   messages: OpenAIMessage[],
   options?: RawMessageOptions,
 ): Promise<OpenAIMessage> => {
   try {
+    const parts = model.split("/");
+    const api = parts[0] as keyof typeof apiUrls;
+    const modelName = parts.slice(1).join("/");
+
     const res = await client.post(
+      api,
       "/chat/completions",
       {
-        model,
+        model: modelName,
         messages,
         temperature: options?.temperature || 0,
         max_tokens: options?.maxTokens,
         tools: options?.tools,
         tool_choice: options?.toolChoice,
       },
-      {
-        headers: {
-          Authorization: `Bearer ${Deno.env.get("OPENAI_API_KEY")}`,
-        },
-      },
     );
 
     if (res.status !== 200) {
-      throw new Error(`OpenAI API error: ${res.statusText}`);
+      throw new Error(
+        `OpenAI API error: ${res.statusText} ${JSON.stringify(res.data)}`,
+      );
     }
 
     return res.data.choices[0].message;
@@ -118,6 +109,7 @@ export const rawMessage = async (
 
 export const embedding = async (text: string) => {
   const embeddingRes = await client.post(
+    "openai",
     "/embeddings",
     {
       model: "text-embedding-ada-002",
@@ -142,12 +134,12 @@ export const transcribe = async (audio: Blob): Promise<string> => {
   formData.append("temperature", "0");
 
   const transcriptionRes = await client.post(
+    "openai",
     "/audio/transcriptions",
     formData,
     {
       headers: {
         "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${Deno.env.get("OPENAI_API_KEY")}`,
       },
     },
   );
@@ -163,17 +155,13 @@ export const generateImage = async (
   style?: "vivid" | "natural",
 ): Promise<ArrayBuffer> => {
   const res = await client.post(
+    "openai",
     "images/generations",
     {
       prompt,
       model: "dall-e-3",
       size: size ?? "1024x1024",
       style,
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${Deno.env.get("OPENAI_API_KEY")}`,
-      },
     },
   );
 
