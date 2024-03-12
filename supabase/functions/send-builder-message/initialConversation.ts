@@ -1,7 +1,13 @@
 import { rawMessage } from "../_shared/utils.ts";
 import { createJob } from "../worker/job.ts";
 import type { Database } from "../_shared/supabaseTypes.d.ts";
-import type { BuilderConversationData } from "./handler.ts";
+
+export type BuilderConversationData = {
+  conversations?: {
+    messages: { role: string; content: string }[];
+    state: "active" | "finished";
+  }[];
+};
 
 const profileQuestions = [
   "Personality Traits: What words would you use to describe yourself?",

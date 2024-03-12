@@ -172,6 +172,7 @@ export interface Database {
       matches: {
         Row: {
           created_at: string
+          data: Json
           id: string
           is_match: boolean
           match_accepted_at: string | null
@@ -181,6 +182,7 @@ export interface Database {
         }
         Insert: {
           created_at?: string
+          data?: Json
           id?: string
           is_match: boolean
           match_accepted_at?: string | null
@@ -190,6 +192,7 @@ export interface Database {
         }
         Update: {
           created_at?: string
+          data?: Json
           id?: string
           is_match?: boolean
           match_accepted_at?: string | null
@@ -408,6 +411,7 @@ export interface Database {
         Args: Record<PropertyKey, never>
         Returns: {
           created_at: string
+          data: Json
           id: string
           is_match: boolean
           match_accepted_at: string | null

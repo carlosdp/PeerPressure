@@ -1,7 +1,7 @@
 import { rawMessage } from "../_shared/utils.ts";
 import { createJob } from "../worker/job.ts";
 import type { Database } from "../_shared/supabaseTypes.d.ts";
-import type { BuilderConversationData } from "./handler.ts";
+import type { BuilderConversationData } from "./initialConversation.ts";
 import type { Block, Photo } from "../_shared/supabaseJsonTypes.d.ts";
 
 const PROMPT =

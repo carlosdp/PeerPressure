@@ -1,7 +1,7 @@
 import { createSupabaseClient } from "../_shared/supabase.ts";
 import { createJob } from "../worker/job.ts";
 
-export const handler: Deno.ServeHandler = async (req) => {
+Deno.serve(async (req) => {
   const { matchId, message } = await req.json();
 
   const supabase = createSupabaseClient(req.headers.get("Authorization")!);
@@ -45,4 +45,4 @@ export const handler: Deno.ServeHandler = async (req) => {
     JSON.stringify({ success: true }),
     { headers: { "Content-Type": "application/json" } },
   );
-};
+});

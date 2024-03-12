@@ -1,15 +1,11 @@
 import { createSupabaseClient } from "../_shared/supabase.ts";
-import { generateInitialConversationMessage } from "./initialConversation.ts";
+import {
+  BuilderConversationData,
+  generateInitialConversationMessage,
+} from "./initialConversation.ts";
 import { generateEditorConversationMessage } from "./editorConversation.ts";
 
-export type BuilderConversationData = {
-  conversations?: {
-    messages: { role: string; content: string }[];
-    state: "active" | "finished";
-  }[];
-};
-
-export const handler: Deno.ServeHandler = async (req) => {
+Deno.serve(async (req) => {
   const { message } = await req.json();
 
   const supabase = createSupabaseClient(req.headers.get("Authorization")!);
@@ -89,4 +85,4 @@ export const handler: Deno.ServeHandler = async (req) => {
     }),
     { headers: { "Content-Type": "application/json" } },
   );
-};
+});

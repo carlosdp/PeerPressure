@@ -1,6 +1,6 @@
 import type { Job } from "npm:pg-boss@9.0.3";
 import { supabase } from "../../_shared/supabase.ts";
-import type { BuilderConversationData } from "../../send-builder-message/handler.ts";
+import type { BuilderConversationData } from "../../send-builder-message/initialConversation.ts";
 import logger from "../../logger.ts";
 import type { Photo } from "../../_shared/supabaseJsonTypes.d.ts";
 import { generateProfile } from "./generateProfile.ts";

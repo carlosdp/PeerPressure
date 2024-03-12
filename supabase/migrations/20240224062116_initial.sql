@@ -27,6 +27,7 @@ create table matches (
   is_match boolean not null,
   match_accepted_at timestamp with time zone,
   match_rejected_at timestamp with time zone,
+  data jsonb not null default '{}',
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 

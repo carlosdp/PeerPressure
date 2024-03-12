@@ -45,4 +45,7 @@ for (const [jobName, jobFunction] of Object.entries(jobs)) {
 
 boss.on("error", (error) => logger.error(error));
 
+// Crons
+boss.schedule("matchBots", "* * * * *");
+
 logger.info("Worker running!");

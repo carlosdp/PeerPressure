@@ -4,3 +4,7 @@ export type Photo = {
 };
 
 export type Block = { photo: { key: string } } | { gas: { text: string } };
+
+export type MatchData = {
+  matchTime?: number;
+};

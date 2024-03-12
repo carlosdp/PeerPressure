@@ -49,7 +49,7 @@ class ChatViewModel {
     
     func sendMessage(matchId: UUID, message: String) async {
         do {
-            try await supabaseF.functions.invoke("send-chat-message", options: FunctionInvokeOptions(body: SendMessageParams(matchId: matchId, message: message)))
+            try await supabase.functions.invoke("send-chat-message", options: FunctionInvokeOptions(body: SendMessageParams(matchId: matchId, message: message)))
         } catch {
             print("Error sending message: \(error)")
         }

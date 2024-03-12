@@ -99,7 +99,7 @@ class ProfileViewModel {
     
     func sendBuilderMessage(message: String) async throws -> ProfileBuilderResponse {
         if self.profile != nil {
-            return try await supabaseF.functions.invoke("send-builder-message", options: FunctionInvokeOptions(body: ["message": message]))
+            return try await supabase.functions.invoke("send-builder-message", options: FunctionInvokeOptions(body: ["message": message]))
         } else {
             throw ProfileBuilderError.profileMissing
         }

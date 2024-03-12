@@ -40,11 +40,6 @@ let supabase = SupabaseClient(
     )
 )
 
-let supabaseF = SupabaseClient(
-    supabaseURL: URL(string: "http://192.168.0.222:8000")!,
-    supabaseKey: supabaseKey
-)
-
 @Observable
 class SupabaseAuth {
     static let shared = SupabaseAuth()

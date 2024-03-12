@@ -1,0 +1,29 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Supabase Functions",
+      "command": "make",
+      "args": [
+        "server"
+      ],
+      "type": "shell",
+    },
+    {
+      "label": "Worker",
+      "command": "make",
+      "args": [
+        "worker"
+      ],
+      "type": "shell",
+    },
+    {
+      "label": "Run",
+      "dependsOrder": "parallel",
+      "dependsOn": [
+        "Supabase Functions",
+        "Worker"
+      ]
+    }
+  ]
+}
