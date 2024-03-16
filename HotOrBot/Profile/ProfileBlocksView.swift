@@ -11,7 +11,7 @@ struct ProfileBlocks_Photo: View {
     var images: [SupabaseImage]
     
     @State
-    private var photoPositions: [PhotoPositioning] = []
+    private var photoPositions = Dictionary<Int, PhotoPositioning>()
     
     struct PhotoPositioning {
         let rotation: CGFloat
@@ -22,6 +22,8 @@ struct ProfileBlocks_Photo: View {
         HStack {
             if photoPositions.count >= images.count {
                 ForEach(Array(zip(images.indices, images)), id: \.0) { (i, image) in
+                    let rotation = if let rot = photoPositions[i]?.rotation { Double(rot) } else { 0.0 }
+                    
                     AsyncSupabaseImage(image: image) { image in
                         image
                             .resizable()
@@ -31,8 +33,8 @@ struct ProfileBlocks_Photo: View {
                     }
                     .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: 512)
                     .clipShape(.rect(cornerRadius: 20))
-                    .scaleEffect(images.count > 1 ? 0.75 + photoPositions[i].scaleOffset : 1.0)
-                    .rotationEffect(.degrees(photoPositions[i].rotation))
+                    .scaleEffect(images.count > 1 ? 0.75 + (photoPositions[i]?.scaleOffset ?? 1.0) : 1.0)
+                    .rotationEffect(.degrees(rotation))
                 }
             }
         }
@@ -42,9 +44,9 @@ struct ProfileBlocks_Photo: View {
     func generatePhotoPositions() {
         for i in 0...images.count - 1 {
             if images.count > 1 {
-                photoPositions.insert(PhotoPositioning(rotation: CGFloat.random(in: -5.0...5.0), scaleOffset: CGFloat.random(in: 0...0.1)), at: i)
+                photoPositions[i] = PhotoPositioning(rotation: CGFloat.random(in: -5.0...5.0), scaleOffset: CGFloat.random(in: 0...0.1))
             } else {
-                photoPositions.insert(PhotoPositioning(rotation: 0, scaleOffset: 0), at: i)
+                photoPositions[i] = PhotoPositioning(rotation: 0, scaleOffset: 0)
             }
         }
     }
