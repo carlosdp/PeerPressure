@@ -2,6 +2,52 @@ create extension postgis with schema extensions;
 
 create type gender as enum ('male', 'female', 'non-binary', 'other');
 
+create table rounds(
+  id uuid primary key default gen_random_uuid(),
+  name varchar not null,
+  voting_enabled boolean not null default false,
+  join_balance integer not null default 0, -- number of votes user starts with if they join while round is active
+  active boolean not null default false,
+  end_time timestamp with time zone not null
+);
+
+-- trigger that ensures only one round is active at a time
+create or replace function ensure_one_active_round()
+returns trigger as $$
+begin
+  if new.active then
+    update rounds set active = false where id != new.id;
+  end if;
+  return new;
+end;
+$$ language plpgsql;
+
+create trigger ensure_one_active_round_trigger
+before update on rounds
+for each row
+execute function ensure_one_active_round();
+
+create table users (
+  id uuid primary key references auth.users,
+  display_name varchar not null default 'Player',
+  votes_balance integer not null default 0
+);
+
+-- trigger create users when auth.user is created
+create or replace function create_user()
+returns trigger as $$
+begin
+  insert into users (id, votes_balance)
+  select new.id, coalesce((select join_balance from rounds where active = true), 0);
+  return new;
+end;
+$$ language plpgsql;
+
+create trigger create_user_trigger
+after insert on auth.users
+for each row
+execute function create_user();
+
 create table profiles (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references auth.users unique, -- null if this is a synthetic profile
@@ -24,12 +70,14 @@ create table matches (
   id uuid primary key default gen_random_uuid(),
   profile_id uuid references profiles not null,
   matched_profile_id uuid references profiles not null,
-  is_match boolean not null,
   match_accepted_at timestamp with time zone,
   match_rejected_at timestamp with time zone,
   data jsonb not null default '{}',
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
+
+create unique index idx_unique_matches_profile_ids
+  on matches (least(profile_id, matched_profile_id), greatest(profile_id, matched_profile_id));
 
 create table messages (
   id uuid primary key default gen_random_uuid(),
@@ -40,6 +88,39 @@ create table messages (
 );
 
 alter publication supabase_realtime add table messages;
+
+create table votes (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users not null,
+  round_id uuid references rounds not null,
+  profile_id uuid references profiles not null,
+  allocation integer not null, -- votes allocated, can be positive or negative
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- trigger on votes, checks if round_id is active,
+-- checks if user has enough votes to allocate,
+-- updates user votes_balance (user has enough votes if the absolute value of "allocation"
+-- is less than or equal to vote value, the absolute value is subtracted from the user's votes_balance)
+create or replace function check_votes()
+returns trigger as $$
+begin
+  if not exists (select 1 from rounds where id = new.round_id and active = true and voting_enabled = true) then
+    raise exception 'Round is not active or does not allow votes';
+  end if;
+
+  if new.allocation = 0 then
+    raise exception 'Allocation must be non-zero';
+  end if;
+
+  if abs(new.allocation) > (select votes_balance from users where id = new.user_id) then
+    raise exception 'User does not have enough votes';
+  end if;
+
+  update users set votes_balance = votes_balance - abs(new.allocation) where id = new.user_id;
+  return new;
+end;
+$$ language plpgsql;
 
 insert into storage.buckets (id, name) values ('photos', 'photos');
 create policy "Users can upload photos for their profile"
@@ -55,9 +136,9 @@ returns profiles as $$
   select * from profiles where user_id = auth.uid();
 $$ language sql stable;
 
-create or replace function create_match(profile_id uuid, is_match boolean) returns void as $$
-  insert into matches (profile_id, matched_profile_id, is_match)
-  values ((select id from profiles where user_id = auth.uid()), profile_id, is_match);
+create or replace function create_match(profile_id uuid) returns void as $$
+  insert into matches (profile_id, matched_profile_id)
+  values ((select id from profiles where user_id = auth.uid()), profile_id);
 $$ language sql;
 
 create or replace function get_unmatched_profiles()
@@ -73,7 +154,7 @@ returns setof jsonb as $$
     p.preferences, 'photo_keys', p.photo_keys, 'blocks', p.blocks))
   from matches m
   join profiles p on ((p.user_id is null or p.user_id != auth.uid()) and (m.profile_id = p.id or m.matched_profile_id = p.id))
-  where m.is_match = true and m.match_accepted_at is not null and (m.profile_id = (select id from profiles where user_id = auth.uid()) or m.matched_profile_id = (select id from profiles where user_id = auth.uid()));
+  where m.match_accepted_at is not null and (m.profile_id = (select id from profiles where user_id = auth.uid()) or m.matched_profile_id = (select id from profiles where user_id = auth.uid()));
 $$ language sql stable;
 
 create or replace function get_likes()
@@ -82,7 +163,7 @@ returns setof jsonb as $$
     , 'gender', p.gender, 'location', p.location, 'display_location', p.display_location, 'biographical_data', p.biographical_data, 'preferences', p.preferences, 'photo_keys', p.photo_keys, 'blocks', p.blocks))
   from matches m
   join profiles p on ((p.user_id is null or p.user_id != auth.uid()) and (m.profile_id = p.id or m.matched_profile_id = p.id))
-  where m.is_match = true and m.match_accepted_at is null and m.match_rejected_at is null and m.matched_profile_id = (select id from profiles where user_id = auth.uid());
+  where m.match_accepted_at is null and m.match_rejected_at is null and m.matched_profile_id = (select id from profiles where user_id = auth.uid());
 $$ language sql stable;
 
 create or replace function send_message(match_id uuid, message text)
@@ -93,7 +174,7 @@ $$ language sql;
 
 create or replace function get_pending_bot_matches()
 returns setof matches as $$
-  select m.* from matches m left join profiles p on m.matched_profile_id = p.id where p.user_id is null and m.match_accepted_at is null and m.match_rejected_at is null and m.is_match = true;
+  select m.* from matches m left join profiles p on m.matched_profile_id = p.id where p.user_id is null and m.match_accepted_at is null and m.match_rejected_at is null;
 $$ language sql stable;
 
 create or replace function sanitize_available_photos()
