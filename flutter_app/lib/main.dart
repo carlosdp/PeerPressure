@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_app/login.dart';
-import 'package:flutter_app/support_allocator.dart';
+import 'package:flutter_app/models/swipe.dart';
+import 'package:flutter_app/swipe_screen.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 const supabaseUrl = 'http://192.168.0.222:54321';
@@ -18,7 +20,14 @@ void main() async {
     anonKey: supabaseAnonKey,
   );
 
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => SwipeModel()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -72,12 +81,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        color: Colors.grey,
-        padding: const EdgeInsets.only(bottom: 20),
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          child: isLoggedIn ? const SupportAllocator() : const Login(),
-        ),
+        color: Colors.white,
+        child: isLoggedIn ? const SwipeScreen() : const Login(),
       ),
     );
   }

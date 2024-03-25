@@ -30,18 +30,19 @@ execute function ensure_one_active_round();
 create table users (
   id uuid primary key references auth.users,
   display_name varchar not null default 'Player',
-  votes_balance integer not null default 0
+  votes_balance integer not null default 0,
+  matching_profile_id uuid references profiles
 );
 
 -- trigger create users when auth.user is created
 create or replace function create_user()
 returns trigger as $$
 begin
-  insert into users (id, votes_balance)
-  select new.id, coalesce((select join_balance from rounds where active = true), 0);
+  insert into public.users (id, votes_balance)
+  select new.id, coalesce((select join_balance from public.rounds where active = true), 0);
   return new;
 end;
-$$ language plpgsql;
+$$ language plpgsql security definer;
 
 create trigger create_user_trigger
 after insert on auth.users
@@ -64,6 +65,13 @@ create table profiles (
   builder_conversation_data jsonb not null default '{}',
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+create table saved_profiles (
+  primary key (user_id, profile_id),
+  user_id uuid references auth.users not null,
+  profile_id uuid references profiles not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
 create table matches (
@@ -212,3 +220,27 @@ create trigger update_profiles_available_photos_trigger
 before update on profiles
 for each row
 execute function sanitize_available_photos();
+
+-- returns the currently matching profile (matching_profile_id) for the logged in user, if not set, chooses one from saved_profiles, if no saved profiles, chooses a random profile, and sets matching_profile_id
+create or replace function get_matching_profile()
+returns profiles as $$
+declare
+  matching_profile profiles;
+begin
+  select * into matching_profile from profiles where id = (select matching_profile_id from users where id = auth.uid());
+  if matching_profile.id is null then
+    select * into matching_profile from profiles where id = (select profile_id from saved_profiles where user_id = auth.uid() order by created_at desc limit 1);
+    if matching_profile.id is null then
+      select * into matching_profile from profiles where id in (select id from profiles where user_id != auth.uid() or user_id is null order by random() limit 1);
+      insert into saved_profiles (user_id, profile_id) values (auth.uid(), matching_profile.id);
+    end if;
+    update users set matching_profile_id = matching_profile.id where id = auth.uid();
+  end if;
+  return matching_profile;
+end;
+$$ language plpgsql;
+
+create or replace function get_contestant_profiles()
+returns setof profiles as $$
+  select * from profiles where user_id != auth.uid() or user_id is null;
+$$ language sql stable;

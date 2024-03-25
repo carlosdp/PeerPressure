@@ -154,7 +154,7 @@ async function generateProfile(
   }
 
   const { error: updateError } = await supabase.from("profiles").update({
-    available_photo_keys: [imageKey],
+    available_photos: [{ key: imageKey }],
     blocks: [{ photo: { key: imageKey } }],
   }).eq("id", profile.id);
   if (updateError) {

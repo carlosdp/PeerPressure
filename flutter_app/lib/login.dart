@@ -18,7 +18,7 @@ class Login extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           InkWell(
-            onTap: signInWIthApple,
+            onTap: signInWithApple,
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
@@ -45,7 +45,7 @@ class Login extends StatelessWidget {
     );
   }
 
-  Future<AuthResponse> signInWIthApple() async {
+  Future<void> signInWithApple() async {
     final rawNonce = supabase.auth.generateRawNonce();
     final hashedNonce = sha256.convert(utf8.encode(rawNonce)).toString();
     final appleCredential = await SignInWithApple.getAppleIDCredential(
@@ -69,7 +69,7 @@ class Login extends StatelessWidget {
           'Could not find token from generated credential');
     }
 
-    return await supabase.auth.signInWithIdToken(
+    await supabase.auth.signInWithIdToken(
       provider: OAuthProvider.apple,
       idToken: idToken,
       nonce: rawNonce,
