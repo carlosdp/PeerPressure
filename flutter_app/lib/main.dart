@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_app/login.dart';
+import 'package:flutter_app/dev_login.dart';
 import 'package:flutter_app/models/swipe.dart';
 import 'package:flutter_app/swipe_screen.dart';
 import 'package:provider/provider.dart';
@@ -82,7 +83,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       body: Container(
         color: Colors.white,
-        child: isLoggedIn ? const SwipeScreen() : const Login(),
+        child: isLoggedIn ? const SwipeScreen() : const DevLogin(),
       ),
     );
   }

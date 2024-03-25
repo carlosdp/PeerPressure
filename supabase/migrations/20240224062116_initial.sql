@@ -242,5 +242,5 @@ $$ language plpgsql;
 
 create or replace function get_contestant_profiles()
 returns setof profiles as $$
-  select * from profiles where user_id != auth.uid() or user_id is null;
-$$ language sql stable;
+  select * from profiles where (user_id != auth.uid() or user_id is null) and id != (select id from get_matching_profile());
+$$ language sql;
