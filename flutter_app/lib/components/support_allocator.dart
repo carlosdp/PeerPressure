@@ -201,9 +201,7 @@ class _SupportAllocatorState extends State<SupportAllocator> {
         children: [
           AnimatedContainer(
             duration: Duration(milliseconds: _dragDelta != 0 ? 0 : 250),
-            curve: _targetHeight == _maxHeight
-                ? Curves.easeOut
-                : Curves.easeOutBack,
+            curve: Curves.easeOutBack,
             height: _targetHeight - _dragDelta > _maxHeight
                 ? _maxHeight + (_targetHeight - _dragDelta - _maxHeight) * 0.2
                 : _targetHeight - _dragDelta < _minHeight

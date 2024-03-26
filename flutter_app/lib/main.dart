@@ -1,10 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_app/login.dart';
-import 'package:flutter_app/dev_login.dart';
+import 'package:flutter_app/components/top_bar.dart';
+import 'package:flutter_app/screens/login.dart';
+import 'package:flutter_app/screens/dev_login.dart';
 import 'package:flutter_app/models/swipe.dart';
-import 'package:flutter_app/swipe_screen.dart';
+import 'package:flutter_app/screens/swipe_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -81,6 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: const TopBar(),
       body: Container(
         color: Colors.white,
         child: isLoggedIn ? const SwipeScreen() : const DevLogin(),

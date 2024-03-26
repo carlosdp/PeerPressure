@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/components/profile_card.dart';
 import 'package:flutter_app/models/swipe.dart';
+import 'package:flutter_app/components/support_card.dart';
+import 'package:flutter_app/screens/match.dart';
 import 'package:provider/provider.dart';
 
 class SwipeScreen extends StatefulWidget {
@@ -86,7 +88,23 @@ class _SwipeScreenState extends State<SwipeScreen> {
                       ),
                     ),
                   ],
-                )
+                ),
+                const SizedBox(height: 25),
+                SupportCard(
+                  onTap: () {
+                    if (model.matchingProfile != null &&
+                        model.currentProfile != null) {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => Match(
+                            matchingProfile: model.matchingProfile!,
+                            swipedProfile: model.currentProfile!,
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                ),
               ],
             ),
           ),
