@@ -90,21 +90,24 @@ class _SwipeScreenState extends State<SwipeScreen> {
                   ],
                 ),
                 const SizedBox(height: 25),
-                SupportCard(
-                  onTap: () {
-                    if (model.matchingProfile != null &&
-                        model.currentProfile != null) {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => Match(
-                            matchingProfile: model.matchingProfile!,
-                            swipedProfile: model.currentProfile!,
-                          ),
-                        ),
-                      );
-                    }
-                  },
-                ),
+                model.match != null
+                    ? SupportCard(
+                        match: model.match!,
+                        onTap: () {
+                          if (model.matchingProfile != null &&
+                              model.currentProfile != null) {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => MatchScreen(
+                                  matchingProfile: model.matchingProfile!,
+                                  swipedProfile: model.currentProfile!,
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                      )
+                    : const SizedBox(),
               ],
             ),
           ),

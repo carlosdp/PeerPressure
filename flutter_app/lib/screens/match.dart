@@ -4,21 +4,21 @@ import 'package:flutter_app/components/support_allocator.dart';
 import 'package:flutter_app/components/top_bar.dart';
 import 'package:flutter_app/models/swipe.dart';
 
-class Match extends StatefulWidget {
+class MatchScreen extends StatefulWidget {
   final Profile matchingProfile;
   final Profile swipedProfile;
 
-  const Match({
+  const MatchScreen({
     super.key,
     required this.matchingProfile,
     required this.swipedProfile,
   });
 
   @override
-  State<Match> createState() => _MatchState();
+  State<MatchScreen> createState() => _MatchScreenState();
 }
 
-class _MatchState extends State<Match> {
+class _MatchScreenState extends State<MatchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

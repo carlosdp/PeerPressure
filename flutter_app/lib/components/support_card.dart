@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/models/swipe.dart';
 
 class SupportCard extends StatelessWidget {
+  final Match match;
   final void Function() onTap;
 
-  const SupportCard({super.key, required this.onTap});
+  const SupportCard({super.key, required this.match, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -27,11 +29,11 @@ class SupportCard extends StatelessWidget {
             ),
           ],
         ),
-        child: const Align(
+        child: Align(
           alignment: Alignment.center,
           child: Text(
-            '30,482',
-            style: TextStyle(
+            '${match.totalVotes}',
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 40,
               fontWeight: FontWeight.bold,

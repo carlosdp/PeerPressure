@@ -64,11 +64,32 @@ class Profile {
   }
 }
 
+class Match {
+  final String id;
+  final String profileId;
+  final String matchedProfileId;
+  final int totalVotes;
+
+  Match({
+    required this.id,
+    required this.profileId,
+    required this.matchedProfileId,
+    required this.totalVotes,
+  });
+
+  Match.fromJson(Map<String, dynamic> json)
+      : id = json['id'] as String,
+        profileId = json['profile_id'] as String,
+        matchedProfileId = json['matched_profile_id'] as String,
+        totalVotes = json['total_votes'] as int;
+}
+
 class SwipeModel extends ChangeNotifier {
   List<Profile> profiles = [];
   Profile? matchingProfile;
   Profile? get currentProfile =>
       profiles.isNotEmpty ? profiles[_currentIndex] : null;
+  Match? match;
 
   int _currentIndex = 0;
 
@@ -78,6 +99,10 @@ class SwipeModel extends ChangeNotifier {
     profiles = data.map<Profile>((p) => Profile.fromJson(p)).toList();
     _currentIndex = 0;
 
+    if (currentProfile != null && matchingProfile != null) {
+      await fetchMatch(currentProfile!.id, matchingProfile!.id);
+    }
+
     notifyListeners();
   }
 
@@ -86,21 +111,36 @@ class SwipeModel extends ChangeNotifier {
 
     matchingProfile = Profile.fromJson(data);
 
+    if (currentProfile != null && matchingProfile != null) {
+      await fetchMatch(currentProfile!.id, matchingProfile!.id);
+    }
+
     notifyListeners();
   }
 
-  void nextProfile() {
-    print(profiles.length);
+  Future<void> fetchMatch(String profileId, String matchedProfileId) async {
+    final response = await supabase.rpc('get_match', params: {
+      'profile_1': profileId,
+      'profile_2': matchedProfileId,
+    });
+
+    match = Match.fromJson(response);
+
+    notifyListeners();
+  }
+
+  void nextProfile() async {
     if (_currentIndex < profiles.length - 1) {
-      print("nexting");
       _currentIndex++;
+      await fetchMatch(currentProfile!.id, matchingProfile!.id);
       notifyListeners();
     }
   }
 
-  void previousProfile() {
+  void previousProfile() async {
     if (_currentIndex > 0) {
       _currentIndex--;
+      await fetchMatch(currentProfile!.id, matchingProfile!.id);
       notifyListeners();
     }
   }

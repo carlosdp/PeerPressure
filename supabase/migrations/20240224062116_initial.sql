@@ -101,10 +101,17 @@ create table votes (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references auth.users not null,
   round_id uuid references rounds not null,
-  profile_id uuid references profiles not null,
+  match_id uuid references matches not null,
   allocation integer not null, -- votes allocated, can be positive or negative
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
+
+-- view that returns matches with total votes for each match
+create or replace view matches_with_votes as
+select m.*, coalesce(sum(v.allocation), 0) as total_votes
+from matches m
+left join votes v on m.id = v.match_id
+group by m.id;
 
 -- trigger on votes, checks if round_id is active,
 -- checks if user has enough votes to allocate,
@@ -129,6 +136,11 @@ begin
   return new;
 end;
 $$ language plpgsql;
+
+create trigger check_votes_trigger
+before insert on votes
+for each row
+execute function check_votes();
 
 insert into storage.buckets (id, name) values ('photos', 'photos');
 create policy "Users can upload photos for their profile"
@@ -244,3 +256,18 @@ create or replace function get_contestant_profiles()
 returns setof profiles as $$
   select * from profiles where (user_id != auth.uid() or user_id is null) and id != (select id from get_matching_profile());
 $$ language sql;
+
+-- returns the match for the given profiles, creates one if it does not exist
+create or replace function get_match(profile_1 uuid, profile_2 uuid)
+returns matches_with_votes as $$
+declare
+  match matches_with_votes;
+begin
+  select * into match from matches_with_votes where (profile_id = profile_1 and matched_profile_id = profile_2) or (profile_id = profile_2 and matched_profile_id = profile_1);
+  if match is null then
+    insert into matches (profile_id, matched_profile_id) values (profile_1, profile_2);
+    select * into match from matches_with_votes where profile_id = profile_1 and matched_profile_id = profile_2;
+  end if;
+  return match;
+end;
+$$ language plpgsql;
