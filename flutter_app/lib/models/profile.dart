@@ -14,8 +14,8 @@ class ProfileModel extends ChangeNotifier {
       profile = Profile.fromJson(response);
 
       notifyListeners();
-    } catch (_) {
-      profile = null;
+    } catch (err) {
+      print('Failed to fetch profile: $err');
     }
   }
 

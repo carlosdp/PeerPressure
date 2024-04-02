@@ -5,9 +5,12 @@ import 'dart:typed_data';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app/models/profile.dart';
+import 'package:provider/provider.dart';
 import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_app/supabase_types.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -19,6 +22,38 @@ Future<String> getFileDataUrl(String filePath, String mimeType) async {
     return dataUrl;
   } else {
     throw Exception('File does not exist');
+  }
+}
+
+class _InterviewStage {
+  final String title;
+  final String instructions;
+
+  _InterviewStage({
+    required this.title,
+    required this.instructions,
+  });
+}
+
+class _InterviewResponse {
+  final BuilderState status;
+  final BuilderChatMessage message;
+
+  _InterviewResponse({
+    required this.status,
+    required this.message,
+  });
+
+  factory _InterviewResponse.fromJson(Map<String, dynamic> json) {
+    return _InterviewResponse(
+      status: json['status'] == 'finished'
+          ? BuilderState.finished
+          : BuilderState.inProgress,
+      message: BuilderChatMessage(
+        role: json['message']['role'],
+        content: json['message']['content'],
+      ),
+    );
   }
 }
 
@@ -38,10 +73,23 @@ class _InterviewState extends State<Interview> {
   StreamSubscription? _listener;
   final _recorder = AudioRecorder();
   final _listenRecorder = AudioRecorder();
+  bool _isRecording = false;
+  late BuilderConversation _conversation;
+  _InterviewStage _currentStage = _InterviewStage(
+    title: "Let's get started",
+    instructions:
+        "I'm going to ask you some questions. Take your time answering each one. Remember to smile!",
+  );
 
   @override
   void initState() {
     super.initState();
+
+    _conversation = Provider.of<ProfileModel>(context, listen: false)
+            .profile
+            ?.currentConversation ??
+        BuilderConversation(state: BuilderState.inProgress, messages: []);
+
     availableCameras().then((cameras) {
       _cameras = cameras;
       if (_cameras.isNotEmpty) {
@@ -89,21 +137,27 @@ class _InterviewState extends State<Interview> {
       final tempDir = await getTemporaryDirectory();
       await _recorder.start(
         const RecordConfig(encoder: AudioEncoder.wav),
-        path: "${tempDir.path}/test234883.wav",
+        path: "${tempDir.path}/voice.wav",
       );
-      print("Started listening");
+
+      setState(() {
+        _isRecording = true;
+      });
     }
   }
 
   Future<void> stopListening() async {
-    print("Stopping listening");
     final path = await _recorder.stop();
+
+    setState(() {
+      _isRecording = false;
+    });
+
     // _listener?.cancel();
     // await _listenRecorder.stop();
     if (path == null) {
       return;
     }
-    print(path);
 
     final dataUrl = await getFileDataUrl(path, "audio/wav");
 
@@ -111,7 +165,22 @@ class _InterviewState extends State<Interview> {
       "upload-interview-audio",
       body: {"audio": dataUrl},
     );
-    print(response.data);
+
+    final interviewResponse = _InterviewResponse.fromJson(response.data);
+
+    setState(() {
+      if (interviewResponse.status == BuilderState.finished) {
+        _currentStage = _InterviewStage(
+          title: "Thank you!",
+          instructions: "You have completed the interview.",
+        );
+      } else {
+        _currentStage = _InterviewStage(
+          title: "Next question",
+          instructions: interviewResponse.message.content,
+        );
+      }
+    });
   }
 
   @override
@@ -147,17 +216,17 @@ class _InterviewState extends State<Interview> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        "Let's get started",
-                        style: TextStyle(
+                      Text(
+                        _currentStage.title,
+                        style: const TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
                       ),
-                      const Text(
-                        "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-                        style: TextStyle(
+                      Text(
+                        _currentStage.instructions,
+                        style: const TextStyle(
                           fontSize: 16,
                           color: Colors.white,
                         ),
@@ -165,23 +234,16 @@ class _InterviewState extends State<Interview> {
                       const SizedBox(height: 16),
                       InkWell(
                         onTap: () {
-                          startListening();
+                          _isRecording ? stopListening() : startListening();
                         },
-                        child: const Text(
-                          "Start recording",
-                          style: TextStyle(color: Colors.white),
+                        child: Text(
+                          _isRecording ? "Stop" : "Start",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 32,
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      InkWell(
-                        onTap: () {
-                          stopListening();
-                        },
-                        child: const Text(
-                          "Stop recording",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      )
                     ],
                   ),
                 ),

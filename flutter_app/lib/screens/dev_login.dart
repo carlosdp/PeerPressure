@@ -47,7 +47,12 @@ class DevLogin extends StatelessWidget {
   }
 
   Future<void> signInWithTestUser() async {
-    await supabase.auth
-        .signUp(email: 'test@test.com', password: 'testtesttest');
+    try {
+      await supabase.auth
+          .signUp(email: 'test@test.com', password: 'testtesttest');
+    } catch (_) {
+      await supabase.auth
+          .signInWithPassword(email: 'test@test.com', password: 'testtesttest');
+    }
   }
 }

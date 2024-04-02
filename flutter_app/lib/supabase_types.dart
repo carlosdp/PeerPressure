@@ -23,6 +23,55 @@ class Block {
   }
 }
 
+enum BuilderState {
+  inProgress,
+  finished,
+}
+
+class BuilderChatMessage {
+  final String role;
+  final String content;
+
+  BuilderChatMessage({
+    required this.role,
+    required this.content,
+  });
+}
+
+class BuilderConversation {
+  BuilderState state;
+  List<BuilderChatMessage> messages;
+
+  BuilderConversation({
+    required this.state,
+    required this.messages,
+  });
+
+  BuilderConversation.fromJson(Map<String, dynamic> json)
+      : state = json['state'] == 'finished'
+            ? BuilderState.finished
+            : BuilderState.inProgress,
+        messages = json['messages']
+            .map<BuilderChatMessage>((m) =>
+                BuilderChatMessage(role: m['role'], content: m['content']))
+            .toList();
+}
+
+class BuilderConversationData {
+  final List<BuilderConversation> conversations;
+
+  BuilderConversationData({
+    required this.conversations,
+  });
+
+  BuilderConversationData.fromJson(Map<String, dynamic> json)
+      : conversations = json['conversations']
+                ?.map<BuilderConversation>(
+                    (c) => BuilderConversation.fromJson(c))
+                .toList() ??
+            [];
+}
+
 class Profile {
   String id = '';
   String userId = '';
@@ -32,6 +81,15 @@ class Profile {
   Location? location;
   String? displayLocation;
   List<Block> blocks = [];
+  BuilderConversationData? builderConversationData;
+
+  BuilderConversation get currentConversation {
+    return builderConversationData?.conversations.lastWhere(
+            (c) => c.state == BuilderState.inProgress,
+            orElse: () => BuilderConversation(
+                state: BuilderState.inProgress, messages: [])) ??
+        BuilderConversation(state: BuilderState.inProgress, messages: []);
+  }
 
   Profile({
     required this.firstName,
@@ -45,7 +103,11 @@ class Profile {
         firstName = json['first_name'] as String,
         gender = json['gender'] as String,
         birthDate = DateTime.parse(json['birth_date'] as String),
-        blocks = json['blocks'].map<Block>((b) => Block.fromJson(b)).toList();
+        blocks = json['blocks'].map<Block>((b) => Block.fromJson(b)).toList(),
+        builderConversationData = json['builder_conversation_data'] != null
+            ? BuilderConversationData.fromJson(
+                json['builder_conversation_data'])
+            : null;
 
   Map<String, dynamic> toJson() {
     final data = {
