@@ -151,6 +151,13 @@ on storage.objects for insert with check (
 create policy "Authenticated users can read photos"
 on storage.objects for select using ( bucket_id = 'photos' and auth.role() = 'authenticated' );
 
+insert into storage.buckets (id, name) values ('videos', 'videos');
+create policy "Users can upload videos for their profile"
+on storage.objects for insert with check (
+    bucket_id = 'videos'
+    and (storage.foldername(name))[1]::uuid = (select id from profiles where user_id = auth.uid())
+);
+
 create or replace function get_profile()
 returns profiles as $$
   select * from profiles where user_id = auth.uid();

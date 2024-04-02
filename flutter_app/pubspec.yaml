@@ -43,6 +43,11 @@ dependencies:
   provider: ^6.1.2
   font_awesome_flutter: ^10.7.0
   auto_size_text: ^3.0.0
+  camera: ^0.10.5+9
+  path_provider: ^2.1.2
+  record: ^5.0.5
+  scroll_date_picker: ^3.8.0
+  geocoding: ^3.0.0
 
 dev_dependencies:
   flutter_test:

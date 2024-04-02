@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/models/swipe.dart';
+import 'package:flutter_app/supabase_types.dart';
 
 class SupportCard extends StatelessWidget {
   final Match match;

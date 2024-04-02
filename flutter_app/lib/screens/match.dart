@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app/components/profile_card.dart';
 import 'package:flutter_app/components/support_allocator.dart';
 import 'package:flutter_app/components/top_bar.dart';
-import 'package:flutter_app/models/swipe.dart';
+import 'package:flutter_app/supabase_types.dart';
 
 class MatchScreen extends StatefulWidget {
   final Profile matchingProfile;

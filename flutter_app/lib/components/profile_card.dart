@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/models/swipe.dart';
+import 'package:flutter_app/supabase_types.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 
 class ProfileCard extends StatefulWidget {

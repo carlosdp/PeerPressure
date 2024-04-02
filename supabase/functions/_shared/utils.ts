@@ -137,20 +137,22 @@ export const transcribe = async (audio: Blob): Promise<string> => {
   formData.append("response_format", "json");
   formData.append("temperature", "0");
 
-  const transcriptionRes = await client.post(
-    "openai",
-    "/audio/transcriptions",
-    formData,
+  const transcriptionRes = await fetch(
+    `${apiUrls.openai.url}/audio/transcriptions`,
     {
+      method: "POST",
+      body: formData,
       headers: {
-        "Content-Type": "multipart/form-data",
+        "Authorization": `Bearer ${Deno.env.get("OPENAI_API_KEY")}`,
       },
     },
+  ).then((r) => r.json());
+
+  console.log(
+    `Transcription response: ${JSON.stringify(transcriptionRes)}`,
   );
 
-  console.log(`Transcription response: ${transcriptionRes.data}`);
-
-  return transcriptionRes.data.text;
+  return transcriptionRes.text;
 };
 
 export const generateImage = async (

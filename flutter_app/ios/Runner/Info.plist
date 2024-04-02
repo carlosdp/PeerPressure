@@ -32,6 +32,10 @@
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+	<key>NSCameraUsageDescription</key>
+	<string>We need camera access so we can record your interview</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>We need microphone access so we can record your interview</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

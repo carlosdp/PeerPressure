@@ -1,15 +1,14 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_app/components/top_bar.dart';
-import 'package:flutter_app/screens/login.dart';
-import 'package:flutter_app/screens/dev_login.dart';
+import 'package:flutter_app/models/profile.dart';
 import 'package:flutter_app/models/swipe.dart';
-import 'package:flutter_app/screens/swipe_screen.dart';
+import 'package:flutter_app/screens/dev_login.dart';
+import 'package:flutter_app/show_kit/screens/contestant_router.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-const supabaseUrl = 'http://192.168.0.222:54321';
+const supabaseUrl = 'http://192.168.0.221:54321';
 const supabaseAnonKey =
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0';
 final supabase = Supabase.instance.client;
@@ -26,6 +25,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => SwipeModel()),
+        ChangeNotifierProvider(create: (context) => ProfileModel()),
       ],
       child: const MyApp(),
     ),
@@ -81,12 +81,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const TopBar(),
-      body: Container(
-        color: Colors.white,
-        child: isLoggedIn ? const SwipeScreen() : const DevLogin(),
-      ),
-    );
+    return isLoggedIn ? const ContestantRouter() : const DevLogin();
   }
 }
