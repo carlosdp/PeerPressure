@@ -97,7 +97,7 @@ class _InterviewState extends State<Interview> {
         _controller = CameraController(
             cameras.firstWhere(
                 (cam) => cam.lensDirection == CameraLensDirection.front),
-            ResolutionPreset.max);
+            ResolutionPreset.veryHigh);
         _controller!.initialize().then((_) {
           if (!mounted) {
             return;
@@ -128,6 +128,10 @@ class _InterviewState extends State<Interview> {
   }
 
   Future<void> startListening() async {
+    if (_controller != null) {
+      await _controller!.startVideoRecording();
+    }
+
     if (await _recorder.hasPermission()) {
       // _audioStream = await _listenRecorder.startStream(
       //   const RecordConfig(encoder: AudioEncoder.pcm16bits),
@@ -140,15 +144,18 @@ class _InterviewState extends State<Interview> {
         const RecordConfig(encoder: AudioEncoder.wav),
         path: "${tempDir.path}/voice.wav",
       );
-
-      setState(() {
-        _isRecording = true;
-      });
     }
+
+    setState(() {
+      _isRecording = true;
+    });
   }
 
   Future<void> stopListening() async {
+    final profileId =
+        Provider.of<ProfileModel>(context, listen: false).profile!.id;
     final path = await _recorder.stop();
+    final videoFile = await _controller!.stopVideoRecording();
     final isInterruption = _isAwaitingResponse;
 
     setState(() {
@@ -158,6 +165,7 @@ class _InterviewState extends State<Interview> {
 
     // _listener?.cancel();
     // await _listenRecorder.stop();
+
     if (path == null) {
       return;
     }
@@ -186,6 +194,17 @@ class _InterviewState extends State<Interview> {
         );
       }
     });
+
+    final randomId = DateTime.now().millisecondsSinceEpoch;
+    File file = File(videoFile.path);
+
+    await supabase.storage.from('videos').upload(
+          "$profileId/interview-videos/$randomId",
+          file,
+          fileOptions: FileOptions(
+            contentType: videoFile.mimeType,
+          ),
+        );
   }
 
   @override
