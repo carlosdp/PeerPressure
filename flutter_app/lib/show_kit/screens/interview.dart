@@ -38,10 +38,12 @@ class _InterviewStage {
 class _InterviewResponse {
   final BuilderState status;
   final BuilderChatMessage message;
+  final int progress;
 
   _InterviewResponse({
     required this.status,
     required this.message,
+    required this.progress,
   });
 
   factory _InterviewResponse.fromJson(Map<String, dynamic> json) {
@@ -49,10 +51,8 @@ class _InterviewResponse {
       status: json['status'] == 'finished'
           ? BuilderState.finished
           : BuilderState.inProgress,
-      message: BuilderChatMessage(
-        role: json['message']['role'],
-        content: json['message']['content'],
-      ),
+      message: BuilderChatMessage.fromJson(json['message']),
+      progress: json['progress'] as int,
     );
   }
 }
@@ -79,6 +79,8 @@ class _InterviewState extends State<Interview> {
     instructions:
         "I'm going to ask you some questions. Take your time answering each one. Remember to smile!",
   );
+  // conversation progress between 0 and 100
+  int _progress = 0;
 
   @override
   void initState() {
@@ -171,6 +173,7 @@ class _InterviewState extends State<Interview> {
 
     setState(() {
       _isAwaitingResponse = false;
+      _progress = interviewResponse.progress;
       if (interviewResponse.status == BuilderState.finished) {
         _currentStage = _InterviewStage(
           title: "Thank you!",
@@ -233,6 +236,8 @@ class _InterviewState extends State<Interview> {
                           color: Colors.white,
                         ),
                       ),
+                      const SizedBox(height: 16),
+                      Text("Progress: $_progress%"),
                       const SizedBox(height: 16),
                       InkWell(
                         onTap: () {

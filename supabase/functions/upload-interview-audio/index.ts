@@ -44,6 +44,7 @@ Deno.serve(async (req) => {
         { role: "assistant", content: "Ready to get started?" },
       ],
       state: "active",
+      progress: 0,
     }];
   } else if (
     !conversationData.conversations.find((c) => c.state === "active")
@@ -54,6 +55,7 @@ Deno.serve(async (req) => {
         { role: "assistant", content: "Ready to get started?" },
       ],
       state: "active",
+      progress: 0,
     });
   }
 
@@ -94,6 +96,7 @@ Deno.serve(async (req) => {
     JSON.stringify({
       status: newConversation.state,
       message: newConversation.messages[newConversation.messages.length - 1],
+      progress: newConversation.progress,
     }),
     { headers: { "content-type": "application/json" } },
   );

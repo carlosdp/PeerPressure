@@ -31,16 +31,32 @@ enum BuilderState {
 class BuilderChatMessage {
   final String role;
   final String content;
+  final bool interruption;
+  final String? topic;
+  final bool followUp;
 
   BuilderChatMessage({
     required this.role,
     required this.content,
+    this.interruption = false,
+    this.topic,
+    this.followUp = false,
   });
+
+  BuilderChatMessage.fromJson(Map<String, dynamic> json)
+      : role = json['role'] as String,
+        content = json['content'] as String,
+        interruption =
+            json['interruption'] != null ? json['interruption'] as bool : false,
+        topic = json['topic'] as String?,
+        followUp =
+            json['follow_up'] != null ? json['follow_up'] as bool : false;
 }
 
 class BuilderConversation {
   BuilderState state;
   List<BuilderChatMessage> messages;
+  int progress = 0;
 
   BuilderConversation({
     required this.state,
@@ -52,9 +68,10 @@ class BuilderConversation {
             ? BuilderState.finished
             : BuilderState.inProgress,
         messages = json['messages']
-            .map<BuilderChatMessage>((m) =>
-                BuilderChatMessage(role: m['role'], content: m['content']))
-            .toList();
+            .map<BuilderChatMessage>(
+                (m) => BuilderChatMessage.fromJson(m as Map<String, dynamic>))
+            .toList(),
+        progress = json['progress'] as int;
 }
 
 class BuilderConversationData {

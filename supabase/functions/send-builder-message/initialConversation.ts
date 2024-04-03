@@ -4,8 +4,15 @@ import type { Database } from "../_shared/supabaseTypes.d.ts";
 
 export type BuilderConversationData = {
   conversations?: {
-    messages: { role: string; content: string; interruption?: boolean }[];
+    messages: {
+      role: string;
+      content: string;
+      interruption?: boolean;
+      topic?: string;
+      followUp?: boolean;
+    }[];
     state: "active" | "finished";
+    progress: number;
   }[];
 };
 
@@ -57,7 +64,9 @@ export async function generateInitialConversationMessage(
   const responseCount =
     conversation.messages.filter((m) => m.role === "user").length - 1;
   const targetResponses = 10;
-  const newConversationMessage = {
+  const newConversationMessage: NonNullable<
+    BuilderConversationData["conversations"]
+  >[number]["messages"][number] = {
     role: "assistant",
     content: "",
   };
@@ -110,7 +119,7 @@ export async function generateInitialConversationMessage(
               "Send a message to the user, this function MUST be used if you want to talk to the user",
             parameters: {
               type: "object",
-              required: ["thought", "topic", "message"],
+              required: ["thought", "topic", "message", "progress"],
               properties: {
                 thought: {
                   type: "string",
@@ -124,6 +133,11 @@ export async function generateInitialConversationMessage(
                 isFollowUp: {
                   type: "boolean",
                   description: "Has the topic already been covered?",
+                },
+                progress: {
+                  type: "number",
+                  description:
+                    "The approximate percentage of the conversation that has been completed, from 0 to 100",
                 },
                 message: {
                   type: "string",
@@ -148,6 +162,9 @@ export async function generateInitialConversationMessage(
   ) {
     const args = JSON.parse(newMessage.tool_calls[0].function.arguments);
     newConversationMessage.content = args.message;
+    newConversationMessage.topic = args.topic;
+    newConversationMessage.followUp = args.isFollowUp;
+    conversation.progress = args.progress;
   } else {
     throw new Error("No message content");
   }
