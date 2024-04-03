@@ -4,7 +4,7 @@ import type { Database } from "../_shared/supabaseTypes.d.ts";
 
 export type BuilderConversationData = {
   conversations?: {
-    messages: { role: string; content: string }[];
+    messages: { role: string; content: string; interruption?: boolean }[];
     state: "active" | "finished";
   }[];
 };
@@ -39,6 +39,7 @@ const PROMPT =
   - NEVER repeat the same (or basically the same) question.
   - When you have a good answer in an area, move on to another area in a natural way. Each area should have a maximum of two follow-up questions.
   - You only have 10 responses maximum to gather information for the profile, so don't linger on a topic too long and cover as much ground as possible.
+  - If the user's message is marked <INTERRUPT>, that means they interrupted before your previous message was finished reading. Assume the user did not finish reading the previous message.
   
   Profile Information: {profile}
 
@@ -91,7 +92,10 @@ export async function generateInitialConversationMessage(
         content:
           `${responseCount}/10 responses used. Based on the conversation, decide the next area to ask about, and ask a question. You must NOT repeat a topic already covered. You can only send the user ONE message at a time.`,
       },
-      ...conversation.messages,
+      ...conversation.messages.map((m) => ({
+        role: m.role,
+        content: `${m.interruption ? "<INTERRUPT> " : ""}${m.content}`,
+      })),
     ],
     {
       temperature: 0,

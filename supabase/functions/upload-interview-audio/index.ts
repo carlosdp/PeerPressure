@@ -7,7 +7,7 @@ import {
 } from "../send-builder-message/initialConversation.ts";
 
 Deno.serve(async (req) => {
-  const { audio } = await req.json();
+  const { audio, interruption } = await req.json();
 
   const supabase = createSupabaseClient(req.headers.get("Authorization")!);
 
@@ -59,7 +59,15 @@ Deno.serve(async (req) => {
 
   const conversation =
     conversationData.conversations[conversationData.conversations.length - 1];
-  conversation.messages.push({ role: "user", content: transcription });
+  conversation.messages.push({
+    role: "user",
+    content: transcription,
+    // it's only an interruption if the last message was not from the user,
+    // from the LLM's perspective
+    interruption: interruption &&
+      conversation.messages[conversation.messages.length - 1].role !==
+        "user",
+  });
 
   const newConversation = conversationData.conversations.length > 1
     ? await generateEditorConversationMessage(profile, conversation)

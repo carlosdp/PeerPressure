@@ -27,6 +27,24 @@ before update on rounds
 for each row
 execute function ensure_one_active_round();
 
+create table profiles (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users unique, -- null if this is a synthetic profile
+  first_name varchar not null,
+  birth_date date not null,
+  gender gender not null,
+  location geography(point) not null,
+  display_location varchar not null,
+  biographical_data jsonb not null default '{}',
+  preferences jsonb not null default '{}',
+  photo_keys jsonb not null default '[]',
+  available_photos jsonb not null default '[]',
+  blocks jsonb not null default '[]',
+  builder_conversation_data jsonb not null default '{}',
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
 create table users (
   id uuid primary key references auth.users,
   display_name varchar not null default 'Player',
@@ -48,24 +66,6 @@ create trigger create_user_trigger
 after insert on auth.users
 for each row
 execute function create_user();
-
-create table profiles (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid references auth.users unique, -- null if this is a synthetic profile
-  first_name varchar not null,
-  birth_date date not null,
-  gender gender not null,
-  location geography(point) not null,
-  display_location varchar not null,
-  biographical_data jsonb not null default '{}',
-  preferences jsonb not null default '{}',
-  photo_keys jsonb not null default '[]',
-  available_photos jsonb not null default '[]',
-  blocks jsonb not null default '[]',
-  builder_conversation_data jsonb not null default '{}',
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
-);
 
 create table saved_profiles (
   primary key (user_id, profile_id),
@@ -207,6 +207,10 @@ $$ language sql stable;
 create or replace function sanitize_available_photos()
 returns trigger as $$
 begin
+  if new.available_photos is null or jsonb_array_length(new.available_photos) = 0 then
+    return new;
+  end if;
+
   new.available_photos = (
     select jsonb_agg(
       case

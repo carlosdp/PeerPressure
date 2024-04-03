@@ -57,9 +57,7 @@ class _InterviewResponse {
   }
 }
 
-/// CameraApp is the Main Application.
 class Interview extends StatefulWidget {
-  /// Default Constructor
   const Interview({super.key});
 
   @override
@@ -74,6 +72,7 @@ class _InterviewState extends State<Interview> {
   final _recorder = AudioRecorder();
   final _listenRecorder = AudioRecorder();
   bool _isRecording = false;
+  bool _isAwaitingResponse = false;
   late BuilderConversation _conversation;
   _InterviewStage _currentStage = _InterviewStage(
     title: "Let's get started",
@@ -148,9 +147,11 @@ class _InterviewState extends State<Interview> {
 
   Future<void> stopListening() async {
     final path = await _recorder.stop();
+    final isInterruption = _isAwaitingResponse;
 
     setState(() {
       _isRecording = false;
+      _isAwaitingResponse = true;
     });
 
     // _listener?.cancel();
@@ -163,12 +164,13 @@ class _InterviewState extends State<Interview> {
 
     final response = await supabase.functions.invoke(
       "upload-interview-audio",
-      body: {"audio": dataUrl},
+      body: {"audio": dataUrl, "interruption": isInterruption},
     );
 
     final interviewResponse = _InterviewResponse.fromJson(response.data);
 
     setState(() {
+      _isAwaitingResponse = false;
       if (interviewResponse.status == BuilderState.finished) {
         _currentStage = _InterviewStage(
           title: "Thank you!",
