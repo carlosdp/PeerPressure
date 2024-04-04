@@ -12,7 +12,9 @@ import 'package:path_provider/path_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_app/supabase_types.dart';
 import 'package:vad/vad.dart';
+import 'package:logging/logging.dart';
 
+final log = Logger('Interview');
 final supabase = Supabase.instance.client;
 
 Future<String> getFileDataUrl(String filePath, String mimeType) async {
@@ -258,7 +260,7 @@ class _InterviewState extends State<Interview> {
 
       interviewResponse = _InterviewResponse.fromJson(response.data);
     } catch (e) {
-      print(e);
+      log.fine(e);
       return;
     }
 

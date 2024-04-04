@@ -49,6 +49,7 @@ dependencies:
   geocoding: ^3.0.0
   vad:
     path: ./packages/vad
+  logging: ^1.2.0
 
 dev_dependencies:
   flutter_test:
