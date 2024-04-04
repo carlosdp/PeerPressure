@@ -14,6 +14,13 @@ Deno.serve(async (req) => {
   const audioBlob = await fetch(audio).then((res) => res.blob());
   const transcription = await transcribe(audioBlob);
 
+  if (transcription.length === 0) {
+    return new Response(
+      JSON.stringify({ error: "Transcription empty" }),
+      { status: 400, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
   const { error } = await supabase.auth.getUser();
   if (error) {
     console.log("Error getting user:", error.message);

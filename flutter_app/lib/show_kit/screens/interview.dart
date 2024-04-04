@@ -11,6 +11,7 @@ import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_app/supabase_types.dart';
+import 'package:vad/vad.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -71,6 +72,8 @@ class _InterviewState extends State<Interview> {
   StreamSubscription? _listener;
   final _recorder = AudioRecorder();
   final _listenRecorder = AudioRecorder();
+  late VoiceActivityDetector _voiceDetector;
+  bool _isInterviewing = false;
   bool _isRecording = false;
   bool _isAwaitingResponse = false;
   late BuilderConversation _conversation;
@@ -81,10 +84,21 @@ class _InterviewState extends State<Interview> {
   );
   // conversation progress between 0 and 100
   int _progress = 0;
+  final int _sampleRate = 16000;
+  final int _vadFrameSizeMs = 30;
+  final int _voiceDebounceMs = 1000;
+  VoiceActivity _voiceActivity = VoiceActivity.inactive;
+  DateTime? _lastVoiceActivity;
 
   @override
   void initState() {
     super.initState();
+
+    _voiceDetector = VoiceActivityDetector();
+    _voiceDetector.setSampleRate(16000);
+    _voiceDetector.setMode(ThresholdMode.aggressive);
+
+    startListening();
 
     _conversation = Provider.of<ProfileModel>(context, listen: false)
             .profile
@@ -123,22 +137,68 @@ class _InterviewState extends State<Interview> {
   void dispose() {
     _controller?.dispose();
     _recorder.dispose();
+    _listener?.cancel();
     _listenRecorder.dispose();
     super.dispose();
   }
 
   Future<void> startListening() async {
+    if (await _recorder.hasPermission()) {
+      _audioStream = await _listenRecorder.startStream(
+        RecordConfig(
+          encoder: AudioEncoder.pcm16bits,
+          sampleRate: _sampleRate,
+          numChannels: 1,
+          echoCancel: true,
+          noiseSuppress: true,
+        ),
+      );
+      _listener = _audioStream!.listen((event) {
+        final frame =
+            event.sublist(0, (_sampleRate ~/ 1000 * _vadFrameSizeMs) * 2);
+        setState(() {
+          _voiceActivity = _voiceDetector.processFrameBytes(frame);
+          if (_voiceActivity == VoiceActivity.active) {
+            _lastVoiceActivity = DateTime.now();
+          } else if (_lastVoiceActivity != null &&
+              DateTime.now().difference(_lastVoiceActivity!).inMilliseconds >
+                  _voiceDebounceMs &&
+              _isRecording) {
+            finishSegment();
+          }
+        });
+      });
+    }
+  }
+
+  Future<void> beginInterview() async {
+    setState(() {
+      _isInterviewing = true;
+    });
+
+    final response = await supabase.functions.invoke(
+      "send-builder-message",
+      body: {"message": "I'm ready"},
+    );
+
+    final interviewResponse = _InterviewResponse.fromJson(response.data);
+
+    setState(() {
+      _currentStage = _InterviewStage(
+        title: "First question",
+        instructions: interviewResponse.message.content,
+      );
+    });
+
+    await startRecording();
+  }
+
+  Future<void> startRecording() async {
     if (_controller != null) {
       await _controller!.startVideoRecording();
     }
 
     if (await _recorder.hasPermission()) {
-      // _audioStream = await _listenRecorder.startStream(
-      //   const RecordConfig(encoder: AudioEncoder.pcm16bits),
-      // );
-      // _listener = _audioStream!.listen((event) {
-      //   print(event);
-      // });
       final tempDir = await getTemporaryDirectory();
       await _recorder.start(
         const RecordConfig(encoder: AudioEncoder.wav),
@@ -151,7 +211,23 @@ class _InterviewState extends State<Interview> {
     });
   }
 
-  Future<void> stopListening() async {
+  Future<void> stopRecording() async {
+    final videoFile = await _controller!.stopVideoRecording();
+    final path = await _recorder.stop();
+
+    if (path != null) {
+      File(path).delete();
+    }
+
+    File(videoFile.path).delete();
+
+    setState(() {
+      _isRecording = false;
+      _isInterviewing = false;
+    });
+  }
+
+  Future<void> finishSegment() async {
     final profileId =
         Provider.of<ProfileModel>(context, listen: false).profile!.id;
     final path = await _recorder.stop();
@@ -161,10 +237,10 @@ class _InterviewState extends State<Interview> {
     setState(() {
       _isRecording = false;
       _isAwaitingResponse = true;
+      _lastVoiceActivity = null;
     });
 
-    // _listener?.cancel();
-    // await _listenRecorder.stop();
+    startRecording();
 
     if (path == null) {
       return;
@@ -172,21 +248,29 @@ class _InterviewState extends State<Interview> {
 
     final dataUrl = await getFileDataUrl(path, "audio/wav");
 
-    final response = await supabase.functions.invoke(
-      "upload-interview-audio",
-      body: {"audio": dataUrl, "interruption": isInterruption},
-    );
+    _InterviewResponse? interviewResponse;
 
-    final interviewResponse = _InterviewResponse.fromJson(response.data);
+    try {
+      final response = await supabase.functions.invoke(
+        "upload-interview-audio",
+        body: {"audio": dataUrl, "interruption": isInterruption},
+      );
+
+      interviewResponse = _InterviewResponse.fromJson(response.data);
+    } catch (e) {
+      print(e);
+      return;
+    }
 
     setState(() {
       _isAwaitingResponse = false;
-      _progress = interviewResponse.progress;
+      _progress = interviewResponse!.progress;
       if (interviewResponse.status == BuilderState.finished) {
         _currentStage = _InterviewStage(
           title: "Thank you!",
           instructions: "You have completed the interview.",
         );
+        stopRecording();
       } else {
         _currentStage = _InterviewStage(
           title: "Next question",
@@ -205,6 +289,8 @@ class _InterviewState extends State<Interview> {
             contentType: videoFile.mimeType,
           ),
         );
+
+    await file.delete();
   }
 
   @override
@@ -258,18 +344,17 @@ class _InterviewState extends State<Interview> {
                       const SizedBox(height: 16),
                       Text("Progress: $_progress%"),
                       const SizedBox(height: 16),
-                      InkWell(
-                        onTap: () {
-                          _isRecording ? stopListening() : startListening();
-                        },
-                        child: Text(
-                          _isRecording ? "Stop" : "Start",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 32,
-                          ),
-                        ),
-                      ),
+                      Text("Voice Activity: $_voiceActivity",
+                          style: const TextStyle(color: Colors.white)),
+                      Text("Recording: $_isRecording",
+                          style: const TextStyle(color: Colors.white)),
+                      SizedBox(
+                          child: !_isInterviewing
+                              ? ElevatedButton(
+                                  onPressed: beginInterview,
+                                  child: const Text("Start Interview"),
+                                )
+                              : const SizedBox()),
                     ],
                   ),
                 ),
