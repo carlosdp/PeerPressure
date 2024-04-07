@@ -13,6 +13,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_app/supabase_types.dart';
 import 'package:vad/vad.dart';
 import 'package:logging/logging.dart';
+import 'package:rive/rive.dart';
 
 final log = Logger('Interview');
 final supabase = Supabase.instance.client;
@@ -31,10 +32,12 @@ Future<String> getFileDataUrl(String filePath, String mimeType) async {
 class _InterviewStage {
   final String title;
   final String instructions;
+  final String topic;
 
   _InterviewStage({
     required this.title,
     required this.instructions,
+    required this.topic,
   });
 }
 
@@ -60,6 +63,257 @@ class _InterviewResponse {
   }
 }
 
+class InterviewPreStart extends StatelessWidget {
+  final Function() onBeginInterview;
+  final String? title;
+  final String? instructions;
+
+  const InterviewPreStart(
+      {super.key,
+      required this.onBeginInterview,
+      this.title,
+      this.instructions});
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          children: [
+            const Spacer(),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(
+                  width: 65,
+                  height: 65,
+                  child: RiveAnimation.asset('assets/zara.riv'),
+                ),
+                const SizedBox(width: 16),
+                Flexible(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title ?? "Let's get started",
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      Text(
+                        instructions ??
+                            "I'm going to ask you some questions. Take your time answering each one. Remember to smile!",
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const Spacer(),
+            GestureDetector(
+              onTap: onBeginInterview,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color.fromRGBO(150, 16, 255, 0.8),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                width: 300,
+                padding: const EdgeInsets.all(18),
+                child: const Center(
+                  child: Text(
+                    "Ready",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _InterviewInflight extends StatelessWidget {
+  final _InterviewStage stage;
+  final int progress;
+  final int targetMinutes = 30;
+  final Function() onPause;
+
+  const _InterviewInflight(
+      {required this.stage, required this.progress, required this.onPause});
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Spacer(),
+            const SizedBox(
+              width: 65,
+              height: 65,
+              child: RiveAnimation.asset('assets/zara.riv'),
+            ),
+            const SizedBox(height: 26),
+            Text(
+              stage.title,
+              style: const TextStyle(
+                fontSize: 48,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 26),
+            Text(
+              stage.instructions,
+              style: const TextStyle(
+                fontSize: 32,
+                color: Colors.white,
+              ),
+            ),
+            const Spacer(),
+            LinearProgressIndicator(
+              value: progress / 100,
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                Color.fromRGBO(240, 71, 255, 1.0),
+              ),
+              minHeight: 7,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            const SizedBox(height: 9),
+            Center(
+              child: Text(
+                stage.topic,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            Center(
+              child: Text(
+                "~${(targetMinutes - targetMinutes * (progress / 100)).floor()} min left",
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            const Spacer(),
+            Center(
+              child: GestureDetector(
+                onTap: onPause,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color.fromRGBO(150, 16, 255, 0.8),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  width: 300,
+                  padding: const EdgeInsets.all(18),
+                  child: const Center(
+                    child: Text(
+                      "Pause",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _InterviewComplete extends StatelessWidget {
+  final Function() onDismiss;
+
+  const _InterviewComplete({
+    required this.onDismiss,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(
+              width: 65,
+              height: 65,
+              child: RiveAnimation.asset('assets/zara.riv'),
+            ),
+            const SizedBox(width: 16),
+            const Text(
+              "Working on your profile",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            const Text(
+              "Thanks! I'm working on putting together your profile. I'll let you know when it's ready.",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 40),
+            GestureDetector(
+              onTap: onDismiss,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color.fromRGBO(150, 16, 255, 0.8),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                width: 300,
+                padding: const EdgeInsets.all(18),
+                child: const Center(
+                  child: Text(
+                    "Ok!",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class Interview extends StatefulWidget {
   const Interview({super.key});
 
@@ -79,11 +333,7 @@ class _InterviewState extends State<Interview> {
   bool _isRecording = false;
   bool _isAwaitingResponse = false;
   late BuilderConversation _conversation;
-  _InterviewStage _currentStage = _InterviewStage(
-    title: "Let's get started",
-    instructions:
-        "I'm going to ask you some questions. Take your time answering each one. Remember to smile!",
-  );
+  _InterviewStage? _currentStage;
   // conversation progress between 0 and 100
   int _progress = 0;
   final int _sampleRate = 16000;
@@ -144,6 +394,12 @@ class _InterviewState extends State<Interview> {
     super.dispose();
   }
 
+  bool get _isPaused =>
+      !_isInterviewing &&
+      (_currentStage != null || _conversation.messages.isNotEmpty);
+
+  bool get _isComplete => _conversation.state == BuilderState.finished;
+
   Future<void> startListening() async {
     if (await _recorder.hasPermission()) {
       _audioStream = await _listenRecorder.startStream(
@@ -189,10 +445,15 @@ class _InterviewState extends State<Interview> {
       _currentStage = _InterviewStage(
         title: "First question",
         instructions: interviewResponse.message.content,
+        topic: "Dating Background",
       );
     });
 
     await startRecording();
+  }
+
+  Future<void> pauseInterview() async {
+    await stopRecording();
   }
 
   Future<void> startRecording() async {
@@ -268,15 +529,13 @@ class _InterviewState extends State<Interview> {
       _isAwaitingResponse = false;
       _progress = interviewResponse!.progress;
       if (interviewResponse.status == BuilderState.finished) {
-        _currentStage = _InterviewStage(
-          title: "Thank you!",
-          instructions: "You have completed the interview.",
-        );
+        _conversation.state = BuilderState.finished;
         stopRecording();
       } else {
         _currentStage = _InterviewStage(
           title: "Next question",
           instructions: interviewResponse.message.content,
+          topic: "Dating Background",
         );
       }
     });
@@ -301,70 +560,37 @@ class _InterviewState extends State<Interview> {
       body: Stack(children: [
         SizedBox(
           height: double.infinity,
-          child: _controller != null && _controller!.value.isInitialized
+          child: _controller != null &&
+                  _controller!.value.isInitialized &&
+                  !_isComplete
               ? CameraPreview(_controller!)
               : const SizedBox(),
         ),
         Container(
           color: Colors.black.withOpacity(0.7),
         ),
-        SafeArea(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 200),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 50,
-                  height: 50,
-                  decoration: const BoxDecoration(
-                    color: Colors.pink,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Flexible(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _currentStage.title,
-                        style: const TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      Text(
-                        _currentStage.instructions,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text("Progress: $_progress%"),
-                      const SizedBox(height: 16),
-                      Text("Voice Activity: $_voiceActivity",
-                          style: const TextStyle(color: Colors.white)),
-                      Text("Recording: $_isRecording",
-                          style: const TextStyle(color: Colors.white)),
-                      SizedBox(
-                          child: !_isInterviewing
-                              ? ElevatedButton(
-                                  onPressed: beginInterview,
-                                  child: const Text("Start Interview"),
-                                )
-                              : const SizedBox()),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+        currentScreen(),
       ]),
     );
+  }
+
+  Widget currentScreen() {
+    if (_isComplete) {
+      return _InterviewComplete(onDismiss: () {});
+    } else if (_isInterviewing && _currentStage != null) {
+      return _InterviewInflight(
+        stage: _currentStage!,
+        progress: _progress,
+        onPause: pauseInterview,
+      );
+    } else {
+      return InterviewPreStart(
+        onBeginInterview: beginInterview,
+        title: _isPaused ? "Ready to continue?" : "Let's get started",
+        instructions: _isPaused
+            ? "We can pick things up where we left off"
+            : "I'm going to ask you some questions. Take your time answering each one. Remember to smile!",
+      );
+    }
   }
 }
