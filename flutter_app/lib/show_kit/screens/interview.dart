@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -63,6 +64,22 @@ class _InterviewResponse {
   }
 }
 
+class Zara extends StatelessWidget {
+  const Zara({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Hero(
+      tag: 'zara',
+      child: SizedBox(
+        width: 65,
+        height: 65,
+        child: RiveAnimation.asset('assets/zara.riv'),
+      ),
+    );
+  }
+}
+
 class InterviewPreStart extends StatelessWidget {
   final Function() onBeginInterview;
   final String? title;
@@ -85,11 +102,7 @@ class InterviewPreStart extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(
-                  width: 65,
-                  height: 65,
-                  child: RiveAnimation.asset('assets/zara.riv'),
-                ),
+                const Zara(),
                 const SizedBox(width: 16),
                 Flexible(
                   child: Column(
@@ -157,89 +170,88 @@ class _InterviewInflight extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Spacer(),
-            const SizedBox(
-              width: 65,
-              height: 65,
-              child: RiveAnimation.asset('assets/zara.riv'),
-            ),
-            const SizedBox(height: 26),
-            Text(
-              stage.title,
-              style: const TextStyle(
-                fontSize: 48,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 26),
-            Text(
-              stage.instructions,
-              style: const TextStyle(
-                fontSize: 32,
-                color: Colors.white,
-              ),
-            ),
-            const Spacer(),
-            LinearProgressIndicator(
-              value: progress / 100,
-              valueColor: const AlwaysStoppedAnimation<Color>(
-                Color.fromRGBO(240, 71, 255, 1.0),
-              ),
-              minHeight: 7,
-              borderRadius: BorderRadius.circular(4),
-            ),
-            const SizedBox(height: 9),
-            Center(
-              child: Text(
-                stage.topic,
+    return BackdropFilter(
+      filter: ui.ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+      child: SafeArea(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Spacer(),
+              const Zara(),
+              const SizedBox(height: 26),
+              Text(
+                stage.title,
                 style: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 48,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
               ),
-            ),
-            Center(
-              child: Text(
-                "~${(targetMinutes - targetMinutes * (progress / 100)).floor()} min left",
+              const SizedBox(height: 26),
+              Text(
+                stage.instructions,
                 style: const TextStyle(
-                  fontSize: 12,
+                  fontSize: 32,
                   color: Colors.white,
                 ),
               ),
-            ),
-            const Spacer(),
-            Center(
-              child: GestureDetector(
-                onTap: onPause,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: const Color.fromRGBO(150, 16, 255, 0.8),
-                    borderRadius: BorderRadius.circular(20),
+              const Spacer(),
+              LinearProgressIndicator(
+                value: progress / 100,
+                valueColor: const AlwaysStoppedAnimation<Color>(
+                  Color.fromRGBO(240, 71, 255, 1.0),
+                ),
+                minHeight: 7,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              const SizedBox(height: 9),
+              Center(
+                child: Text(
+                  stage.topic,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
-                  width: 300,
-                  padding: const EdgeInsets.all(18),
-                  child: const Center(
-                    child: Text(
-                      "Pause",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                ),
+              ),
+              Center(
+                child: Text(
+                  "~${(targetMinutes - targetMinutes * (progress / 100)).floor()} min left",
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              const Spacer(),
+              Center(
+                child: GestureDetector(
+                  onTap: onPause,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: const Color.fromRGBO(150, 16, 255, 0.8),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    width: 300,
+                    padding: const EdgeInsets.all(18),
+                    child: const Center(
+                      child: Text(
+                        "Pause",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -262,11 +274,7 @@ class _InterviewComplete extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(
-              width: 65,
-              height: 65,
-              child: RiveAnimation.asset('assets/zara.riv'),
-            ),
+            const Zara(),
             const SizedBox(width: 16),
             const Text(
               "Working on your profile",
