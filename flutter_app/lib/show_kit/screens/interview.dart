@@ -6,6 +6,7 @@ import 'dart:ui' as ui;
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_app/models/profile.dart';
 import 'package:provider/provider.dart';
 import 'package:record/record.dart';
@@ -577,7 +578,12 @@ class _InterviewState extends State<Interview> {
         Container(
           color: Colors.black.withOpacity(0.7),
         ),
-        currentScreen(),
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          transitionBuilder: (child, animation) =>
+              FadeTransition(opacity: animation, child: child),
+          child: currentScreen(),
+        ),
       ]),
     );
   }
