@@ -224,7 +224,7 @@ class _SupportAllocatorState extends State<SupportAllocator> {
                       fontSize: 40,
                       fontWeight: FontWeight.bold,
                     ),
-                    prefix: "+",
+                    prefix: '+',
                     enableSeparator: true,
                   ),
                   SupportSlider(

@@ -66,7 +66,7 @@ class InterviewInflight extends StatelessWidget {
               ),
               Center(
                 child: Text(
-                  "~${(targetMinutes - targetMinutes * (progress / 100)).floor()} min left",
+                  '~${(targetMinutes - targetMinutes * (progress / 100)).floor()} min left',
                   style: const TextStyle(
                     fontSize: 12,
                     color: Colors.white,
@@ -86,7 +86,7 @@ class InterviewInflight extends StatelessWidget {
                     padding: const EdgeInsets.all(18),
                     child: const Center(
                       child: Text(
-                        "Pause",
+                        'Pause',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 20,

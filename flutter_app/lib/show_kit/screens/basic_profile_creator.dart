@@ -138,7 +138,7 @@ class _BasicProfileCreatorState extends State<BasicProfileCreator> {
     final model = Provider.of<ProfileModel>(context, listen: false);
 
     List<Location> locations = await locationFromAddress(
-        "1600 Amphitheatre Parkway, Mountain View, CA");
+        '1600 Amphitheatre Parkway, Mountain View, CA');
     _profile.location = locations.first;
     _profile.displayLocation = 'Cupertino, CA';
 

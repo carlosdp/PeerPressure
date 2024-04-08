@@ -63,7 +63,7 @@ class InterviewPreStart extends StatelessWidget {
                 padding: const EdgeInsets.all(18),
                 child: const Center(
                   child: Text(
-                    "Ready",
+                    'Ready',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 20,

@@ -188,7 +188,7 @@ class _InterviewState extends State<Interview> {
       final tempDir = await getTemporaryDirectory();
       await _recorder.start(
         const RecordConfig(encoder: AudioEncoder.wav),
-        path: "${tempDir.path}/voice.wav",
+        path: '${tempDir.path}/voice.wav',
       );
     }
 
@@ -238,7 +238,7 @@ class _InterviewState extends State<Interview> {
     File file = File(videoFile.path);
 
     await supabase.storage.from('videos').upload(
-          "$profileId/interview-videos/$randomId",
+          '$profileId/interview-videos/$randomId',
           file,
           fileOptions: FileOptions(
             contentType: videoFile.mimeType,
@@ -249,18 +249,18 @@ class _InterviewState extends State<Interview> {
   }
 
   Future<void> uploadInterviewAudio(String path, bool isInterruption) async {
-    final dataUrl = await getFileDataUrl(path, "audio/wav");
+    final dataUrl = await getFileDataUrl(path, 'audio/wav');
 
     await sendMessage(jsonEncode({
-      "audio": dataUrl,
-      "interruption": isInterruption,
+      'audio': dataUrl,
+      'interruption': isInterruption,
     }));
   }
 
   Future<void> sendTextMessage(String message, bool isInterruption) async {
     await sendMessage(jsonEncode({
-      "text": message,
-      "interruption": isInterruption,
+      'text': message,
+      'interruption': isInterruption,
     }));
   }
 
@@ -269,12 +269,12 @@ class _InterviewState extends State<Interview> {
 
     try {
       final request = http.Request(
-        "POST",
-        Uri.parse("$supabaseUrl/functions/v1/upload-interview-audio"),
+        'POST',
+        Uri.parse('$supabaseUrl/functions/v1/upload-interview-audio'),
       );
-      request.headers["Authorization"] =
-          "Bearer ${supabase.auth.currentSession!.accessToken}";
-      request.headers["Content-Type"] = "application/json";
+      request.headers['Authorization'] =
+          'Bearer ${supabase.auth.currentSession!.accessToken}';
+      request.headers['Content-Type'] = 'application/json';
       request.body = messageJson;
       final response = await client.send(request);
       final parser = InterviewResponseStreamParser();
@@ -348,9 +348,9 @@ class _InterviewState extends State<Interview> {
     } else {
       return InterviewPreStart(
         onBeginInterview: beginInterview,
-        title: _isPaused ? "Ready to continue?" : "Let's get started",
+        title: _isPaused ? 'Ready to continue?' : "Let's get started",
         instructions: _isPaused
-            ? "We can pick things up where we left off"
+            ? 'We can pick things up where we left off'
             : "I'm going to ask you some questions. Take your time answering each one. Remember to smile!",
       );
     }

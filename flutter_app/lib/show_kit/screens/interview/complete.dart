@@ -21,7 +21,7 @@ class InterviewComplete extends StatelessWidget {
             const Zara(),
             const SizedBox(width: 16),
             const Text(
-              "Working on your profile",
+              'Working on your profile',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 28,
@@ -49,7 +49,7 @@ class InterviewComplete extends StatelessWidget {
                 padding: const EdgeInsets.all(18),
                 child: const Center(
                   child: Text(
-                    "Ok!",
+                    'Ok!',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 20,
