@@ -6,7 +6,6 @@ import 'dart:ui' as ui;
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_app/models/profile.dart';
 import 'package:provider/provider.dart';
 import 'package:record/record.dart';
@@ -16,6 +15,7 @@ import 'package:flutter_app/supabase_types.dart';
 import 'package:vad/vad.dart';
 import 'package:logging/logging.dart';
 import 'package:rive/rive.dart';
+import 'package:http/http.dart' as http;
 
 final log = Logger('Interview');
 final supabase = Supabase.instance.client;
@@ -32,9 +32,9 @@ Future<String> getFileDataUrl(String filePath, String mimeType) async {
 }
 
 class _InterviewStage {
-  final String title;
-  final String instructions;
-  final String topic;
+  String title;
+  String instructions;
+  String topic;
 
   _InterviewStage({
     required this.title,
@@ -43,25 +43,54 @@ class _InterviewStage {
   });
 }
 
-class _InterviewResponse {
-  final BuilderState status;
-  final BuilderChatMessage message;
-  final int progress;
+class _InterviewResponseStreamParser {
+  final _InterviewStage _stage = _InterviewStage(
+    title: '',
+    instructions: '',
+    topic: '',
+  );
+  String _buffer = '';
+  String? _currentKey;
 
-  _InterviewResponse({
-    required this.status,
-    required this.message,
-    required this.progress,
-  });
+  _InterviewStage parseChunk(String chunk) {
+    for (var c in chunk.characters) {
+      if (c == '>') {
+        _currentKey = _buffer;
+        _buffer = '';
+      } else if (c == '<') {
+        switch (_currentKey) {
+          case 'title':
+            _stage.title = _buffer;
+            break;
+          case 'message':
+            _stage.instructions = _buffer;
+            break;
+          case 'topic':
+            _stage.topic = _buffer;
+            break;
+        }
+        _currentKey = null;
+        _buffer = '';
+      } else {
+        _buffer += c;
 
-  factory _InterviewResponse.fromJson(Map<String, dynamic> json) {
-    return _InterviewResponse(
-      status: json['status'] == 'finished'
-          ? BuilderState.finished
-          : BuilderState.inProgress,
-      message: BuilderChatMessage.fromJson(json['message']),
-      progress: json['progress'] as int,
-    );
+        if (_currentKey != null) {
+          switch (_currentKey) {
+            case 'title':
+              _stage.title = _buffer;
+              break;
+            case 'message':
+              _stage.instructions = _buffer;
+              break;
+            case 'topic':
+              _stage.topic = _buffer;
+              break;
+          }
+        }
+      }
+    }
+
+    return _stage;
   }
 }
 
@@ -350,6 +379,7 @@ class _InterviewState extends State<Interview> {
   final int _voiceDebounceMs = 1000;
   VoiceActivity _voiceActivity = VoiceActivity.inactive;
   DateTime? _lastVoiceActivity;
+  StreamSubscription<String>? _responseStream;
 
   @override
   void initState() {
@@ -443,20 +473,7 @@ class _InterviewState extends State<Interview> {
       _isInterviewing = true;
     });
 
-    final response = await supabase.functions.invoke(
-      "send-builder-message",
-      body: {"message": "I'm ready"},
-    );
-
-    final interviewResponse = _InterviewResponse.fromJson(response.data);
-
-    setState(() {
-      _currentStage = _InterviewStage(
-        title: "First question",
-        instructions: interviewResponse.message.content,
-        topic: "Dating Background",
-      );
-    });
+    sendTextMessage("I'm ready", false);
 
     await startRecording();
   }
@@ -518,36 +535,7 @@ class _InterviewState extends State<Interview> {
       return;
     }
 
-    final dataUrl = await getFileDataUrl(path, "audio/wav");
-
-    _InterviewResponse? interviewResponse;
-
-    try {
-      final response = await supabase.functions.invoke(
-        "upload-interview-audio",
-        body: {"audio": dataUrl, "interruption": isInterruption},
-      );
-
-      interviewResponse = _InterviewResponse.fromJson(response.data);
-    } catch (e) {
-      log.fine(e);
-      return;
-    }
-
-    setState(() {
-      _isAwaitingResponse = false;
-      _progress = interviewResponse!.progress;
-      if (interviewResponse.status == BuilderState.finished) {
-        _conversation.state = BuilderState.finished;
-        stopRecording();
-      } else {
-        _currentStage = _InterviewStage(
-          title: "Next question",
-          instructions: interviewResponse.message.content,
-          topic: "Dating Background",
-        );
-      }
-    });
+    uploadInterviewAudio(path, isInterruption);
 
     final randomId = DateTime.now().millisecondsSinceEpoch;
     File file = File(videoFile.path);
@@ -561,6 +549,65 @@ class _InterviewState extends State<Interview> {
         );
 
     await file.delete();
+  }
+
+  Future<void> uploadInterviewAudio(String path, bool isInterruption) async {
+    final dataUrl = await getFileDataUrl(path, "audio/wav");
+
+    await sendMessage(jsonEncode({
+      "audio": dataUrl,
+      "interruption": isInterruption,
+    }));
+
+    // setState(() {
+    //   _isAwaitingResponse = false;
+    //   _progress = interviewResponse!.progress;
+    //   if (interviewResponse.status == BuilderState.finished) {
+    //     _conversation.state = BuilderState.finished;
+    //     stopRecording();
+    //   } else {
+    //     _currentStage = _InterviewStage(
+    //       title: "Next question",
+    //       instructions: interviewResponse.message.content,
+    //       topic: "Dating Background",
+    //     );
+    //   }
+    // });
+  }
+
+  Future<void> sendTextMessage(String message, bool isInterruption) async {
+    await sendMessage(jsonEncode({
+      "message": message,
+      "interruption": isInterruption,
+    }));
+  }
+
+  Future<void> sendMessage(String messageJson) async {
+    final client = http.Client();
+
+    try {
+      final request = http.Request(
+        "POST",
+        Uri.parse(
+            "http://192.168.0.221:54321/functions/v1/upload-interview-audio"),
+      );
+      request.headers["Authorization"] =
+          "Bearer ${supabase.auth.currentSession!.accessToken}";
+      request.headers["Content-Type"] = "application/json";
+      request.body = messageJson;
+      final response = await client.send(request);
+      final parser = _InterviewResponseStreamParser();
+
+      _responseStream = response.stream.transform(utf8.decoder).listen((chunk) {
+        // each chunk starts with "data: ", so we skip the first 6 characters
+        setState(() {
+          _currentStage = parser.parseChunk(chunk);
+        });
+      });
+    } catch (e) {
+      log.fine(e);
+      return;
+    }
   }
 
   @override

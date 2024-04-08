@@ -111,6 +111,50 @@ export const rawMessage = async (
   }
 };
 
+export const rawMessageStream = async (
+  model: ApiModel,
+  messages: OpenAIMessage[],
+  options?: RawMessageOptions,
+) => {
+  try {
+    const parts = model.split("/");
+    const api = parts[0] as keyof typeof apiUrls;
+    const modelName = parts.slice(1).join("/");
+
+    const res = await fetch(`${apiUrls[api].url}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${Deno.env.get(apiUrls[api].keyEnv)}`,
+      },
+      body: JSON.stringify(
+        {
+          model: modelName,
+          messages,
+          temperature: options?.temperature || 0,
+          max_tokens: options?.maxTokens,
+          tools: options?.tools,
+          tool_choice: options?.toolChoice,
+          stream: true,
+        },
+      ),
+    });
+
+    if (res.status !== 200) {
+      throw new Error(
+        `OpenAI API error: ${res.statusText} ${
+          JSON.stringify(await res.json())
+        }`,
+      );
+    }
+
+    return res;
+  } catch (error) {
+    console.error(JSON.stringify(error.response?.data));
+    throw error;
+  }
+};
+
 export const embedding = async (text: string) => {
   const embeddingRes = await client.post(
     "openai",

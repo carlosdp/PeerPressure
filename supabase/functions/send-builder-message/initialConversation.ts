@@ -1,4 +1,4 @@
-import { rawMessage } from "../_shared/utils.ts";
+import { rawMessageStream } from "../_shared/utils.ts";
 import { createJob } from "../worker/job.ts";
 import type { Database } from "../_shared/supabaseTypes.d.ts";
 
@@ -71,16 +71,17 @@ export async function generateInitialConversationMessage(
     content: "",
   };
 
-  if (responseCount >= targetResponses) {
-    conversation.state = "finished";
-    newConversationMessage.content = "Thank you! Working on your profile...";
+  // TODO: re-implement this with streaming
+  // if (responseCount >= targetResponses) {
+  //   conversation.state = "finished";
+  //   newConversationMessage.content = "Thank you! Working on your profile...";
 
-    await createJob("buildProfile", { profileId: profile.id });
+  //   await createJob("buildProfile", { profileId: profile.id });
 
-    return conversation;
-  }
+  //   return conversation;
+  // }
 
-  const newMessage = await rawMessage(
+  const res = await rawMessageStream(
     "openai/gpt-4-turbo-preview",
     [
       {
@@ -105,71 +106,26 @@ export async function generateInitialConversationMessage(
         role: m.role,
         content: `${m.interruption ? "<INTERRUPT> " : ""}${m.content}`,
       })),
+      {
+        role: "system",
+        content:
+          `You MUST respond in the following format, and include all fields listed:
+        - thought: Your reasoning for choosing this topic and asking this question
+        - topic: The topic to ask about
+        - isFollowUp: Has the topic already been covered?
+        - progress: The approximate percentage of the conversation that has been completed, from 0 to 100
+        - title: A short title for the message, for example: "Let's talk about family" or "What do you do for fun?"
+        - message: The message to send
+        
+        Provide each field in this format, no other text should be included in your message:
+        <thought>thought here<topic>topic here<isFollowUp>true or false<progress>0-100<title>title here<message>message here`,
+      },
     ],
     {
       temperature: 0,
       maxTokens: 500,
-      toolChoice: { type: "function", function: { name: "sendMessage" } },
-      tools: [
-        {
-          type: "function",
-          function: {
-            name: "sendMessage",
-            description:
-              "Send a message to the user, this function MUST be used if you want to talk to the user",
-            parameters: {
-              type: "object",
-              required: ["thought", "topic", "message", "progress"],
-              properties: {
-                thought: {
-                  type: "string",
-                  description:
-                    "Your reasoning for choosing this topic and asking this question",
-                },
-                topic: {
-                  type: "string",
-                  description: "The topic to ask about",
-                },
-                isFollowUp: {
-                  type: "boolean",
-                  description: "Has the topic already been covered?",
-                },
-                progress: {
-                  type: "number",
-                  description:
-                    "The approximate percentage of the conversation that has been completed, from 0 to 100",
-                },
-                message: {
-                  type: "string",
-                  description: "The message to send",
-                },
-              },
-            },
-          },
-        },
-      ],
     },
   );
 
-  console.log("New message:", newMessage);
-
-  if (newMessage.content || !newMessage.tool_calls) {
-    throw new Error("Unexpected message content");
-  }
-
-  if (
-    newMessage.tool_calls[0]?.function.name === "sendMessage"
-  ) {
-    const args = JSON.parse(newMessage.tool_calls[0].function.arguments);
-    newConversationMessage.content = args.message;
-    newConversationMessage.topic = args.topic;
-    newConversationMessage.followUp = args.isFollowUp;
-    conversation.progress = args.progress;
-  } else {
-    throw new Error("No message content");
-  }
-
-  conversation.messages.push(newConversationMessage);
-
-  return conversation;
+  return res;
 }

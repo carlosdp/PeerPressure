@@ -7,16 +7,27 @@ import {
 } from "../send-builder-message/initialConversation.ts";
 
 Deno.serve(async (req) => {
-  const { audio, interruption } = await req.json();
+  const { text, audio, interruption } = await req.json();
 
   const supabase = createSupabaseClient(req.headers.get("Authorization")!);
 
-  const audioBlob = await fetch(audio).then((res) => res.blob());
-  const transcription = await transcribe(audioBlob);
+  let transcription: string;
 
-  if (transcription.length === 0) {
+  if (audio) {
+    const audioBlob = await fetch(audio).then((res) => res.blob());
+    transcription = await transcribe(audioBlob);
+
+    if (transcription.length === 0) {
+      return new Response(
+        JSON.stringify({ error: "Transcription empty" }),
+        { status: 400, headers: { "Content-Type": "application/json" } },
+      );
+    }
+  } else if (text) {
+    transcription = text;
+  } else {
     return new Response(
-      JSON.stringify({ error: "Transcription empty" }),
+      JSON.stringify({ error: "No text or audio provided" }),
       { status: 400, headers: { "Content-Type": "application/json" } },
     );
   }
@@ -78,33 +89,60 @@ Deno.serve(async (req) => {
         "user",
   });
 
-  const newConversation = conversationData.conversations.length > 1
-    ? await generateEditorConversationMessage(profile, conversation)
-    : await generateInitialConversationMessage(
-      profile,
-      conversation,
-    );
+  const streamRes = await generateInitialConversationMessage(
+    profile,
+    conversation,
+  );
 
-  conversationData.conversations[conversationData.conversations.length - 1] =
-    newConversation;
+  // conversationData.conversations[conversationData.conversations.length - 1] =
+  //   newConversation;
 
-  const { error: updateError } = await supabase.from("profiles").update({
-    builder_conversation_data: conversationData,
-  }).eq("id", profile.id);
-  if (updateError) {
-    console.error("Error updating profile:", updateError.message);
-    return new Response(
-      JSON.stringify({ error: "Server Error" }),
-      { status: 500, headers: { "Content-Type": "application/json" } },
-    );
-  }
+  // const { error: updateError } = await supabase.from("profiles").update({
+  //   builder_conversation_data: conversationData,
+  // }).eq("id", profile.id);
+  // if (updateError) {
+  //   console.error("Error updating profile:", updateError.message);
+  //   return new Response(
+  //     JSON.stringify({ error: "Server Error" }),
+  //     { status: 500, headers: { "Content-Type": "application/json" } },
+  //   );
+  // }
+
+  const converted = streamRes.body?.pipeThrough(new TextDecoderStream())
+    .pipeThrough(
+      new TransformStream({
+        transform: (chunk, controller) => {
+          console.log(chunk);
+          if (chunk.includes("data: [DONE]")) {
+            controller.terminate();
+            return;
+          }
+          const data: any[] = [];
+          const lines = chunk.split("\n");
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
+              data.push(JSON.parse(line.slice(6)));
+            }
+          }
+
+          for (const d of data) {
+            controller.enqueue(d.choices[0].delta.content);
+          }
+        },
+      }),
+    ).pipeThrough(new TextEncoderStream());
 
   return new Response(
-    JSON.stringify({
-      status: newConversation.state,
-      message: newConversation.messages[newConversation.messages.length - 1],
-      progress: newConversation.progress,
-    }),
-    { headers: { "content-type": "application/json" } },
+    converted,
+    {
+      status: streamRes.status,
+      headers: streamRes.headers,
+    },
+    // JSON.stringify({
+    //   status: newConversation.state,
+    //   message: newConversation.messages[newConversation.messages.length - 1],
+    //   progress: newConversation.progress,
+    // }),
+    // { headers: { "content-type": "application/json" } },
   );
 });
