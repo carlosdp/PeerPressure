@@ -1,5 +1,6 @@
 import { createSupabaseClient } from "../_shared/supabase.ts";
 import { transcribe } from "../_shared/utils.ts";
+import logger from "../logger.ts";
 import { generateEditorConversationMessage } from "../send-builder-message/editorConversation.ts";
 import {
   BuilderConversationData,
@@ -107,42 +108,125 @@ Deno.serve(async (req) => {
   //     { status: 500, headers: { "Content-Type": "application/json" } },
   //   );
   // }
+  const body = streamRes.body;
+  if (!body) {
+    logger.error("No body in stream response");
 
-  const converted = streamRes.body?.pipeThrough(new TextDecoderStream())
-    .pipeThrough(
-      new TransformStream({
-        transform: (chunk, controller) => {
-          console.log(chunk);
-          if (chunk.includes("data: [DONE]")) {
-            controller.terminate();
-            return;
-          }
-          const data: any[] = [];
-          const lines = chunk.split("\n");
-          for (const line of lines) {
-            if (line.startsWith("data: ")) {
-              data.push(JSON.parse(line.slice(6)));
-            }
-          }
+    return new Response(
+      JSON.stringify({ error: "Server Error" }),
+      { status: 500, headers: { "Content-Type": "application/json" } },
+    );
+  }
 
-          for (const d of data) {
-            controller.enqueue(d.choices[0].delta.content);
-          }
+  let tag = "";
+  let buffer = "";
+
+  const textEncoder = new TextEncoder();
+  const stream = new ReadableStream({
+    async start(controller) {
+      console.log("starting stream");
+      const llmStream = body.pipeThrough(new TextDecoderStream())
+        .pipeThrough(
+          new TransformStream({
+            transform: (chunk, controller) => {
+              console.log(chunk);
+              if (chunk.includes("data: [DONE]")) {
+                console.log("DONE WITH LLM");
+                return;
+              }
+              const data: any[] = [];
+              const lines = chunk.split("\n");
+              for (const line of lines) {
+                if (line.startsWith("data: ")) {
+                  data.push(JSON.parse(line.slice(6)));
+                }
+              }
+
+              for (const d of data) {
+                const content = d.choices[0].delta.content;
+
+                for (const c of content) {
+                  if (c === "<") {
+                    tag = "";
+                    buffer = "";
+                  } else if (c === ">") {
+                    tag = buffer;
+                    buffer = "";
+                  } else {
+                    buffer += c;
+                  }
+                }
+
+                controller.enqueue(
+                  textEncoder.encode(content),
+                );
+              }
+            },
+            async flush(controller) {
+              console.log("DONE WITH LLM, calling 11labs");
+              controller.enqueue(textEncoder.encode("<audio>"));
+
+              const audioRes = await fetch(
+                "https://api.elevenlabs.io/v1/text-to-speech/iP95p4xoKVk53GoZ742B/stream", // ?output_format=pcm_24000",
+                {
+                  method: "POST",
+                  body: JSON.stringify({
+                    text: buffer,
+                    // model: 'eleven_turbo_v2',
+                  }),
+                  headers: {
+                    "Content-Type": "application/json",
+                    "xi-api-key": Deno.env.get("ELEVEN_LABS_API_KEY")!,
+                  },
+                },
+              );
+              const audioBody = audioRes.body;
+              if (!audioBody) {
+                logger.error("No audio body in response");
+                controller.terminate();
+                return;
+              }
+
+              if (audioRes.status !== 200) {
+                logger.error(
+                  `Error from 11labs: ${audioRes.status} ${await audioRes
+                    .text()}`,
+                );
+                controller.terminate();
+                return;
+              }
+
+              const audioReader = audioBody.getReader();
+              let audioResult = await audioReader.read();
+              while (!audioResult.done) {
+                console.log(audioResult.value);
+                controller.enqueue(audioResult.value);
+                audioResult = await audioReader.read();
+              }
+              console.log("DONE WITH 11LABS");
+            },
+          }),
+        );
+
+      const writableStream = new WritableStream({
+        write(chunk) {
+          controller.enqueue(chunk);
         },
-      }),
-    ).pipeThrough(new TextEncoderStream());
+        close() {
+          controller.close();
+        },
+      });
+
+      llmStream.pipeTo(writableStream);
+    },
+  });
 
   return new Response(
-    converted,
+    stream,
     {
-      status: streamRes.status,
-      headers: streamRes.headers,
+      headers: {
+        "Content-Type": "text/event-stream",
+      },
     },
-    // JSON.stringify({
-    //   status: newConversation.state,
-    //   message: newConversation.messages[newConversation.messages.length - 1],
-    //   progress: newConversation.progress,
-    // }),
-    // { headers: { "content-type": "application/json" } },
   );
 });

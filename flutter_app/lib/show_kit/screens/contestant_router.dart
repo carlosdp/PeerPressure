@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/models/profile.dart';
 import 'package:flutter_app/show_kit/screens/basic_profile_creator.dart';
-import 'package:flutter_app/show_kit/screens/interview.dart';
+import 'package:flutter_app/show_kit/screens/interview/interview.dart';
 import 'package:provider/provider.dart';
 
 class ContestantRouter extends StatefulWidget {

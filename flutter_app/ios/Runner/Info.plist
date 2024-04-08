@@ -36,6 +36,11 @@
 	<string>We need camera access so we can record your interview</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>We need microphone access so we can record your interview</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

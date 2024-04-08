@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_app/supabase_types.dart';
-
-final supabase = Supabase.instance.client;
+import 'package:flutter_app/supabase.dart';
 
 class SwipeModel extends ChangeNotifier {
   List<Profile> profiles = [];

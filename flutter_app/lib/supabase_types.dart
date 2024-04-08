@@ -1,7 +1,5 @@
 import 'package:geocoding/geocoding.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-
-final supabase = Supabase.instance.client;
+import 'package:flutter_app/supabase.dart';
 
 enum BlockType { photo, gas }
 

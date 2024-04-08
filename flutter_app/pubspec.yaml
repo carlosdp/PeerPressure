@@ -52,6 +52,8 @@ dependencies:
   logging: ^1.2.0
   rive: ^0.13.1
   http: ^1.2.1
+  just_audio: ^0.9.37
+  audio_session: ^0.1.19
 
 dev_dependencies:
   flutter_test:
