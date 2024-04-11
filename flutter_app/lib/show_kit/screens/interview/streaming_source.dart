@@ -20,8 +20,7 @@ class StreamingSource extends StreamAudioSource {
     final data = _buffer.sublist(start, end);
 
     final response = StreamAudioResponse(
-      sourceLength:
-          _buffer.length, // _sampleRate * 60, // 60 seconds, fake long duration
+      sourceLength: _buffer.length,
       contentLength: end - start, // data.length * sizeOf<Int32>(),
       offset: start,
       stream: Stream.fromIterable([data]),

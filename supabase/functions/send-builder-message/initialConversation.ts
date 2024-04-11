@@ -118,7 +118,7 @@ export async function generateInitialConversationMessage(
         - message: The message to send
         
         Provide each field in this format, no other text should be included in your message:
-        <thought>thought here<topic>topic here<isFollowUp>true or false<progress>0-100<title>title here<message>message here`,
+        <thought>thought here<message>message here<title>title here<topic>topic here<isFollowUp>true or false<progress>0-100`,
       },
     ],
     {

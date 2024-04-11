@@ -23,6 +23,7 @@ import 'package:vad/vad.dart';
 import 'package:logging/logging.dart';
 import 'package:http/http.dart' as http;
 import 'package:audio_session/audio_session.dart';
+// import 'package:flutter_sound/flutter_sound.dart';
 
 final log = Logger('Interview');
 
@@ -63,12 +64,16 @@ class _InterviewState extends State<Interview> {
   final int _sampleRate = 16000;
   final int _vadFrameSizeMs = 30;
   final int _voiceDebounceMs = 1000;
+  final int _minVoiceDuration = 2000;
   VoiceActivity _voiceActivity = VoiceActivity.inactive;
+  DateTime? _voiceActivityStart;
   DateTime? _lastVoiceActivity;
   StreamSubscription<List<int>>? _responseStream;
+  StreamSubscription<List<int>>? _audioStreamSubscription;
   final audioPlayer = AudioPlayer();
   StreamingSource? _audioSource;
   final streamCtrl = StreamController<List<int>>.broadcast();
+  // FlutterSoundPlayer _player = FlutterSoundPlayer();
 
   @override
   void initState() {
@@ -79,6 +84,9 @@ class _InterviewState extends State<Interview> {
     _voiceDetector.setMode(ThresholdMode.aggressive);
 
     startListening();
+
+    // ** FLUTTER SOUND **
+    // _player.openPlayer();
 
     _conversation = Provider.of<ProfileModel>(context, listen: false)
             .profile
@@ -119,6 +127,9 @@ class _InterviewState extends State<Interview> {
     _recorder.dispose();
     _listener?.cancel();
     _listenRecorder.dispose();
+    audioPlayer.dispose();
+    // _player.stopPlayer();
+    // _player.closePlayer();
     super.dispose();
   }
 
@@ -151,13 +162,20 @@ class _InterviewState extends State<Interview> {
         final frame =
             event.sublist(0, (_sampleRate ~/ 1000 * _vadFrameSizeMs) * 2);
         setState(() {
+          final previousVoiceActivity = _voiceActivity;
           _voiceActivity = _voiceDetector.processFrameBytes(frame);
           if (_voiceActivity == VoiceActivity.active && _isInterviewing) {
+            if (previousVoiceActivity == VoiceActivity.inactive) {
+              _voiceActivityStart = DateTime.now();
+            }
+
             _lastVoiceActivity = DateTime.now();
           } else if (_lastVoiceActivity != null &&
+              _voiceActivityStart != null &&
               DateTime.now().difference(_lastVoiceActivity!).inMilliseconds >
                   _voiceDebounceMs &&
               _isRecording) {
+            log.fine('Finished segment, uploading');
             finishSegment();
           }
         });
@@ -188,7 +206,7 @@ class _InterviewState extends State<Interview> {
       final tempDir = await getTemporaryDirectory();
       await _recorder.start(
         const RecordConfig(encoder: AudioEncoder.wav),
-        path: '${tempDir.path}/voice.wav',
+        path: '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}.wav',
       );
     }
 
@@ -198,14 +216,16 @@ class _InterviewState extends State<Interview> {
   }
 
   Future<void> stopRecording() async {
-    final videoFile = await _controller!.stopVideoRecording();
+    if (_controller != null) {
+      final videoFile = await _controller!.stopVideoRecording();
+      File(videoFile.path).delete();
+    }
+
     final path = await _recorder.stop();
 
     if (path != null) {
       File(path).delete();
     }
-
-    File(videoFile.path).delete();
 
     setState(() {
       _isRecording = false;
@@ -217,7 +237,10 @@ class _InterviewState extends State<Interview> {
     final profileId =
         Provider.of<ProfileModel>(context, listen: false).profile!.id;
     final path = await _recorder.stop();
-    final videoFile = await _controller!.stopVideoRecording();
+    XFile? videoFile;
+    if (_controller != null) {
+      videoFile = await _controller!.stopVideoRecording();
+    }
     final isInterruption = _isAwaitingResponse;
 
     setState(() {
@@ -234,18 +257,20 @@ class _InterviewState extends State<Interview> {
 
     uploadInterviewAudio(path, isInterruption);
 
-    final randomId = DateTime.now().millisecondsSinceEpoch;
-    File file = File(videoFile.path);
+    if (videoFile != null) {
+      final randomId = DateTime.now().millisecondsSinceEpoch;
+      File file = File(videoFile.path);
 
-    await supabase.storage.from('videos').upload(
-          '$profileId/interview-videos/$randomId',
-          file,
-          fileOptions: FileOptions(
-            contentType: videoFile.mimeType,
-          ),
-        );
+      await supabase.storage.from('videos').upload(
+            '$profileId/interview-videos/$randomId',
+            file,
+            fileOptions: FileOptions(
+              contentType: videoFile.mimeType,
+            ),
+          );
 
-    await file.delete();
+      await file.delete();
+    }
   }
 
   Future<void> uploadInterviewAudio(String path, bool isInterruption) async {
@@ -278,32 +303,47 @@ class _InterviewState extends State<Interview> {
       request.body = messageJson;
       final response = await client.send(request);
       final parser = InterviewResponseStreamParser();
+      // ** THIS CODE IS FOR FLUTTER_SOUND, we need to get back to this
+      // // REMOVE
+      // final session = await AudioSession.instance;
+      // await session.configure(const AudioSessionConfiguration(
+      //   avAudioSessionCategory: AVAudioSessionCategory.playAndRecord,
+      //   avAudioSessionCategoryOptions:
+      //       AVAudioSessionCategoryOptions.allowBluetooth,
+      //   avAudioSessionMode: AVAudioSessionMode.spokenAudio,
+      // ));
+      // if (_player.isStopped) {
+      //   _player.startPlayerFromStream(
+      //     codec: Codec.pcm16,
+      //     numChannels: 1,
+      //     sampleRate: 16000,
+      //   );
+      // }
+      // _audioStreamSubscription = streamCtrl.stream.listen((chunk) =>
+      //     _player.foodSink!.add(FoodData(Uint8List.fromList(chunk))));
 
-      bool parsingAudio = false;
+      _audioSource = StreamingSource(streamCtrl.stream);
 
       _responseStream = response.stream.listen((chunk) {
-        if (!parsingAudio) {
-          final decoded = utf8.decode(chunk);
+        setState(() {
+          final result = parser.parseChunk(chunk);
 
-          if (decoded == '<audio>') {
-            // switch to parsing audio stream
-            parsingAudio = true;
-            _audioSource = StreamingSource(streamCtrl.stream);
+          if (result.isStage) {
+            _currentStage = result.stage;
           } else {
-            setState(() {
-              _currentStage = parser.parseChunk(decoded);
-            });
+            _audioSource!.addToBuffer(result.audio!);
+            // streamCtrl.sink.add(result.audio!);
           }
-        } else if (_audioSource != null) {
-          _audioSource!.addToBuffer(chunk);
-          streamCtrl.sink.add(chunk);
-        }
+        });
       }, onDone: () {
-        if (!audioPlayer.playing) {
-          audioPlayer.setAudioSource(_audioSource!).then((duration) {
-            audioPlayer.play();
-          });
-        }
+        // _player.foodSink!.add(FoodEvent(() async {
+        //   await _player.stopPlayer();
+        // }));
+        // if (!audioPlayer.playing) {
+        audioPlayer.setAudioSource(_audioSource!).then((duration) {
+          audioPlayer.play();
+        });
+        // }
       });
     } catch (e) {
       log.fine(e);
