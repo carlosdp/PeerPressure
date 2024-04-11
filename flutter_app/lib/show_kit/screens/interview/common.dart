@@ -5,11 +5,14 @@ class InterviewStage {
   String title;
   String instructions;
   String topic;
+  // conversation progress between 0 and 100
+  int progress = 0;
 
   InterviewStage({
     required this.title,
     required this.instructions,
     required this.topic,
+    this.progress = 0,
   });
 }
 

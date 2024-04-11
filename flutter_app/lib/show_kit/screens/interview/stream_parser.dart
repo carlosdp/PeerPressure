@@ -59,19 +59,7 @@ class InterviewResponseStreamParser {
           _currentKey = _buffer;
           _buffer = '';
         } else if (c == '<') {
-          switch (_currentKey) {
-            case 'title':
-              _stage.title = _buffer;
-              break;
-            case 'message':
-              _stage.instructions = _buffer;
-              break;
-            case 'topic':
-              _stage.topic = _buffer;
-              break;
-          }
-          _currentKey = null;
-          _buffer = '';
+          _commitCurrentKey();
         } else {
           _buffer += c;
 
@@ -97,5 +85,30 @@ class InterviewResponseStreamParser {
       // return chunk, skipping the beginning bytes for the <audio> utf8 tag
       return StreamOutput(audio: chunk.sublist(7));
     }
+  }
+
+  InterviewStage finalize() {
+    _commitCurrentKey();
+
+    return _stage;
+  }
+
+  void _commitCurrentKey() {
+    switch (_currentKey) {
+      case 'title':
+        _stage.title = _buffer;
+        break;
+      case 'message':
+        _stage.instructions = _buffer;
+        break;
+      case 'topic':
+        _stage.topic = _buffer;
+        break;
+      case 'progress':
+        _stage.progress = int.parse(_buffer);
+        break;
+    }
+    _currentKey = null;
+    _buffer = '';
   }
 }

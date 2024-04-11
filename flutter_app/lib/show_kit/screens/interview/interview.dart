@@ -58,13 +58,9 @@ class _InterviewState extends State<Interview> {
   bool _isAwaitingResponse = false;
   late BuilderConversation _conversation;
   InterviewStage? _currentStage;
-  // conversation progress between 0 and 100
-  // TODO: place in stage
-  int _progress = 0;
   final int _sampleRate = 16000;
   final int _vadFrameSizeMs = 30;
   final int _voiceDebounceMs = 1000;
-  final int _minVoiceDuration = 2000;
   VoiceActivity _voiceActivity = VoiceActivity.inactive;
   DateTime? _voiceActivityStart;
   DateTime? _lastVoiceActivity;
@@ -336,6 +332,7 @@ class _InterviewState extends State<Interview> {
           }
         });
       }, onDone: () {
+        _currentStage = parser.finalize();
         // _player.foodSink!.add(FoodEvent(() async {
         //   await _player.stopPlayer();
         // }));
@@ -382,7 +379,7 @@ class _InterviewState extends State<Interview> {
     } else if (_isInterviewing && _currentStage != null) {
       return InterviewInflight(
         stage: _currentStage!,
-        progress: _progress,
+        progress: _currentStage!.progress,
         onPause: pauseInterview,
       );
     } else {
