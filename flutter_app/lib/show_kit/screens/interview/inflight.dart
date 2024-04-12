@@ -70,18 +70,15 @@ class InterviewInflight extends StatelessWidget {
                   opacity: animation,
                   child: child,
                 ),
-                child: Flexible(
-                  fit: FlexFit.tight,
-                  child: AutoSizeText(
-                    stage.instructions,
-                    key: ValueKey(stage.instructions),
-                    minFontSize: 12,
-                    maxFontSize: 32,
-                    maxLines: 5,
-                    style: const TextStyle(
-                      fontSize: 32,
-                      color: Colors.white,
-                    ),
+                child: AutoSizeText(
+                  stage.instructions,
+                  key: ValueKey(stage.instructions),
+                  minFontSize: 12,
+                  maxFontSize: 32,
+                  maxLines: 5,
+                  style: const TextStyle(
+                    fontSize: 32,
+                    color: Colors.white,
                   ),
                 ),
               ),

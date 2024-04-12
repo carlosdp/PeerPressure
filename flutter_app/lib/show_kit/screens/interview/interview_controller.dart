@@ -53,7 +53,7 @@ class InterviewController {
   final _listenRecorder = AudioRecorder();
   StreamSubscription? _listener;
   late VoiceActivityDetector _voiceDetector;
-  final audioPlayer = AudioPlayer();
+  final audioPlayer = AudioPlayer(handleAudioSessionActivation: false);
   final streamCtrl = StreamController<List<int>>.broadcast();
   // FlutterSoundPlayer _player = FlutterSoundPlayer();
 
@@ -278,6 +278,9 @@ class InterviewController {
         // }));
         if (!isPaused) {
           audioPlayer.setAudioSource(_audioSource!).then((duration) {
+            // I'm not sure this should be necessary, let's look into it
+            // at some point. Hack works for now.
+            audioPlayer.setVolume(3.0);
             audioPlayer.play();
           });
         }
