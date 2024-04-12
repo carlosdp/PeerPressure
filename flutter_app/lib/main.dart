@@ -5,6 +5,7 @@ import 'package:flutter_app/models/profile.dart';
 import 'package:flutter_app/models/swipe.dart';
 import 'package:flutter_app/screens/dev_login.dart';
 import 'package:flutter_app/show_kit/screens/contestant_router.dart';
+import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_app/supabase.dart';
@@ -16,6 +17,12 @@ void main() async {
     url: supabaseUrl,
     anonKey: supabaseAnonKey,
   );
+
+  Logger.root.level = Level.ALL;
+  Logger.root.onRecord.listen((record) {
+    // ignore: avoid_print
+    print('${record.level.name}: ${record.time}: ${record.message}');
+  });
 
   runApp(
     MultiProvider(

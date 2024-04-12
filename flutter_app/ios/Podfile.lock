@@ -92,7 +92,7 @@ SPEC CHECKSUMS:
   geocoding_ios: d7460f56e80e118d57678efe5c2cdc888739ff18
   just_audio: baa7252489dbcf47a4c7cc9ca663e9661c99aafa
   path_provider_foundation: 3784922295ac71e43754bd15e0653ccfd36a147c
-  record_darwin: a27261e1c301ac5ab8c4139f92cd0af52513b1d7
+  record_darwin: 18b8596cb10e8e74e794c2d1d9ca604c85d37443
   rive_common: c537b4eed761e903a9403d93c347b69bd7a4762f
   shared_preferences_foundation: b4c3b4cddf1c21f02770737f147a3f5da9d39695
   sign_in_with_apple: f3bf75217ea4c2c8b91823f225d70230119b8440

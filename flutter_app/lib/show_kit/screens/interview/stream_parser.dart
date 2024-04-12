@@ -2,6 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_app/show_kit/screens/interview/common.dart';
+import 'package:logging/logging.dart';
+
+final log = Logger('InterviewResponseStreamParser');
 
 class StreamOutput {
   final InterviewStage? stage;
@@ -62,20 +65,6 @@ class InterviewResponseStreamParser {
           _commitCurrentKey();
         } else {
           _buffer += c;
-
-          if (_currentKey != null) {
-            switch (_currentKey) {
-              case 'title':
-                _stage.title = _buffer;
-                break;
-              case 'message':
-                _stage.instructions = _buffer;
-                break;
-              case 'topic':
-                _stage.topic = _buffer;
-                break;
-            }
-          }
         }
       }
 
@@ -105,7 +94,11 @@ class InterviewResponseStreamParser {
         _stage.topic = _buffer;
         break;
       case 'progress':
-        _stage.progress = int.parse(_buffer);
+        try {
+          _stage.progress = int.parse(_buffer);
+        } catch (_) {
+          log.warning('Error parsing progress: $_buffer');
+        }
         break;
     }
     _currentKey = null;

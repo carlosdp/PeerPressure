@@ -1,42 +1,20 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/models/profile.dart';
-import 'package:flutter_app/show_kit/screens/interview/common.dart';
 import 'package:flutter_app/show_kit/screens/interview/complete.dart';
 import 'package:flutter_app/show_kit/screens/interview/inflight.dart';
+import 'package:flutter_app/show_kit/screens/interview/interview_controller.dart';
 import 'package:flutter_app/show_kit/screens/interview/pre_start.dart';
-import 'package:flutter_app/show_kit/screens/interview/stream_parser.dart';
-import 'package:flutter_app/show_kit/screens/interview/streaming_source.dart';
-import 'package:just_audio/just_audio.dart';
-import 'package:provider/provider.dart';
-import 'package:record/record.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_app/supabase.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter_app/supabase_types.dart';
-import 'package:vad/vad.dart';
 import 'package:logging/logging.dart';
-import 'package:http/http.dart' as http;
-import 'package:audio_session/audio_session.dart';
-// import 'package:flutter_sound/flutter_sound.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 final log = Logger('Interview');
-
-Future<String> getFileDataUrl(String filePath, String mimeType) async {
-  final file = File(filePath);
-  if (await file.exists()) {
-    final bytes = await file.readAsBytes();
-    final dataUrl = 'data:$mimeType;base64,${base64Encode(bytes)}';
-    return dataUrl;
-  } else {
-    throw Exception('File does not exist');
-  }
-}
 
 class Interview extends StatefulWidget {
   const Interview({super.key});
@@ -48,41 +26,31 @@ class Interview extends StatefulWidget {
 class _InterviewState extends State<Interview> {
   CameraController? _controller;
   List<CameraDescription> _cameras = [];
-  Stream<Uint8List>? _audioStream;
-  StreamSubscription? _listener;
-  final _recorder = AudioRecorder();
-  final _listenRecorder = AudioRecorder();
-  late VoiceActivityDetector _voiceDetector;
-  bool _isInterviewing = false;
-  bool _isRecording = false;
-  bool _isAwaitingResponse = false;
   late BuilderConversation _conversation;
-  InterviewStage? _currentStage;
-  final int _sampleRate = 16000;
-  final int _vadFrameSizeMs = 30;
-  final int _voiceDebounceMs = 1000;
-  VoiceActivity _voiceActivity = VoiceActivity.inactive;
-  DateTime? _voiceActivityStart;
-  DateTime? _lastVoiceActivity;
-  StreamSubscription<List<int>>? _responseStream;
-  StreamSubscription<List<int>>? _audioStreamSubscription;
-  final audioPlayer = AudioPlayer();
-  StreamingSource? _audioSource;
-  final streamCtrl = StreamController<List<int>>.broadcast();
-  // FlutterSoundPlayer _player = FlutterSoundPlayer();
+  late InterviewController _interviewController;
+  late String profileId;
 
   @override
   void initState() {
     super.initState();
 
-    _voiceDetector = VoiceActivityDetector();
-    _voiceDetector.setSampleRate(16000);
-    _voiceDetector.setMode(ThresholdMode.veryAggressive);
+    final profile = Provider.of<ProfileModel>(context, listen: false).profile;
+    profileId = profile!.id;
 
-    startListening();
-
-    // ** FLUTTER SOUND **
-    // _player.openPlayer();
+    _interviewController = InterviewController(
+      onSubmit: () {
+        _uploadVideoSegment();
+      },
+      onStageUpdate: () {
+        setState(() {});
+      },
+      onComplete: () {
+        setState(() {
+          _conversation.state = BuilderState.finished;
+        });
+      },
+      profileId: profileId,
+    );
 
     _conversation = Provider.of<ProfileModel>(context, listen: false)
             .profile
@@ -120,152 +88,42 @@ class _InterviewState extends State<Interview> {
   @override
   void dispose() {
     _controller?.dispose();
-    _recorder.dispose();
-    _listener?.cancel();
-    _listenRecorder.dispose();
-    audioPlayer.dispose();
-    // _player.stopPlayer();
-    // _player.closePlayer();
+    _interviewController.dispose();
     super.dispose();
   }
 
   bool get _isPaused =>
-      !_isInterviewing &&
-      (_currentStage != null || _conversation.messages.isNotEmpty);
+      _interviewController.isPaused ||
+      (!_interviewController.isInterviewing &&
+          _conversation.messages.isNotEmpty);
 
   bool get _isComplete => _conversation.state == BuilderState.finished;
 
-  Future<void> startListening() async {
-    if (await _recorder.hasPermission()) {
-      _audioStream = await _listenRecorder.startStream(
-        RecordConfig(
-          encoder: AudioEncoder.pcm16bits,
-          sampleRate: _sampleRate,
-          numChannels: 1,
-          echoCancel: true,
-          noiseSuppress: true,
-        ),
-      );
-
-      await setupAudioSession();
-
-      _listener = _audioStream!.listen((event) {
-        final frame =
-            event.sublist(0, (_sampleRate ~/ 1000 * _vadFrameSizeMs) * 2);
-        final previousVoiceActivity = _voiceActivity;
-        _voiceActivity = _voiceDetector.processFrameBytes(frame);
-
-        if (previousVoiceActivity != _voiceActivity) {
-          print('Voice activity: $_voiceActivity');
-          log.fine('Voice activity: $_voiceActivity');
-        }
-
-        if (_voiceActivity == VoiceActivity.active && _isInterviewing) {
-          setState(() {
-            if (previousVoiceActivity == VoiceActivity.inactive) {
-              _voiceActivityStart = DateTime.now();
-            }
-
-            _lastVoiceActivity = DateTime.now();
-          });
-        } else if (_lastVoiceActivity != null &&
-            _voiceActivityStart != null &&
-            DateTime.now().difference(_lastVoiceActivity!).inMilliseconds >
-                _voiceDebounceMs &&
-            _isRecording) {
-          log.fine('Finished segment, uploading');
-          finishSegment();
-        }
-      });
-    }
+  Future<void> _beginInterview() async {
+    // Ordering of these is important! If the order is swapped, echo cancellation fails to work.
+    // Not sure why this happens yet, perhaps something to do with the AudioSession?
+    await _startVideoRecording();
+    await _interviewController.beginInterview();
   }
 
-  Future<void> setupAudioSession() async {
-    final session = await AudioSession.instance;
-    await session.configure(const AudioSessionConfiguration(
-      avAudioSessionCategory: AVAudioSessionCategory.playAndRecord,
-      avAudioSessionCategoryOptions:
-          AVAudioSessionCategoryOptions.allowBluetooth,
-      avAudioSessionMode: AVAudioSessionMode.videoChat,
-    ));
+  Future<void> _pauseInterview() async {
+    await _stopVideoRecording();
+    await _interviewController.pauseInterview();
   }
 
-  Future<void> beginInterview() async {
-    setState(() {
-      _isInterviewing = true;
-    });
-
-    sendTextMessage(_isPaused ? "I'm ready to continue" : "I'm ready", false);
-
-    await startRecording();
-  }
-
-  Future<void> pauseInterview() async {
-    await stopRecording();
-  }
-
-  Future<void> startRecording() async {
+  Future<void> _startVideoRecording() async {
     if (_controller != null) {
       await _controller!.startVideoRecording();
     }
-
-    if (await _recorder.hasPermission()) {
-      final tempDir = await getTemporaryDirectory();
-      await _recorder.start(
-        const RecordConfig(encoder: AudioEncoder.wav),
-        path: '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}.wav',
-      );
-      await setupAudioSession();
-    }
-
-    setState(() {
-      _isRecording = true;
-    });
   }
 
-  Future<void> stopRecording() async {
-    if (_controller != null) {
-      final videoFile = await _controller!.stopVideoRecording();
-      File(videoFile.path).delete();
-    }
-
-    final path = await _recorder.stop();
-
-    if (path != null) {
-      File(path).delete();
-    }
-
-    setState(() {
-      _isRecording = false;
-      _isInterviewing = false;
-    });
-  }
-
-  Future<void> finishSegment() async {
-    final profileId =
-        Provider.of<ProfileModel>(context, listen: false).profile!.id;
-    final path = await _recorder.stop();
+  Future<void> _uploadVideoSegment() async {
     XFile? videoFile;
     if (_controller != null) {
       videoFile = await _controller!.stopVideoRecording();
     }
-    final isInterruption = _isAwaitingResponse;
-    // cancel any current response we're getting
-    _responseStream?.cancel();
 
-    setState(() {
-      _isRecording = false;
-      _isAwaitingResponse = true;
-      _lastVoiceActivity = null;
-    });
-
-    startRecording();
-
-    if (path == null) {
-      return;
-    }
-
-    uploadInterviewAudio(path, isInterruption);
+    _startVideoRecording();
 
     if (videoFile != null) {
       final randomId = DateTime.now().millisecondsSinceEpoch;
@@ -283,89 +141,10 @@ class _InterviewState extends State<Interview> {
     }
   }
 
-  Future<void> uploadInterviewAudio(String path, bool isInterruption) async {
-    final dataUrl = await getFileDataUrl(path, 'audio/wav');
-
-    await sendMessage(jsonEncode({
-      'audio': dataUrl,
-      'interruption': isInterruption,
-    }));
-  }
-
-  Future<void> sendTextMessage(String message, bool isInterruption) async {
-    await sendMessage(jsonEncode({
-      'text': message,
-      'interruption': isInterruption,
-    }));
-  }
-
-  Future<void> sendMessage(String messageJson) async {
-    final client = http.Client();
-
-    try {
-      final request = http.Request(
-        'POST',
-        Uri.parse('$supabaseUrl/functions/v1/upload-interview-audio'),
-      );
-      request.headers['Authorization'] =
-          'Bearer ${supabase.auth.currentSession!.accessToken}';
-      request.headers['Content-Type'] = 'application/json';
-      request.body = messageJson;
-      final response = await client.send(request);
-      if (response.statusCode != 200) {
-        log.warning('Failed to send message: ${response.statusCode}');
-        return;
-      }
-      final parser = InterviewResponseStreamParser();
-      // ** THIS CODE IS FOR FLUTTER_SOUND, we need to get back to this
-      // // REMOVE
-      // final session = await AudioSession.instance;
-      // await session.configure(const AudioSessionConfiguration(
-      //   avAudioSessionCategory: AVAudioSessionCategory.playAndRecord,
-      //   avAudioSessionCategoryOptions:
-      //       AVAudioSessionCategoryOptions.allowBluetooth,
-      //   avAudioSessionMode: AVAudioSessionMode.spokenAudio,
-      // ));
-      // if (_player.isStopped) {
-      //   _player.startPlayerFromStream(
-      //     codec: Codec.pcm16,
-      //     numChannels: 1,
-      //     sampleRate: 16000,
-      //   );
-      // }
-      // _audioStreamSubscription = streamCtrl.stream.listen((chunk) =>
-      //     _player.foodSink!.add(FoodData(Uint8List.fromList(chunk))));
-
-      _audioSource = StreamingSource(streamCtrl.stream);
-
-      _responseStream = response.stream.listen((chunk) {
-        setState(() {
-          final result = parser.parseChunk(chunk);
-
-          if (result.isStage) {
-            _currentStage = result.stage;
-            if (_currentStage!.progress >= 100) {
-              _conversation.state = BuilderState.finished;
-            }
-          } else {
-            _audioSource!.addToBuffer(result.audio!);
-            // streamCtrl.sink.add(result.audio!);
-          }
-        });
-      }, onDone: () {
-        _currentStage = parser.finalize();
-        // _player.foodSink!.add(FoodEvent(() async {
-        //   await _player.stopPlayer();
-        // }));
-        if (!_isComplete && !_isPaused) {
-          audioPlayer.setAudioSource(_audioSource!).then((duration) {
-            audioPlayer.play();
-          });
-        }
-      });
-    } catch (e) {
-      log.fine(e);
-      return;
+  Future<void> _stopVideoRecording() async {
+    if (_controller != null) {
+      final videoFile = await _controller!.stopVideoRecording();
+      File(videoFile.path).delete();
     }
   }
 
@@ -397,15 +176,16 @@ class _InterviewState extends State<Interview> {
   Widget currentScreen() {
     if (_isComplete) {
       return InterviewComplete(onDismiss: () {});
-    } else if (_isInterviewing && _currentStage != null) {
+    } else if (_interviewController.isInterviewing &&
+        _interviewController.currentStage != null) {
       return InterviewInflight(
-        stage: _currentStage!,
-        progress: _currentStage!.progress,
-        onPause: pauseInterview,
+        stage: _interviewController.currentStage!,
+        progress: _interviewController.currentStage!.progress,
+        onPause: _pauseInterview,
       );
     } else {
       return InterviewPreStart(
-        onBeginInterview: beginInterview,
+        onBeginInterview: _beginInterview,
         title: _isPaused ? 'Ready to continue?' : "Let's get started",
         instructions: _isPaused
             ? 'We can pick things up where we left off'
