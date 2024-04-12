@@ -206,7 +206,7 @@ Deno.serve(async (req) => {
 
                 for (const c of content) {
                   if (c === "<") {
-                    if (tag === "message") {
+                    if (tag === "voice") {
                       // initiate call to 11labs w/ buffer
                       message = buffer;
                     } else if (tag === "progress") {

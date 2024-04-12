@@ -87,7 +87,7 @@ class InterviewResponseStreamParser {
       case 'title':
         _stage.title = _buffer;
         break;
-      case 'message':
+      case 'instructions':
         _stage.instructions = _buffer;
         break;
       case 'topic':

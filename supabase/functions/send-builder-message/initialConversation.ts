@@ -113,13 +113,14 @@ export async function generateInitialConversationMessage(
           `You MUST respond in the following format, and include all fields listed:
         - thought: Your reasoning for choosing this topic and asking this question
         - topic: The topic to ask about
+        - voice: A short voice script to read out to the user
         - isFollowUp: Has the topic already been covered?
         - progress: The approximate percentage of the conversation that has been completed, from 0 to 100
-        - title: A short title for the message, for example: "Let's talk about family" or "What do you do for fun?"
-        - message: The message to send
+        - title: A short title for the message, for example: "Let's talk family" or "What about fun?", 2-3 words
+        - instructions: Short clarifying instructions for what the question is asking and how to answer
         
         Provide each field in this format, no other text should be included in your message:
-        <thought>thought here<message>message here<title>title here<topic>topic here<isFollowUp>true or false<progress>0-100`,
+        <thought>thought here<voice>voice script here<instructions>instructions here<title>title here<topic>topic here<isFollowUp>true or false<progress>0-100`,
       },
     ],
     {
