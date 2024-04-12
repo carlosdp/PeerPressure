@@ -31,6 +31,7 @@ Future<String> getFileDataUrl(String filePath, String mimeType) async {
 class InterviewController {
   Function() onSubmit;
   Function() onStageUpdate;
+  Function() onPause;
   Function() onComplete;
   String profileId;
   InterviewStage? currentStage;
@@ -61,6 +62,7 @@ class InterviewController {
   InterviewController({
     required this.onSubmit,
     required this.onStageUpdate,
+    required this.onPause,
     required this.onComplete,
     required this.profileId,
   }) {
@@ -68,7 +70,9 @@ class InterviewController {
     _voiceDetector.setSampleRate(16000);
     _voiceDetector.setMode(ThresholdMode.veryAggressive);
 
-    _startListening();
+    _setupAudioSession().then((_) {
+      _startListening();
+    });
 
     // ** FLUTTER SOUND **
     // _player.openPlayer();
@@ -93,6 +97,7 @@ class InterviewController {
 
   Future<void> pauseInterview() async {
     await _stopRecording();
+    onPause();
   }
 
   Future<void> endInterview() async {
@@ -114,7 +119,7 @@ class InterviewController {
         ),
       );
 
-      await _setupAudioSession();
+      // await _setupAudioSession();
 
       _listener = _audioStream!.listen((event) {
         final frame =
@@ -138,7 +143,7 @@ class InterviewController {
                 _voiceDebounceMs &&
             _isRecording) {
           log.fine('Finished segment, uploading');
-          _finishSegment();
+          // _finishSegment();
         }
       });
     }
@@ -161,7 +166,7 @@ class InterviewController {
         const RecordConfig(encoder: AudioEncoder.wav),
         path: '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}.wav',
       );
-      await _setupAudioSession();
+      // await _setupAudioSession();
     }
 
     _isRecording = true;

@@ -44,6 +44,9 @@ class _InterviewState extends State<Interview> {
       onStageUpdate: () {
         setState(() {});
       },
+      onPause: () {
+        setState(() {});
+      },
       onComplete: () {
         setState(() {
           _conversation.state = BuilderState.finished;
@@ -179,6 +182,7 @@ class _InterviewState extends State<Interview> {
     } else if (_interviewController.isInterviewing &&
         _interviewController.currentStage != null) {
       return InterviewInflight(
+        key: const ValueKey('inflight'),
         stage: _interviewController.currentStage!,
         progress: _interviewController.currentStage!.progress,
         onPause: _pauseInterview,

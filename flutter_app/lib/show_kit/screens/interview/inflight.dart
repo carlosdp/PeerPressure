@@ -26,25 +26,63 @@ class InterviewInflight extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Spacer(),
+              const SizedBox(height: 70),
               const Zara(),
               const SizedBox(height: 26),
-              Text(
-                stage.title,
-                style: const TextStyle(
-                  fontSize: 48,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 500),
+                switchInCurve: Curves.elasticOut,
+                switchOutCurve: Curves.easeIn,
+                transitionBuilder: (child, animation) {
+                  if (child.key == ValueKey(stage.title)) {
+                    return SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(1.2, 0.0),
+                        end: Offset.zero,
+                      ).animate(animation),
+                      child: child,
+                    );
+                  } else {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: child,
+                    );
+                  }
+                },
+                child: AutoSizeText(
+                  stage.title,
+                  maxFontSize: 48,
+                  minFontSize: 36,
+                  maxLines: 2,
+                  wrapWords: false,
+                  key: ValueKey(stage.title),
+                  style: const TextStyle(
+                    fontSize: 48,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
               ),
               const SizedBox(height: 26),
-              AutoSizeText(
-                stage.instructions,
-                minFontSize: 12,
-                maxFontSize: 32,
-                style: const TextStyle(
-                  fontSize: 32,
-                  color: Colors.white,
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 2000),
+                transitionBuilder: (child, animation) => FadeTransition(
+                  opacity: animation,
+                  child: child,
+                ),
+                child: Flexible(
+                  fit: FlexFit.tight,
+                  child: AutoSizeText(
+                    stage.instructions,
+                    key: ValueKey(stage.instructions),
+                    minFontSize: 12,
+                    maxFontSize: 32,
+                    maxLines: 5,
+                    style: const TextStyle(
+                      fontSize: 32,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ),
               const Spacer(),
@@ -76,7 +114,7 @@ class InterviewInflight extends StatelessWidget {
                   ),
                 ),
               ),
-              const Spacer(),
+              const SizedBox(height: 30),
               Center(
                 child: GestureDetector(
                   onTap: onPause,
