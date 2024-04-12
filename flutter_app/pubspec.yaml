@@ -56,6 +56,13 @@ dependencies:
   audio_session: ^0.1.19
   flutter_sound: ^9.2.13
 
+dependency_overrides:
+  record_darwin:
+    git:
+      url: https://github.com/carlosdp/record.git
+      ref: echo-cancel-ios
+      path: record_darwin
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

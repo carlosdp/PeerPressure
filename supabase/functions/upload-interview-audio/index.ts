@@ -16,18 +16,18 @@ Deno.serve(async (req) => {
   if (audio) {
     const audioBlob = await fetch(audio).then((res) => res.blob());
     transcription = await transcribe(audioBlob);
-
-    if (transcription.length === 0) {
-      return new Response(
-        JSON.stringify({ error: "Transcription empty" }),
-        { status: 400, headers: { "Content-Type": "application/json" } },
-      );
-    }
   } else if (text) {
     transcription = text;
   } else {
     return new Response(
       JSON.stringify({ error: "No text or audio provided" }),
+      { status: 400, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
+  if (transcription.length < 3) {
+    return new Response(
+      JSON.stringify({ error: "Transcription empty" }),
       { status: 400, headers: { "Content-Type": "application/json" } },
     );
   }
@@ -89,6 +89,22 @@ Deno.serve(async (req) => {
         "user",
   });
 
+  const nonce = (conversationData.nonce ?? 0) + 1;
+  conversationData.nonce = nonce;
+  conversationData.conversations[conversationData.conversations.length - 1] =
+    conversation;
+
+  const { error: nonceError } = await supabase.from("profiles").update({
+    builder_conversation_data: conversationData,
+  }).eq("id", profile.id);
+  if (nonceError) {
+    console.error("Error updating nonce:", nonceError.message);
+    return new Response(
+      JSON.stringify({ error: "Server Error" }),
+      { status: 500, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
   const streamRes = await generateInitialConversationMessage(
     profile,
     conversation,
@@ -109,6 +125,7 @@ Deno.serve(async (req) => {
   let message = "";
   let progress = conversation.progress;
   const queuingStrategy = new CountQueuingStrategy({ highWaterMark: 1 });
+  let cancelled = false;
 
   const textEncoder = new TextEncoder();
   const stream = new ReadableStream({
@@ -119,6 +136,10 @@ Deno.serve(async (req) => {
         },
         async close() {
           // controller.close();
+          if (cancelled) {
+            return;
+          }
+
           conversation.messages.push({
             role: "assistant",
             content: message,
@@ -128,6 +149,20 @@ Deno.serve(async (req) => {
           conversationData
             .conversations![conversationData.conversations!.length - 1] =
               conversation;
+
+          const { data: nonceProfile, error: nonceProfileError } =
+            await supabase.from("profiles").select("builder_conversation_data")
+              .eq("id", profile.id).single();
+          if (nonceProfileError) {
+            console.error("Error getting nonce:", nonceProfileError.message);
+            return;
+          }
+          const nonceConversationData = nonceProfile
+            .builder_conversation_data as BuilderConversationData;
+          if (nonceConversationData.nonce !== nonce) {
+            console.log("Nonce mismatch, not updating");
+            return;
+          }
 
           const { error: updateError } = await supabase.from("profiles").update(
             {
@@ -263,6 +298,9 @@ Deno.serve(async (req) => {
         });
         audioStream.pipeTo(writableStream2);
       }
+    },
+    cancel() {
+      cancelled = true;
     },
   }, queuingStrategy);
 

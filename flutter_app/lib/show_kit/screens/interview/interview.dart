@@ -77,7 +77,7 @@ class _InterviewState extends State<Interview> {
 
     _voiceDetector = VoiceActivityDetector();
     _voiceDetector.setSampleRate(16000);
-    _voiceDetector.setMode(ThresholdMode.aggressive);
+    _voiceDetector.setMode(ThresholdMode.veryAggressive);
 
     startListening();
 
@@ -137,14 +137,6 @@ class _InterviewState extends State<Interview> {
 
   Future<void> startListening() async {
     if (await _recorder.hasPermission()) {
-      final session = await AudioSession.instance;
-      await session.configure(const AudioSessionConfiguration(
-        avAudioSessionCategory: AVAudioSessionCategory.playAndRecord,
-        avAudioSessionCategoryOptions:
-            AVAudioSessionCategoryOptions.allowBluetooth,
-        avAudioSessionMode: AVAudioSessionMode.spokenAudio,
-      ));
-
       _audioStream = await _listenRecorder.startStream(
         RecordConfig(
           encoder: AudioEncoder.pcm16bits,
@@ -154,29 +146,48 @@ class _InterviewState extends State<Interview> {
           noiseSuppress: true,
         ),
       );
+
+      await setupAudioSession();
+
       _listener = _audioStream!.listen((event) {
         final frame =
             event.sublist(0, (_sampleRate ~/ 1000 * _vadFrameSizeMs) * 2);
-        setState(() {
-          final previousVoiceActivity = _voiceActivity;
-          _voiceActivity = _voiceDetector.processFrameBytes(frame);
-          if (_voiceActivity == VoiceActivity.active && _isInterviewing) {
+        final previousVoiceActivity = _voiceActivity;
+        _voiceActivity = _voiceDetector.processFrameBytes(frame);
+
+        if (previousVoiceActivity != _voiceActivity) {
+          print('Voice activity: $_voiceActivity');
+          log.fine('Voice activity: $_voiceActivity');
+        }
+
+        if (_voiceActivity == VoiceActivity.active && _isInterviewing) {
+          setState(() {
             if (previousVoiceActivity == VoiceActivity.inactive) {
               _voiceActivityStart = DateTime.now();
             }
 
             _lastVoiceActivity = DateTime.now();
-          } else if (_lastVoiceActivity != null &&
-              _voiceActivityStart != null &&
-              DateTime.now().difference(_lastVoiceActivity!).inMilliseconds >
-                  _voiceDebounceMs &&
-              _isRecording) {
-            log.fine('Finished segment, uploading');
-            finishSegment();
-          }
-        });
+          });
+        } else if (_lastVoiceActivity != null &&
+            _voiceActivityStart != null &&
+            DateTime.now().difference(_lastVoiceActivity!).inMilliseconds >
+                _voiceDebounceMs &&
+            _isRecording) {
+          log.fine('Finished segment, uploading');
+          finishSegment();
+        }
       });
     }
+  }
+
+  Future<void> setupAudioSession() async {
+    final session = await AudioSession.instance;
+    await session.configure(const AudioSessionConfiguration(
+      avAudioSessionCategory: AVAudioSessionCategory.playAndRecord,
+      avAudioSessionCategoryOptions:
+          AVAudioSessionCategoryOptions.allowBluetooth,
+      avAudioSessionMode: AVAudioSessionMode.videoChat,
+    ));
   }
 
   Future<void> beginInterview() async {
@@ -184,7 +195,7 @@ class _InterviewState extends State<Interview> {
       _isInterviewing = true;
     });
 
-    sendTextMessage("I'm ready", false);
+    sendTextMessage(_isPaused ? "I'm ready to continue" : "I'm ready", false);
 
     await startRecording();
   }
@@ -204,6 +215,7 @@ class _InterviewState extends State<Interview> {
         const RecordConfig(encoder: AudioEncoder.wav),
         path: '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}.wav',
       );
+      await setupAudioSession();
     }
 
     setState(() {
@@ -238,6 +250,8 @@ class _InterviewState extends State<Interview> {
       videoFile = await _controller!.stopVideoRecording();
     }
     final isInterruption = _isAwaitingResponse;
+    // cancel any current response we're getting
+    _responseStream?.cancel();
 
     setState(() {
       _isRecording = false;
@@ -298,6 +312,10 @@ class _InterviewState extends State<Interview> {
       request.headers['Content-Type'] = 'application/json';
       request.body = messageJson;
       final response = await client.send(request);
+      if (response.statusCode != 200) {
+        log.warning('Failed to send message: ${response.statusCode}');
+        return;
+      }
       final parser = InterviewResponseStreamParser();
       // ** THIS CODE IS FOR FLUTTER_SOUND, we need to get back to this
       // // REMOVE
@@ -326,6 +344,9 @@ class _InterviewState extends State<Interview> {
 
           if (result.isStage) {
             _currentStage = result.stage;
+            if (_currentStage!.progress >= 100) {
+              _conversation.state = BuilderState.finished;
+            }
           } else {
             _audioSource!.addToBuffer(result.audio!);
             // streamCtrl.sink.add(result.audio!);
@@ -336,11 +357,11 @@ class _InterviewState extends State<Interview> {
         // _player.foodSink!.add(FoodEvent(() async {
         //   await _player.stopPlayer();
         // }));
-        // if (!audioPlayer.playing) {
-        audioPlayer.setAudioSource(_audioSource!).then((duration) {
-          audioPlayer.play();
-        });
-        // }
+        if (!_isComplete && !_isPaused) {
+          audioPlayer.setAudioSource(_audioSource!).then((duration) {
+            audioPlayer.play();
+          });
+        }
       });
     } catch (e) {
       log.fine(e);

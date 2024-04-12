@@ -14,6 +14,7 @@ export type BuilderConversationData = {
     state: "active" | "finished";
     progress: number;
   }[];
+  nonce?: number;
 };
 
 const profileQuestions = [

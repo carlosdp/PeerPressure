@@ -641,12 +641,13 @@ packages:
     source: hosted
     version: "1.1.0"
   record_darwin:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: record_darwin
-      sha256: ee8cb1bb1712d7ce38140ecabe70e5c286c02f05296d66043bee865ace7eb1b9
-      url: "https://pub.dev"
-    source: hosted
+      path: record_darwin
+      ref: echo-cancel-ios
+      resolved-ref: "86a82fc5d3b134aa10364b8cde6f4617f327c712"
+      url: "https://github.com/carlosdp/record.git"
+    source: git
     version: "1.0.1"
   record_linux:
     dependency: transitive
