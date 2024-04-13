@@ -277,7 +277,7 @@ class InterviewController {
           _audioSource!.addToBuffer(result.audio!);
           // streamCtrl.sink.add(result.audio!);
         }
-      }, onDone: () {
+      }, onDone: () async {
         final newStage = parser.finalize();
         if (!parser.wait) {
           currentStage = newStage;
@@ -289,6 +289,10 @@ class InterviewController {
         //   await _player.stopPlayer();
         // }));
         if (!isPaused) {
+          if (audioPlayer.playing) {
+            await audioPlayer.stop();
+          }
+
           audioPlayer.setAudioSource(_audioSource!).then((duration) {
             // I think we fixed the volume issue. We need to let audioPlayer
             // override the AudioSession temporarily during playback, and then
