@@ -65,7 +65,7 @@ class InterviewInflight extends StatelessWidget {
               ),
               const SizedBox(height: 26),
               AnimatedSwitcher(
-                duration: const Duration(milliseconds: 2000),
+                duration: const Duration(milliseconds: 1000),
                 transitionBuilder: (child, animation) => FadeTransition(
                   opacity: animation,
                   child: child,

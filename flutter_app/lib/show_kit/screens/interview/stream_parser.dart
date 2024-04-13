@@ -26,6 +26,7 @@ bool iteratorEquals<T>(Iterator<T> a, Iterator<T> b) {
 }
 
 class InterviewResponseStreamParser {
+  bool wait = false;
   final InterviewStage _stage = InterviewStage(
     title: '',
     instructions: '',
@@ -61,6 +62,10 @@ class InterviewResponseStreamParser {
         if (c == '>') {
           _currentKey = _buffer;
           _buffer = '';
+
+          if (_currentKey == 'wait') {
+            wait = true;
+          }
         } else if (c == '<') {
           _commitCurrentKey();
         } else {

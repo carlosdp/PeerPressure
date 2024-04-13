@@ -110,7 +110,13 @@ export async function generateInitialConversationMessage(
       {
         role: "system",
         content:
-          `You MUST respond in the following format, and include all fields listed:
+          `You MUST respond in one of the following formats, and include all fields listed:
+        Determine if the user is likely to be done answering the question, based on how they finished their answer.
+        If you do not think they are done yet, respond with just this tag to indicate we're still waiting for them to finish:
+
+        <wait>
+
+        Otherwise, if they are done and we're ready to move to the next question, respond with these fields:
         - thought: Your reasoning for choosing this topic and asking this question
         - topic: The topic to ask about
         - voice: A short voice script to read out to the user

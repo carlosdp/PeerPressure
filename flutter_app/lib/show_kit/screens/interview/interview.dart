@@ -107,6 +107,7 @@ class _InterviewState extends State<Interview> {
     // Not sure why this happens yet, perhaps something to do with the AudioSession?
     await _startVideoRecording();
     await _interviewController.beginInterview();
+    setState(() {});
   }
 
   Future<void> _pauseInterview() async {

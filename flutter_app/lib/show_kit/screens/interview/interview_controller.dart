@@ -53,7 +53,7 @@ class InterviewController {
   final _listenRecorder = AudioRecorder();
   StreamSubscription? _listener;
   late VoiceActivityDetector _voiceDetector;
-  final audioPlayer = AudioPlayer(handleAudioSessionActivation: false);
+  final audioPlayer = AudioPlayer(handleAudioSessionActivation: true);
   final streamCtrl = StreamController<List<int>>.broadcast();
   // FlutterSoundPlayer _player = FlutterSoundPlayer();
 
@@ -90,7 +90,8 @@ class InterviewController {
   Future<void> beginInterview() async {
     isInterviewing = true;
 
-    _sendTextMessage(isPaused ? "I'm ready to continue" : "I'm ready", false);
+    _sendTextMessage(
+        isPaused ? 'Please repeat the question' : "I'm ready", false);
 
     await _startRecording();
   }
@@ -119,8 +120,6 @@ class InterviewController {
         ),
       );
 
-      // await _setupAudioSession();
-
       _listener = _audioStream!.listen((event) {
         final frame =
             event.sublist(0, (_sampleRate ~/ 1000 * _vadFrameSizeMs) * 2);
@@ -143,7 +142,7 @@ class InterviewController {
                 _voiceDebounceMs &&
             _isRecording) {
           log.fine('Finished segment, uploading');
-          // _finishSegment();
+          _finishSegment();
         }
       });
     }
@@ -151,22 +150,29 @@ class InterviewController {
 
   Future<void> _setupAudioSession() async {
     final session = await AudioSession.instance;
-    await session.configure(const AudioSessionConfiguration(
+    await session.configure(AudioSessionConfiguration(
       avAudioSessionCategory: AVAudioSessionCategory.playAndRecord,
       avAudioSessionCategoryOptions:
-          AVAudioSessionCategoryOptions.allowBluetooth,
+          AVAudioSessionCategoryOptions.allowBluetooth |
+              AVAudioSessionCategoryOptions.defaultToSpeaker,
       avAudioSessionMode: AVAudioSessionMode.videoChat,
     ));
+    session.setActive(true);
   }
 
   Future<void> _startRecording() async {
     if (await _recorder.hasPermission()) {
       final tempDir = await getTemporaryDirectory();
       await _recorder.start(
-        const RecordConfig(encoder: AudioEncoder.wav),
+        RecordConfig(
+          encoder: AudioEncoder.wav,
+          sampleRate: _sampleRate,
+          numChannels: 1,
+          echoCancel: true,
+          noiseSuppress: true,
+        ),
         path: '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}.wav',
       );
-      // await _setupAudioSession();
     }
 
     _isRecording = true;
@@ -261,10 +267,10 @@ class InterviewController {
         final result = parser.parseChunk(chunk);
 
         if (result.isStage) {
-          currentStage = result.stage;
-          onStageUpdate();
+          // currentStage = result.stage;
+          // onStageUpdate();
 
-          if (currentStage!.progress >= 100) {
+          if (currentStage != null && currentStage!.progress >= 100) {
             onComplete();
           }
         } else {
@@ -272,16 +278,25 @@ class InterviewController {
           // streamCtrl.sink.add(result.audio!);
         }
       }, onDone: () {
-        currentStage = parser.finalize();
+        final newStage = parser.finalize();
+        if (!parser.wait) {
+          currentStage = newStage;
+          onStageUpdate();
+        } else {
+          log.fine('User not finished, waiting...');
+        }
         // _player.foodSink!.add(FoodEvent(() async {
         //   await _player.stopPlayer();
         // }));
         if (!isPaused) {
           audioPlayer.setAudioSource(_audioSource!).then((duration) {
-            // I'm not sure this should be necessary, let's look into it
-            // at some point. Hack works for now.
-            audioPlayer.setVolume(3.0);
-            audioPlayer.play();
+            // I think we fixed the volume issue. We need to let audioPlayer
+            // override the AudioSession temporarily during playback, and then
+            // restore it to the recording mode when it's done.
+            audioPlayer.setVolume(1.0);
+            audioPlayer.play().then((_) {
+              _setupAudioSession();
+            });
           });
         }
       });

@@ -126,6 +126,7 @@ Deno.serve(async (req) => {
   let progress = conversation.progress;
   const queuingStrategy = new CountQueuingStrategy({ highWaterMark: 1 });
   let cancelled = false;
+  let waiting = false;
 
   const textEncoder = new TextEncoder();
   const stream = new ReadableStream({
@@ -136,7 +137,7 @@ Deno.serve(async (req) => {
         },
         async close() {
           // controller.close();
-          if (cancelled) {
+          if (cancelled || waiting) {
             return;
           }
 
@@ -193,7 +194,7 @@ Deno.serve(async (req) => {
                 console.log("DONE WITH LLM");
                 return;
               }
-              const data: any[] = [];
+              const data: { choices: { delta: { content: string } }[] }[] = [];
               const lines = chunk.split("\n");
               for (const line of lines) {
                 if (line.startsWith("data: ")) {
@@ -219,6 +220,10 @@ Deno.serve(async (req) => {
                     tag = buffer;
                     console.log("TAG", tag);
                     buffer = "";
+
+                    if (tag === "wait") {
+                      waiting = true;
+                    }
                   } else {
                     buffer += c;
                   }
@@ -230,7 +235,11 @@ Deno.serve(async (req) => {
               }
             },
             flush() {
-              createAudioStream(message);
+              if (!waiting && !cancelled) {
+                createAudioStream(message);
+              } else {
+                controller.close();
+              }
             },
           }),
         );
