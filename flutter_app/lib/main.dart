@@ -18,7 +18,7 @@ void main() async {
     anonKey: supabaseAnonKey,
   );
 
-  Logger.root.level = Level.ALL;
+  Logger.root.level = Level.FINE;
   Logger.root.onRecord.listen((record) {
     // ignore: avoid_print
     print('${record.level.name}: ${record.time}: ${record.message}');

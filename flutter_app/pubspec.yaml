@@ -47,8 +47,6 @@ dependencies:
   record: ^5.0.5
   scroll_date_picker: ^3.8.0
   geocoding: ^3.0.0
-  vad:
-    path: ./packages/vad
   logging: ^1.2.0
   rive: ^0.13.1
   http: ^1.2.1
@@ -56,6 +54,7 @@ dependencies:
   audio_session: ^0.1.19
   flutter_sound: ^9.2.13
   speech_to_text: ^6.6.0
+  onnxruntime: ^1.4.1
 
 dependency_overrides:
   record_darwin:
@@ -88,6 +87,7 @@ flutter:
 
   assets:
     - assets/zara.riv
+    - assets/silero_vad.onnx
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

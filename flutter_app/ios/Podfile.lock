@@ -14,6 +14,14 @@ PODS:
     - Flutter
   - just_audio (0.0.1):
     - Flutter
+  - onnxruntime (0.0.1):
+    - Flutter
+    - onnxruntime-objc (= 1.15.1)
+  - onnxruntime-c (1.15.1)
+  - onnxruntime-objc (1.15.1):
+    - onnxruntime-objc/Core (= 1.15.1)
+  - onnxruntime-objc/Core (1.15.1):
+    - onnxruntime-c (= 1.15.1)
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -44,6 +52,7 @@ DEPENDENCIES:
   - flutter_sound (from `.symlinks/plugins/flutter_sound/ios`)
   - geocoding_ios (from `.symlinks/plugins/geocoding_ios/ios`)
   - just_audio (from `.symlinks/plugins/just_audio/ios`)
+  - onnxruntime (from `.symlinks/plugins/onnxruntime/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - record_darwin (from `.symlinks/plugins/record_darwin/ios`)
   - rive_common (from `.symlinks/plugins/rive_common/ios`)
@@ -57,6 +66,8 @@ SPEC REPOS:
   trunk:
     - flutter_sound_core
     - Try
+    - onnxruntime-c
+    - onnxruntime-objc
 
 EXTERNAL SOURCES:
   app_links:
@@ -73,6 +84,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/geocoding_ios/ios"
   just_audio:
     :path: ".symlinks/plugins/just_audio/ios"
+  onnxruntime:
+    :path: ".symlinks/plugins/onnxruntime/ios"
   path_provider_foundation:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
   record_darwin:
@@ -99,6 +112,9 @@ SPEC CHECKSUMS:
   flutter_sound_core: 26c10e5832e76aaacfae252d8925232281c486ae
   geocoding_ios: d7460f56e80e118d57678efe5c2cdc888739ff18
   just_audio: baa7252489dbcf47a4c7cc9ca663e9661c99aafa
+  onnxruntime: e9346181d75b8dea8733bdae512a22c298962e00
+  onnxruntime-c: ebdcfd8650bcbd10121c125262f99dea681b92a3
+  onnxruntime-objc: ae7acec7a3d03eaf072d340afed7a35635c1c2a6
   path_provider_foundation: 3784922295ac71e43754bd15e0653ccfd36a147c
   record_darwin: 1f6619f2abac4d1ca91d3eeab038c980d76f1517
   rive_common: c537b4eed761e903a9403d93c347b69bd7a4762f
