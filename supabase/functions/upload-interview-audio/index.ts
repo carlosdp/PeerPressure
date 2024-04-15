@@ -191,7 +191,7 @@ Deno.serve(async (req) => {
         },
         async close() {
           // controller.close();
-          if (cancelled || waiting) {
+          if (cancelled || waiting || message.length === 0) {
             return;
           }
 
