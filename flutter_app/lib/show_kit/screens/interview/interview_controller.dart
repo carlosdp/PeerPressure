@@ -13,7 +13,6 @@ import 'package:just_audio/just_audio.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
-import 'package:vad/vad.dart';
 import 'package:http/http.dart' as http;
 import 'package:audio_session/audio_session.dart';
 
@@ -43,7 +42,7 @@ class InterviewController {
   bool _isRecording = false;
   bool _isAwaitingResponse = false;
   final int _sampleRate = 16000;
-  final int _vadFrameSizeMs = 30;
+  final int _vadFrameSizeMs = 64;
   final int _voiceDebounceMs = 1000;
   bool _voiceActivity = false;
   DateTime? _voiceActivityStart;
@@ -54,9 +53,7 @@ class InterviewController {
   final _recorder = AudioRecorder();
   final _listenRecorder = AudioRecorder();
   StreamSubscription? _listener;
-  late VoiceActivityDetector _voiceDetector;
   late VadIterator _vadIterator;
-  final _vadFrameSize = 64;
   final audioPlayer = AudioPlayer(handleAudioSessionActivation: true);
   final streamCtrl = StreamController<List<int>>.broadcast();
   // FlutterSoundPlayer _player = FlutterSoundPlayer();
@@ -71,10 +68,6 @@ class InterviewController {
     required this.onComplete,
     required this.profileId,
   }) {
-    _voiceDetector = VoiceActivityDetector();
-    _voiceDetector.setSampleRate(16000);
-    _voiceDetector.setMode(ThresholdMode.veryAggressive);
-
     _vadIterator = VadIterator(64, _sampleRate);
     _vadIterator.initModel();
 
@@ -142,7 +135,7 @@ class InterviewController {
       );
 
       _listener = _audioStream!.listen((event) async {
-        final windowByteCount = _vadFrameSize * 2 * _sampleRate ~/ 1000;
+        final windowByteCount = _vadFrameSizeMs * 2 * _sampleRate ~/ 1000;
         final frame = event.sublist(0, windowByteCount);
 
         final previousVoiceActivity = _voiceActivity;
@@ -156,8 +149,8 @@ class InterviewController {
           log.fine('Voice activity: $_voiceActivity');
         }
 
-        if (_voiceActivity == VoiceActivity.active && isInterviewing) {
-          if (previousVoiceActivity == VoiceActivity.inactive) {
+        if (_voiceActivity && isInterviewing) {
+          if (previousVoiceActivity) {
             _voiceActivityStart = DateTime.now();
           }
 

@@ -47,8 +47,6 @@ dependencies:
   record: ^5.0.5
   scroll_date_picker: ^3.8.0
   geocoding: ^3.0.0
-  vad:
-    path: ./packages/vad
   logging: ^1.2.0
   rive: ^0.13.1
   http: ^1.2.1

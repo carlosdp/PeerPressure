@@ -1,7 +1,10 @@
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
+import 'package:logging/logging.dart';
 import 'package:onnxruntime/onnxruntime.dart';
+
+final log = Logger('VadIterator');
 
 class VadIterator {
   final _threshold = 0.5;
@@ -39,7 +42,7 @@ class VadIterator {
     _windowSizeSamples = srPerMs * _frameSize;
     OrtEnv.instance.init();
     OrtEnv.instance.availableProviders().forEach((element) {
-      print('onnx provider=$element');
+      log.fine('onnx provider=$element');
     });
   }
 
@@ -66,7 +69,7 @@ class VadIterator {
       ..setInterOpNumThreads(1)
       ..setIntraOpNumThreads(1)
       ..setSessionGraphOptimizationLevel(GraphOptimizationLevel.ortEnableAll);
-    const assetFileName = 'assets/models/silero_vad.onnx';
+    const assetFileName = 'assets/silero_vad.onnx';
     final rawAssetFile = await rootBundle.load(assetFileName);
     final bytes = rawAssetFile.buffer.asUint8List();
     _session = OrtSession.fromBuffer(bytes, _sessionOptions!);
@@ -114,12 +117,12 @@ class VadIterator {
 
     /// 1) Silence
     if ((output < _threshold) && !_triggered) {
-      print('vad silence: ${_currentSample / _sampleRate}s');
+      log.finest('vad silence: ${_currentSample / _sampleRate}s');
     }
 
     /// 2) Speaking
     if ((output >= (_threshold - 0.15)) && _triggered) {
-      print('vad speaking2: ${_currentSample / _sampleRate}s');
+      log.finest('vad speaking2: ${_currentSample / _sampleRate}s');
     }
 
     /// 3) Start
@@ -129,7 +132,7 @@ class VadIterator {
       /// minus window_size_samples to get precise start time point.
       final speechStart =
           _currentSample - _windowSizeSamples - _speechPadSamples;
-      print('vad start: ${speechStart / _sampleRate}s');
+      log.finest('vad start: ${speechStart / _sampleRate}s');
     }
 
     /// 4) End
@@ -140,7 +143,7 @@ class VadIterator {
 
       /// a. silence < min_slience_samples, continue speaking
       if (_currentSample - _tempEnd < _minSilenceSamples) {
-        print('vad speaking4: ${_currentSample / _sampleRate}s');
+        log.finest('vad speaking4: ${_currentSample / _sampleRate}s');
       }
 
       /// b. silence >= min_slience_samples, end speaking
@@ -150,7 +153,7 @@ class VadIterator {
             : _currentSample + _speechPadSamples;
         _tempEnd = 0;
         _triggered = false;
-        print('vad end: ${speechEnd / _sampleRate}s');
+        log.finest('vad end: ${speechEnd / _sampleRate}s');
       }
     }
     return _triggered;
