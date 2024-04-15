@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter_app/models/interview.dart';
 import 'package:flutter_app/show_kit/screens/interview/common.dart';
 import 'package:flutter_app/show_kit/screens/interview/stream_parser.dart';
 import 'package:flutter_app/show_kit/screens/interview/streaming_source.dart';
@@ -56,6 +57,7 @@ class InterviewController {
   final audioPlayer = AudioPlayer(handleAudioSessionActivation: true);
   final streamCtrl = StreamController<List<int>>.broadcast();
   // FlutterSoundPlayer _player = FlutterSoundPlayer();
+  final InterviewModel _interviewModel = InterviewModel();
 
   bool get isPaused => !isInterviewing && currentStage != null;
 
@@ -72,6 +74,19 @@ class InterviewController {
 
     _setupAudioSession().then((_) {
       _startListening();
+    });
+
+    _interviewModel.fetchActiveInterview().then((_) {
+      if (_interviewModel.interview != null) {
+        final idx = _interviewModel.messages
+            .lastIndexWhere((e) => e.role == 'assistant');
+        if (idx > -1) {
+          final stage =
+              _interviewModel.messages[idx].metadata as InterviewStage?;
+          currentStage = stage;
+          onStageUpdate();
+        }
+      }
     });
 
     // ** FLUTTER SOUND **

@@ -103,6 +103,70 @@ export interface Database {
         }
         Relationships: []
       }
+      interview_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          interview_id: string
+          metadata: Json
+          role: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          interview_id: string
+          metadata?: Json
+          role: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          interview_id?: string
+          metadata?: Json
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_messages_interview_id_fkey"
+            columns: ["interview_id"]
+            isOneToOne: false
+            referencedRelation: "interviews"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      interviews: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          profile_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          profile_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interviews_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       job: {
         Row: {
           completedon: string | null
@@ -174,7 +238,6 @@ export interface Database {
           created_at: string
           data: Json
           id: string
-          is_match: boolean
           match_accepted_at: string | null
           match_rejected_at: string | null
           matched_profile_id: string
@@ -184,7 +247,6 @@ export interface Database {
           created_at?: string
           data?: Json
           id?: string
-          is_match: boolean
           match_accepted_at?: string | null
           match_rejected_at?: string | null
           matched_profile_id: string
@@ -194,7 +256,6 @@ export interface Database {
           created_at?: string
           data?: Json
           id?: string
-          is_match?: boolean
           match_accepted_at?: string | null
           match_rejected_at?: string | null
           matched_profile_id?: string
@@ -248,6 +309,13 @@ export interface Database {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "messages_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches_with_votes"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "messages_sender_id_fkey"
             columns: ["sender_id"]
             isOneToOne: false
@@ -262,7 +330,6 @@ export interface Database {
           biographical_data: Json
           birth_date: string
           blocks: Json
-          builder_conversation_data: Json
           created_at: string
           display_location: string
           first_name: string
@@ -279,7 +346,6 @@ export interface Database {
           biographical_data?: Json
           birth_date: string
           blocks?: Json
-          builder_conversation_data?: Json
           created_at?: string
           display_location: string
           first_name: string
@@ -296,7 +362,6 @@ export interface Database {
           biographical_data?: Json
           birth_date?: string
           blocks?: Json
-          builder_conversation_data?: Json
           created_at?: string
           display_location?: string
           first_name?: string
@@ -313,6 +378,66 @@ export interface Database {
             foreignKeyName: "profiles_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      rounds: {
+        Row: {
+          active: boolean
+          end_time: string
+          id: string
+          join_balance: number
+          name: string
+          voting_enabled: boolean
+        }
+        Insert: {
+          active?: boolean
+          end_time: string
+          id?: string
+          join_balance?: number
+          name: string
+          voting_enabled?: boolean
+        }
+        Update: {
+          active?: boolean
+          end_time?: string
+          id?: string
+          join_balance?: number
+          name?: string
+          voting_enabled?: boolean
+        }
+        Relationships: []
+      }
+      saved_profiles: {
+        Row: {
+          created_at: string
+          profile_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          profile_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          profile_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_profiles_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saved_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           }
@@ -369,6 +494,42 @@ export interface Database {
         }
         Relationships: []
       }
+      users: {
+        Row: {
+          display_name: string
+          id: string
+          matching_profile_id: string | null
+          votes_balance: number
+        }
+        Insert: {
+          display_name?: string
+          id: string
+          matching_profile_id?: string | null
+          votes_balance?: number
+        }
+        Update: {
+          display_name?: string
+          id?: string
+          matching_profile_id?: string | null
+          votes_balance?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "users_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "users_matching_profile_id_fkey"
+            columns: ["matching_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       version: {
         Row: {
           cron_on: string | null
@@ -387,25 +548,181 @@ export interface Database {
         }
         Relationships: []
       }
+      votes: {
+        Row: {
+          allocation: number
+          created_at: string
+          id: string
+          match_id: string
+          round_id: string
+          user_id: string
+        }
+        Insert: {
+          allocation: number
+          created_at?: string
+          id?: string
+          match_id: string
+          round_id: string
+          user_id: string
+        }
+        Update: {
+          allocation?: number
+          created_at?: string
+          id?: string
+          match_id?: string
+          round_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "votes_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "votes_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches_with_votes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "votes_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: false
+            referencedRelation: "rounds"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "votes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
-      [_ in never]: never
+      matches_with_votes: {
+        Row: {
+          created_at: string | null
+          data: Json | null
+          id: string | null
+          match_accepted_at: string | null
+          match_rejected_at: string | null
+          matched_profile_id: string | null
+          profile_id: string | null
+          total_votes: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matches_matched_profile_id_fkey"
+            columns: ["matched_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Functions: {
+      active_interview: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          profile_id: string
+        }
+      }
+      active_interview_for_profile: {
+        Args: {
+          profile_id: string
+        }
+        Returns: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          profile_id: string
+        }
+      }
       create_match: {
         Args: {
           profile_id: string
-          is_match: boolean
         }
         Returns: undefined
+      }
+      get_contestant_profiles: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          available_photos: Json
+          biographical_data: Json
+          birth_date: string
+          blocks: Json
+          created_at: string
+          display_location: string
+          first_name: string
+          gender: Database["public"]["Enums"]["gender"]
+          id: string
+          location: unknown
+          photo_keys: Json
+          preferences: Json
+          updated_at: string
+          user_id: string | null
+        }[]
       }
       get_likes: {
         Args: Record<PropertyKey, never>
         Returns: Json[]
       }
+      get_match: {
+        Args: {
+          profile_1: string
+          profile_2: string
+        }
+        Returns: {
+          created_at: string | null
+          data: Json | null
+          id: string | null
+          match_accepted_at: string | null
+          match_rejected_at: string | null
+          matched_profile_id: string | null
+          profile_id: string | null
+          total_votes: number | null
+        }
+      }
       get_matches: {
         Args: Record<PropertyKey, never>
         Returns: Json[]
+      }
+      get_matching_profile: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          available_photos: Json
+          biographical_data: Json
+          birth_date: string
+          blocks: Json
+          created_at: string
+          display_location: string
+          first_name: string
+          gender: Database["public"]["Enums"]["gender"]
+          id: string
+          location: unknown
+          photo_keys: Json
+          preferences: Json
+          updated_at: string
+          user_id: string | null
+        }
       }
       get_pending_bot_matches: {
         Args: Record<PropertyKey, never>
@@ -413,7 +730,6 @@ export interface Database {
           created_at: string
           data: Json
           id: string
-          is_match: boolean
           match_accepted_at: string | null
           match_rejected_at: string | null
           matched_profile_id: string
@@ -427,7 +743,6 @@ export interface Database {
           biographical_data: Json
           birth_date: string
           blocks: Json
-          builder_conversation_data: Json
           created_at: string
           display_location: string
           first_name: string
@@ -447,7 +762,6 @@ export interface Database {
           biographical_data: Json
           birth_date: string
           blocks: Json
-          builder_conversation_data: Json
           created_at: string
           display_location: string
           first_name: string

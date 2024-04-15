@@ -184,3 +184,76 @@ class Match {
         matchedProfileId = json['matched_profile_id'] as String,
         totalVotes = json['total_votes'] as int;
 }
+
+class Interview {
+  final String id;
+  final String profileId;
+  final DateTime createdAt;
+  final DateTime? completedAt;
+
+  bool get isActive => completedAt == null;
+
+  Interview({
+    required this.id,
+    required this.profileId,
+    required this.createdAt,
+    required this.completedAt,
+  });
+
+  Interview.fromJson(Map<String, dynamic> json)
+      : id = json['id'] as String,
+        profileId = json['profile_id'] as String,
+        createdAt = DateTime.parse(json['created_at'] as String),
+        completedAt = json['completed_at'] != null
+            ? DateTime.parse(json['completed_at'] as String)
+            : null;
+}
+
+class InterviewMessageMetadata {
+  final String title;
+  final String topic;
+  final String instructions;
+  final int progress;
+
+  InterviewMessageMetadata({
+    required this.title,
+    required this.topic,
+    required this.instructions,
+    required this.progress,
+  });
+
+  InterviewMessageMetadata.fromJson(Map<String, dynamic> json)
+      : title = json['title'] as String,
+        topic = json['topic'] as String,
+        instructions = json['instructions'] as String,
+        progress = json['progress'] as int;
+}
+
+class InterviewMessage {
+  final String id;
+  final String interviewId;
+  final String role;
+  final String content;
+  final InterviewMessageMetadata? metadata;
+  final DateTime createdAt;
+
+  InterviewMessage({
+    required this.id,
+    required this.interviewId,
+    required this.role,
+    required this.content,
+    required this.metadata,
+    required this.createdAt,
+  });
+
+  InterviewMessage.fromJson(Map<String, dynamic> json)
+      : id = json['id'] as String,
+        interviewId = json['interview_id'] as String,
+        role = json['role'] as String,
+        content = json['content'] as String,
+        metadata =
+            json['metadata'] != null && json['metadata']!['title'] != null
+                ? InterviewMessageMetadata.fromJson(json['metadata'])
+                : null,
+        createdAt = DateTime.parse(json['created_at'] as String);
+}

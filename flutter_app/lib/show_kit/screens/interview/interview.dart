@@ -28,14 +28,14 @@ class _InterviewState extends State<Interview> {
   List<CameraDescription> _cameras = [];
   late BuilderConversation _conversation;
   late InterviewController _interviewController;
-  late String profileId;
+  late String _profileId;
 
   @override
   void initState() {
     super.initState();
 
     final profile = Provider.of<ProfileModel>(context, listen: false).profile;
-    profileId = profile!.id;
+    _profileId = profile!.id;
 
     _interviewController = InterviewController(
       onSubmit: () {
@@ -52,7 +52,7 @@ class _InterviewState extends State<Interview> {
           _conversation.state = BuilderState.finished;
         });
       },
-      profileId: profileId,
+      profileId: _profileId,
     );
 
     _conversation = Provider.of<ProfileModel>(context, listen: false)
@@ -134,7 +134,7 @@ class _InterviewState extends State<Interview> {
       File file = File(videoFile.path);
 
       await supabase.storage.from('videos').upload(
-            '$profileId/interview-videos/$randomId',
+            '$_profileId/interview-videos/$randomId',
             file,
             fileOptions: FileOptions(
               contentType: videoFile.mimeType,
@@ -178,6 +178,10 @@ class _InterviewState extends State<Interview> {
   }
 
   Widget currentScreen() {
+    // final stage = _interviewController.currentStage ??
+    //     _interviewModel.messages
+    //         .lastWhere((m) => m.role == 'assistant')
+    //         ?.metadata as InterviewStage?;
     if (_isComplete) {
       return InterviewComplete(onDismiss: () {});
     } else if (_interviewController.isInterviewing &&

@@ -1,21 +1,16 @@
 import { rawMessageStream } from "../_shared/utils.ts";
-import { createJob } from "../worker/job.ts";
 import type { Database } from "../_shared/supabaseTypes.d.ts";
 
-export type BuilderConversationData = {
-  conversations?: {
-    messages: {
-      role: string;
-      content: string;
-      interruption?: boolean;
-      topic?: string;
-      followUp?: boolean;
-    }[];
-    state: "active" | "finished";
-    progress: number;
-  }[];
-  nonce?: number;
+type InterviewUserMessageMetadata = {
+  interruption: boolean;
 };
+
+function isInterviewUserMessage(
+  message: unknown,
+): message is InterviewUserMessageMetadata {
+  return typeof message === "object" && message !== null &&
+    "interruption" in message;
+}
 
 const profileQuestions = [
   "Personality Traits: What words would you use to describe yourself?",
@@ -60,27 +55,9 @@ const PROMPT =
 
 export async function generateInitialConversationMessage(
   profile: Database["public"]["Tables"]["profiles"]["Row"],
-  conversation: NonNullable<BuilderConversationData["conversations"]>[number],
+  messages: Database["public"]["Tables"]["interview_messages"]["Row"][],
 ) {
-  const responseCount =
-    conversation.messages.filter((m) => m.role === "user").length - 1;
-  const targetResponses = 10;
-  const newConversationMessage: NonNullable<
-    BuilderConversationData["conversations"]
-  >[number]["messages"][number] = {
-    role: "assistant",
-    content: "",
-  };
-
-  // TODO: re-implement this with streaming
-  // if (responseCount >= targetResponses) {
-  //   conversation.state = "finished";
-  //   newConversationMessage.content = "Thank you! Working on your profile...";
-
-  //   await createJob("buildProfile", { profileId: profile.id });
-
-  //   return conversation;
-  // }
+  const responseCount = messages.filter((m) => m.role === "user").length - 1;
 
   const res = await rawMessageStream(
     "openai/gpt-4-turbo-preview",
@@ -103,9 +80,13 @@ export async function generateInitialConversationMessage(
         content:
           `${responseCount}/10 responses used. Based on the conversation, decide the next area to ask about, and ask a question. You must NOT repeat a topic already covered. You can only send the user ONE message at a time.`,
       },
-      ...conversation.messages.map((m) => ({
+      ...messages.map((m) => ({
         role: m.role,
-        content: `${m.interruption ? "<INTERRUPT> " : ""}${m.content}`,
+        content: `${
+          isInterviewUserMessage(m.metadata)
+            ? m.metadata.interruption ? "<INTERRUPT> " : ""
+            : ""
+        }${m.content}`,
       })),
       {
         role: "system",

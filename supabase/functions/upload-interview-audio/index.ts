@@ -2,9 +2,18 @@ import { createSupabaseClient } from "../_shared/supabase.ts";
 import { transcribe } from "../_shared/utils.ts";
 import logger from "../logger.ts";
 import {
-  BuilderConversationData,
   generateInitialConversationMessage,
 } from "../send-builder-message/initialConversation.ts";
+
+type InterviewAssistantMessageData = {
+  progress?: number;
+};
+
+function isInterviewAssistantMessageData(
+  data: unknown,
+): data is InterviewAssistantMessageData {
+  return typeof data === "object" && data !== null;
+}
 
 Deno.serve(async (req) => {
   const { text, audio, interruption } = await req.json();
@@ -52,62 +61,94 @@ Deno.serve(async (req) => {
     );
   }
 
-  const conversationData = profile
-    .builder_conversation_data as BuilderConversationData;
-
-  if (!conversationData.conversations) {
-    // initial conversation
-    conversationData.conversations = [{
-      messages: [
-        { role: "assistant", content: "Ready to get started?" },
-      ],
-      state: "active",
-      progress: 0,
-    }];
-  } else if (
-    !conversationData.conversations.find((c) => c.state === "active")
-  ) {
-    // starting new conversation
-    conversationData.conversations.push({
-      messages: [
-        { role: "assistant", content: "Ready to get started?" },
-      ],
-      state: "active",
-      progress: 0,
-    });
-  }
-
-  const conversation =
-    conversationData.conversations[conversationData.conversations.length - 1];
-  conversation.messages.push({
-    role: "user",
-    content: transcription,
-    // it's only an interruption if the last message was not from the user,
-    // from the LLM's perspective
-    interruption: interruption &&
-      conversation.messages[conversation.messages.length - 1].role !==
-        "user",
-  });
-
-  const nonce = (conversationData.nonce ?? 0) + 1;
-  conversationData.nonce = nonce;
-  conversationData.conversations[conversationData.conversations.length - 1] =
-    conversation;
-
-  const { error: nonceError } = await supabase.from("profiles").update({
-    builder_conversation_data: conversationData,
-  }).eq("id", profile.id);
-  if (nonceError) {
-    console.error("Error updating nonce:", nonceError.message);
+  const { data: interview, error: interviewError } = await supabase.rpc(
+    "active_interview_for_profile",
+    { profile_id: profile.id },
+  );
+  if (interviewError) {
+    console.error("Error getting interview:", interviewError.message);
     return new Response(
       JSON.stringify({ error: "Server Error" }),
       { status: 500, headers: { "Content-Type": "application/json" } },
     );
   }
 
+  let activeInterview = interview;
+
+  if (!activeInterview) {
+    const { data: newInterview, error: newInterviewError } = await supabase
+      .from("interviews").insert({
+        profile_id: profile.id,
+      }).select().single();
+    if (newInterviewError) {
+      console.error("Error creating interview:", newInterviewError.message);
+      return new Response(
+        JSON.stringify({ error: "Server Error" }),
+        { status: 500, headers: { "Content-Type": "application/json" } },
+      );
+    }
+
+    activeInterview = newInterview;
+  }
+
+  const { data: messages, error: messagesError } = await supabase.from(
+    "interview_messages",
+  ).select().eq("interview_id", activeInterview.id);
+  if (messagesError) {
+    console.error("Error getting messages:", messagesError.message);
+    return new Response(
+      JSON.stringify({ error: "Server Error" }),
+      { status: 500, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
+  if (messages.length === 0) {
+    const { data: newMessage, error: insertError } = await supabase.from(
+      "interview_messages",
+    )
+      .insert({
+        interview_id: activeInterview.id,
+        role: "assistant",
+        content: "Ready to get started?",
+      }).select().single();
+    if (insertError) {
+      console.error("Error inserting message:", insertError.message);
+      return new Response(
+        JSON.stringify({ error: "Server Error" }),
+        { status: 500, headers: { "Content-Type": "application/json" } },
+      );
+    }
+
+    messages.push(newMessage);
+  }
+
+  const { data: newMessage, error: newMessageError } = await supabase.from(
+    "interview_messages",
+  ).insert({
+    interview_id: activeInterview.id,
+    role: "user",
+    content: transcription,
+    metadata: {
+      // it's only an interruption if the last message was not from the user,
+      // from the LLM's perspective
+      interruption: interruption &&
+        messages[messages.length - 1].role !==
+          "user",
+    },
+  }).select().single();
+  if (newMessageError) {
+    console.error("Error inserting message:", newMessageError.message);
+    return new Response(
+      JSON.stringify({ error: "Server Error" }),
+      { status: 500, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
+  messages.push(newMessage);
+
   const streamRes = await generateInitialConversationMessage(
     profile,
-    conversation,
+    messages,
   );
 
   const body = streamRes.body;
@@ -123,7 +164,12 @@ Deno.serve(async (req) => {
   let tag = "";
   let buffer = "";
   let message = "";
-  let progress = conversation.progress;
+  const lastAssistantMessageMetadata = messages.findLast((m) =>
+    m.role === "assistant"
+  )?.metadata;
+  let progress = isInterviewAssistantMessageData(lastAssistantMessageMetadata)
+    ? lastAssistantMessageMetadata.progress ?? 0
+    : 0;
   const queuingStrategy = new CountQueuingStrategy({ highWaterMark: 1 });
   let cancelled = false;
   let waiting = false;
@@ -141,37 +187,33 @@ Deno.serve(async (req) => {
             return;
           }
 
-          conversation.messages.push({
+          const { error: insertError } = await supabase.from(
+            "interview_messages",
+          ).insert({
+            interview_id: activeInterview.id,
             role: "assistant",
             content: message,
-          });
-          conversation.progress = progress;
-          conversation.state = progress >= 100 ? "finished" : "active";
-          conversationData
-            .conversations![conversationData.conversations!.length - 1] =
-              conversation;
-
-          const { data: nonceProfile, error: nonceProfileError } =
-            await supabase.from("profiles").select("builder_conversation_data")
-              .eq("id", profile.id).single();
-          if (nonceProfileError) {
-            console.error("Error getting nonce:", nonceProfileError.message);
-            return;
-          }
-          const nonceConversationData = nonceProfile
-            .builder_conversation_data as BuilderConversationData;
-          if (nonceConversationData.nonce !== nonce) {
-            console.log("Nonce mismatch, not updating");
-            return;
-          }
-
-          const { error: updateError } = await supabase.from("profiles").update(
-            {
-              builder_conversation_data: conversationData,
+            metadata: {
+              progress,
             },
-          ).eq("id", profile.id);
-          if (updateError) {
-            console.error("Error updating profile:", updateError.message);
+          });
+          if (insertError) {
+            console.error("Error inserting message:", insertError.message);
+            return;
+          }
+
+          if (progress >= 100) {
+            const { error: updateError } = await supabase.from("interviews")
+              .update({
+                completed_at: new Date().toISOString(),
+              }).eq("id", activeInterview.id);
+            if (updateError) {
+              console.error(
+                "Error updating interview for completion:",
+                updateError.message,
+              );
+              return;
+            }
           }
         },
       }, queuingStrategy);
