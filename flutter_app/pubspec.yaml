@@ -55,6 +55,7 @@ dependencies:
   just_audio: ^0.9.37
   audio_session: ^0.1.19
   flutter_sound: ^9.2.13
+  onnxruntime: ^1.4.1
 
 dependency_overrides:
   record_darwin:
@@ -87,6 +88,7 @@ flutter:
 
   assets:
     - assets/zara.riv
+    - assets/silero_vad.onnx
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

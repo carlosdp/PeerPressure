@@ -7,6 +7,7 @@ import 'package:flutter_app/models/interview.dart';
 import 'package:flutter_app/show_kit/screens/interview/common.dart';
 import 'package:flutter_app/show_kit/screens/interview/stream_parser.dart';
 import 'package:flutter_app/show_kit/screens/interview/streaming_source.dart';
+import 'package:flutter_app/show_kit/screens/interview/vad_iterator.dart';
 import 'package:flutter_app/supabase.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:logging/logging.dart';
@@ -44,7 +45,7 @@ class InterviewController {
   final int _sampleRate = 16000;
   final int _vadFrameSizeMs = 30;
   final int _voiceDebounceMs = 1000;
-  VoiceActivity _voiceActivity = VoiceActivity.inactive;
+  bool _voiceActivity = false;
   DateTime? _voiceActivityStart;
   DateTime? _lastVoiceActivity;
   StreamSubscription<List<int>>? _responseStream;
@@ -54,6 +55,8 @@ class InterviewController {
   final _listenRecorder = AudioRecorder();
   StreamSubscription? _listener;
   late VoiceActivityDetector _voiceDetector;
+  late VadIterator _vadIterator;
+  final _vadFrameSize = 64;
   final audioPlayer = AudioPlayer(handleAudioSessionActivation: true);
   final streamCtrl = StreamController<List<int>>.broadcast();
   // FlutterSoundPlayer _player = FlutterSoundPlayer();
@@ -71,6 +74,9 @@ class InterviewController {
     _voiceDetector = VoiceActivityDetector();
     _voiceDetector.setSampleRate(16000);
     _voiceDetector.setMode(ThresholdMode.veryAggressive);
+
+    _vadIterator = VadIterator(64, _sampleRate);
+    _vadIterator.initModel();
 
     _setupAudioSession().then((_) {
       _startListening();
@@ -135,11 +141,16 @@ class InterviewController {
         ),
       );
 
-      _listener = _audioStream!.listen((event) {
-        final frame =
-            event.sublist(0, (_sampleRate ~/ 1000 * _vadFrameSizeMs) * 2);
+      _listener = _audioStream!.listen((event) async {
+        final windowByteCount = _vadFrameSize * 2 * _sampleRate ~/ 1000;
+        final frame = event.sublist(0, windowByteCount);
+
         final previousVoiceActivity = _voiceActivity;
-        _voiceActivity = _voiceDetector.processFrameBytes(frame);
+
+        final floatBytes = Float32List.fromList(
+            Int16List.view(frame.buffer).map((e) => e / 32768).toList());
+
+        _voiceActivity = await _vadIterator.predict(floatBytes, false);
 
         if (previousVoiceActivity != _voiceActivity) {
           log.fine('Voice activity: $_voiceActivity');
