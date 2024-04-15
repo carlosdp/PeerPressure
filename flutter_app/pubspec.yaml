@@ -52,7 +52,6 @@ dependencies:
   http: ^1.2.1
   just_audio: ^0.9.37
   audio_session: ^0.1.19
-  flutter_sound: ^9.2.13
   speech_to_text: ^6.6.0
   onnxruntime: ^1.4.1
 
