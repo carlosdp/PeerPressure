@@ -4,13 +4,16 @@ import 'package:just_audio/just_audio.dart';
 class StreamingSource extends StreamAudioSource {
   static const int _sampleRate = 44100;
 
-  final Stream<List<int>> stream;
   final List<int> _buffer = [];
 
-  StreamingSource(this.stream);
+  StreamingSource();
 
   void addToBuffer(List<int> chunk) {
     _buffer.addAll(chunk);
+  }
+
+  bool hasAudio() {
+    return _buffer.isNotEmpty;
   }
 
   @override

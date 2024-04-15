@@ -169,9 +169,6 @@ Deno.serve(async (req) => {
     );
   }
 
-  let tag = "";
-  let buffer = "";
-  let message = "";
   const lastAssistantMessageMetadata = messages.findLast((m) =>
     m.role === "assistant"
   )?.metadata;
@@ -180,52 +177,11 @@ Deno.serve(async (req) => {
     : 0;
   const queuingStrategy = new CountQueuingStrategy({ highWaterMark: 1 });
   let cancelled = false;
-  let waiting = false;
+  let audioStream: ReadableStream<Uint8Array> | undefined;
 
-  const textEncoder = new TextEncoder();
   const stream = new ReadableStream({
     start(controller) {
-      const writableStream = new WritableStream({
-        write(chunk) {
-          controller.enqueue(chunk);
-        },
-        async close() {
-          // controller.close();
-          if (cancelled || waiting || message.length === 0) {
-            return;
-          }
-
-          const { error: insertError } = await supabase.from(
-            "interview_messages",
-          ).insert({
-            interview_id: activeInterview!.id,
-            role: "assistant",
-            content: message,
-            metadata: {
-              progress,
-            },
-          });
-          if (insertError) {
-            console.error("Error inserting message:", insertError.message);
-            return;
-          }
-
-          if (progress >= 100) {
-            const { error: updateError } = await supabase.from("interviews")
-              .update({
-                completed_at: new Date().toISOString(),
-              }).eq("id", activeInterview!.id);
-            if (updateError) {
-              console.error(
-                "Error updating interview for completion:",
-                updateError.message,
-              );
-              return;
-            }
-          }
-        },
-      }, queuingStrategy);
-      const writableStream2 = new WritableStream({
+      const audioOutputStream = new WritableStream({
         write(chunk) {
           controller.enqueue(chunk);
         },
@@ -234,131 +190,137 @@ Deno.serve(async (req) => {
         },
       }, queuingStrategy);
 
-      let audioStream: ReadableStream<Uint8Array> | undefined;
+      const reader = body.getReader();
+      let buffer = "";
+      let tag = "";
+      let message = "";
+      let waiting = false;
 
-      const llmStream = body.pipeThrough(new TextDecoderStream())
-        .pipeThrough(
-          new TransformStream({
-            transform: (chunk, controller) => {
-              if (chunk.includes("data: [DONE]")) {
-                console.log("DONE WITH LLM");
-                return;
-              }
-              const data: { choices: { delta: { content: string } }[] }[] = [];
-              const lines = chunk.split("\n");
-              for (const line of lines) {
-                if (line.startsWith("data: ")) {
-                  data.push(JSON.parse(line.slice(6)));
-                }
-              }
+      async function readStream() {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) {
+            break;
+          }
+          const chunk = new TextDecoder().decode(value);
+          if (chunk.includes("data: [DONE]")) {
+            console.log("DONE WITH LLM");
+            break;
+          }
+          const lines = chunk.split("\n");
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
+              const data = JSON.parse(line.slice(6));
+              const content = data.choices[0].delta.content;
 
-              for (const d of data) {
-                const content = d.choices[0].delta.content;
+              for (const c of content) {
+                if (c === "<") {
+                  if (tag === "voice") {
+                    // initiate call to 11labs w/ buffer
+                    message = buffer;
 
-                for (const c of content) {
-                  if (c === "<") {
-                    if (tag === "voice") {
-                      // initiate call to 11labs w/ buffer
-                      message = buffer;
-                    } else if (tag === "progress") {
-                      progress = parseInt(buffer);
+                    if (!waiting && !cancelled) {
+                      createAudioStream(message);
                     }
-
-                    tag = "";
-                    buffer = "";
-                  } else if (c === ">") {
-                    tag = buffer;
-                    console.log("TAG", tag);
-                    buffer = "";
-
-                    if (tag === "wait") {
-                      waiting = true;
-                    }
-                  } else {
-                    buffer += c;
+                  } else if (tag === "progress") {
+                    progress = parseInt(buffer);
                   }
+
+                  tag = "";
+                  buffer = "";
+                } else if (c === ">") {
+                  tag = buffer;
+                  console.log("TAG", tag);
+                  buffer = "";
+
+                  if (tag === "wait") {
+                    waiting = true;
+                    console.log("Waiting for user to finish");
+                    controller.close();
+                    return;
+                  }
+                } else {
+                  buffer += c;
                 }
-
-                controller.enqueue(
-                  textEncoder.encode(content),
-                );
               }
-            },
-            flush() {
-              if (!waiting && !cancelled) {
-                createAudioStream(message);
-              } else {
-                controller.close();
-              }
-            },
-          }),
-        );
-
-      llmStream.pipeTo(writableStream);
-
-      function createAudioStream(text: string) {
-        audioStream = new ReadableStream({
-          async start(controller) {
-            const audioRes = await fetch(
-              "https://api.elevenlabs.io/v1/text-to-speech/XqpJyEffBCIfiqUJ5cyZ/stream", // ?output_format=pcm_16000",
-              {
-                method: "POST",
-                body: JSON.stringify({
-                  text: text,
-                  model: "eleven_turbo_v2",
-                }),
-                headers: {
-                  "Content-Type": "application/json",
-                  "xi-api-key": Deno.env.get(
-                    "ELEVEN_LABS_API_KEY",
-                  )!,
-                },
-              },
-            );
-            const audioBody = audioRes.body;
-            if (!audioBody) {
-              logger.error("No audio body in response");
-              controller.close();
-              return;
             }
+          }
+        }
 
-            if (audioRes.status !== 200) {
-              logger.error(
-                `Error from 11labs: ${audioRes.status} ${await audioRes
-                  .text()}`,
-              );
-              controller.close();
-              return;
-            }
+        if (cancelled || waiting || message.length === 0) {
+          return;
+        }
 
-            const tag = textEncoder.encode("<audio>");
-            const closeTag = textEncoder.encode("</audio>");
-            const audioReader = audioBody.getReader();
-            let audioResult = await audioReader.read();
-            while (!audioResult.done) {
-              const tagAndAudio = new Uint8Array(
-                tag.length + audioResult.value.length +
-                  closeTag.length,
-              );
-              tagAndAudio.set(tag);
-              tagAndAudio.set(audioResult.value, tag.length);
-              tagAndAudio.set(
-                closeTag,
-                tag.length + audioResult.value.length,
-              );
-
-              controller.enqueue(tagAndAudio);
-
-              audioResult = await audioReader.read();
-            }
-
-            controller.close();
+        const { error: insertError } = await supabase.from(
+          "interview_messages",
+        ).insert({
+          interview_id: activeInterview!.id,
+          role: "assistant",
+          content: message,
+          metadata: {
+            progress,
           },
         });
-        audioStream.pipeTo(writableStream2);
+        if (insertError) {
+          console.error("Error inserting message:", insertError.message);
+          return;
+        }
+
+        if (progress >= 100) {
+          const { error: updateError } = await supabase.from("interviews")
+            .update({
+              completed_at: new Date().toISOString(),
+            }).eq("id", activeInterview!.id);
+          if (updateError) {
+            console.error(
+              "Error updating interview for completion:",
+              updateError.message,
+            );
+            return;
+          }
+        }
+      }
+
+      readStream();
+
+      async function createAudioStream(text: string) {
+        const audioRes = await fetch(
+          "https://api.elevenlabs.io/v1/text-to-speech/XqpJyEffBCIfiqUJ5cyZ/stream", // ?output_format=pcm_16000",
+          {
+            method: "POST",
+            body: JSON.stringify({
+              text: text,
+              model: "eleven_turbo_v2",
+            }),
+            headers: {
+              "Content-Type": "application/json",
+              "xi-api-key": Deno.env.get(
+                "ELEVEN_LABS_API_KEY",
+              )!,
+            },
+          },
+        );
+        const audioBody = audioRes.body;
+        if (!audioBody) {
+          logger.error("No audio body in response");
+          controller.close();
+          return;
+        }
+
+        if (audioRes.status !== 200) {
+          logger.error(
+            `Error from 11labs: ${audioRes.status} ${await audioRes
+              .text()}`,
+          );
+          controller.close();
+          return;
+        }
+
+        audioBody.pipeTo(audioOutputStream);
       }
     },
     cancel() {
+      audioStream?.cancel();
       cancelled = true;
     },
   }, queuingStrategy);
@@ -367,7 +329,7 @@ Deno.serve(async (req) => {
     stream,
     {
       headers: {
-        "Content-Type": "text/event-stream",
+        "Content-Type": "audio/mp3",
       },
     },
   );

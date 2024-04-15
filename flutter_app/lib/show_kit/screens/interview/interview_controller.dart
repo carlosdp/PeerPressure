@@ -54,7 +54,6 @@ class InterviewController {
   StreamSubscription? _listener;
   late VadIterator _vadIterator;
   final audioPlayer = AudioPlayer(handleAudioSessionActivation: true);
-  final streamCtrl = StreamController<List<int>>.broadcast();
   final InterviewModel _interviewModel = InterviewModel();
   final _speech = stt.SpeechToText();
 
@@ -192,20 +191,20 @@ class InterviewController {
   }
 
   void _onSpeechResult(srr.SpeechRecognitionResult result) {
-    if (result.finalResult) {
+    if (result.finalResult && result.recognizedWords.isNotEmpty) {
       log.fine('Speech result: ${result.recognizedWords}');
       _sendTextMessage(result.recognizedWords, _isAwaitingResponse);
     }
   }
 
   Future<void> _finishSegment() async {
-    await _speech.stop();
-    // cancel any current response we're getting
-    _responseStream?.cancel();
-
     _isRecording = false;
     _isAwaitingResponse = true;
     _lastVoiceActivity = null;
+
+    await _speech.stop();
+    // cancel any current response we're getting
+    _responseStream?.cancel();
 
     _startRecording();
   }
@@ -234,29 +233,13 @@ class InterviewController {
         log.warning('Failed to send message: ${response.statusCode}');
         return;
       }
-      final parser = InterviewResponseStreamParser();
 
-      _audioSource = StreamingSource(streamCtrl.stream);
+      _audioSource = StreamingSource();
 
       _responseStream = response.stream.listen((chunk) {
-        final result = parser.parseChunk(chunk);
-
-        if (result.isStage) {
-          if (currentStage != null && currentStage!.progress >= 100) {
-            onComplete();
-          }
-        } else {
-          _audioSource!.addToBuffer(result.audio!);
-        }
+        _audioSource!.addToBuffer(chunk);
       }, onDone: () async {
-        final newStage = parser.finalize();
-        if (!parser.wait) {
-          currentStage = newStage;
-          onStageUpdate();
-        } else {
-          log.fine('User not finished, waiting...');
-        }
-        if (!isPaused) {
+        if (!isPaused && _audioSource!.hasAudio()) {
           if (audioPlayer.playing) {
             await audioPlayer.stop();
           }
