@@ -10,11 +10,12 @@ import 'package:flutter_app/show_kit/screens/interview/streaming_source.dart';
 import 'package:flutter_app/supabase.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:logging/logging.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 import 'package:vad/vad.dart';
 import 'package:http/http.dart' as http;
 import 'package:audio_session/audio_session.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:speech_to_text/speech_recognition_result.dart' as srr;
 
 final log = Logger('InterviewController');
 
@@ -48,16 +49,14 @@ class InterviewController {
   DateTime? _voiceActivityStart;
   DateTime? _lastVoiceActivity;
   StreamSubscription<List<int>>? _responseStream;
-  StreamSubscription<List<int>>? _audioStreamSubscription;
   StreamingSource? _audioSource;
-  final _recorder = AudioRecorder();
   final _listenRecorder = AudioRecorder();
   StreamSubscription? _listener;
   late VoiceActivityDetector _voiceDetector;
   final audioPlayer = AudioPlayer(handleAudioSessionActivation: true);
   final streamCtrl = StreamController<List<int>>.broadcast();
-  // FlutterSoundPlayer _player = FlutterSoundPlayer();
   final InterviewModel _interviewModel = InterviewModel();
+  final _speech = stt.SpeechToText();
 
   bool get isPaused => !isInterviewing && currentStage != null;
 
@@ -71,6 +70,8 @@ class InterviewController {
     _voiceDetector = VoiceActivityDetector();
     _voiceDetector.setSampleRate(16000);
     _voiceDetector.setMode(ThresholdMode.veryAggressive);
+
+    _speech.initialize();
 
     _setupAudioSession().then((_) {
       _startListening();
@@ -88,18 +89,12 @@ class InterviewController {
         }
       }
     });
-
-    // ** FLUTTER SOUND **
-    // _player.openPlayer();
   }
 
   void dispose() {
-    _recorder.dispose();
     _listener?.cancel();
     _listenRecorder.dispose();
     audioPlayer.dispose();
-    // _player.stopPlayer();
-    // _player.closePlayer();
   }
 
   Future<void> beginInterview() async {
@@ -124,7 +119,7 @@ class InterviewController {
   }
 
   Future<void> _startListening() async {
-    if (await _recorder.hasPermission()) {
+    if (await _listenRecorder.hasPermission()) {
       _audioStream = await _listenRecorder.startStream(
         RecordConfig(
           encoder: AudioEncoder.pcm16bits,
@@ -176,37 +171,31 @@ class InterviewController {
   }
 
   Future<void> _startRecording() async {
-    if (await _recorder.hasPermission()) {
-      final tempDir = await getTemporaryDirectory();
-      await _recorder.start(
-        RecordConfig(
-          encoder: AudioEncoder.wav,
-          sampleRate: _sampleRate,
-          numChannels: 1,
-          echoCancel: true,
-          noiseSuppress: true,
-        ),
-        path: '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}.wav',
-      );
-    }
-
+    await _speech.listen(
+      onResult: _onSpeechResult,
+      listenOptions: stt.SpeechListenOptions(
+        partialResults: false,
+        listenMode: stt.ListenMode.dictation,
+      ),
+    );
     _isRecording = true;
   }
 
   Future<void> _stopRecording() async {
-    final path = await _recorder.stop();
-
-    if (path != null) {
-      File(path).delete();
-    }
-
+    await _speech.stop();
     _isRecording = false;
     isInterviewing = false;
   }
 
+  void _onSpeechResult(srr.SpeechRecognitionResult result) {
+    if (result.finalResult) {
+      log.fine('Speech result: ${result.recognizedWords}');
+      _sendTextMessage(result.recognizedWords, _isAwaitingResponse);
+    }
+  }
+
   Future<void> _finishSegment() async {
-    final path = await _recorder.stop();
-    final isInterruption = _isAwaitingResponse;
+    await _speech.stop();
     // cancel any current response we're getting
     _responseStream?.cancel();
 
@@ -215,21 +204,6 @@ class InterviewController {
     _lastVoiceActivity = null;
 
     _startRecording();
-
-    if (path == null) {
-      return;
-    }
-
-    _uploadInterviewAudio(path, isInterruption);
-  }
-
-  Future<void> _uploadInterviewAudio(String path, bool isInterruption) async {
-    final dataUrl = await getFileDataUrl(path, 'audio/wav');
-
-    await _sendMessage(jsonEncode({
-      'audio': dataUrl,
-      'interruption': isInterruption,
-    }));
   }
 
   Future<void> _sendTextMessage(String message, bool isInterruption) async {
@@ -257,24 +231,6 @@ class InterviewController {
         return;
       }
       final parser = InterviewResponseStreamParser();
-      // ** THIS CODE IS FOR FLUTTER_SOUND, we need to get back to this
-      // // REMOVE
-      // final session = await AudioSession.instance;
-      // await session.configure(const AudioSessionConfiguration(
-      //   avAudioSessionCategory: AVAudioSessionCategory.playAndRecord,
-      //   avAudioSessionCategoryOptions:
-      //       AVAudioSessionCategoryOptions.allowBluetooth,
-      //   avAudioSessionMode: AVAudioSessionMode.spokenAudio,
-      // ));
-      // if (_player.isStopped) {
-      //   _player.startPlayerFromStream(
-      //     codec: Codec.pcm16,
-      //     numChannels: 1,
-      //     sampleRate: 16000,
-      //   );
-      // }
-      // _audioStreamSubscription = streamCtrl.stream.listen((chunk) =>
-      //     _player.foodSink!.add(FoodData(Uint8List.fromList(chunk))));
 
       _audioSource = StreamingSource(streamCtrl.stream);
 
@@ -282,15 +238,11 @@ class InterviewController {
         final result = parser.parseChunk(chunk);
 
         if (result.isStage) {
-          // currentStage = result.stage;
-          // onStageUpdate();
-
           if (currentStage != null && currentStage!.progress >= 100) {
             onComplete();
           }
         } else {
           _audioSource!.addToBuffer(result.audio!);
-          // streamCtrl.sink.add(result.audio!);
         }
       }, onDone: () async {
         final newStage = parser.finalize();
@@ -300,9 +252,6 @@ class InterviewController {
         } else {
           log.fine('User not finished, waiting...');
         }
-        // _player.foodSink!.add(FoodEvent(() async {
-        //   await _player.stopPlayer();
-        // }));
         if (!isPaused) {
           if (audioPlayer.playing) {
             await audioPlayer.stop();

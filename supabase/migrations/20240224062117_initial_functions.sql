@@ -152,10 +152,14 @@ begin
 end;
 $$ language plpgsql;
 
-create function active_interview_for_profile(profile_id uuid) returns interviews as $$
-  select * from interviews where profile_id = $1 and completed_at is null limit 1;
-$$ language sql stable;
+create or replace function active_interview_for_profile(profile_id uuid) returns setof interviews as $$
+begin
+    return query select * from interviews where interviews.profile_id = $1 and completed_at is null limit 1;
+end;
+$$ language plpgsql stable;
 
-create function active_interview() returns interviews as $$
-  select * from interviews where profile_id = (select id from get_profile()) and completed_at is null limit 1;
-$$ language sql stable;
+create or replace function active_interview() returns setof interviews as $$
+begin
+  return query select * from interviews where interviews.profile_id = (select id from get_profile()) and completed_at is null limit 1;
+end;
+$$ language plpgsql stable;

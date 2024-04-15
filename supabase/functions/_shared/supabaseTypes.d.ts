@@ -643,7 +643,7 @@ export interface Database {
           created_at: string
           id: string
           profile_id: string
-        }
+        }[]
       }
       active_interview_for_profile: {
         Args: {
@@ -654,7 +654,7 @@ export interface Database {
           created_at: string
           id: string
           profile_id: string
-        }
+        }[]
       }
       create_match: {
         Args: {

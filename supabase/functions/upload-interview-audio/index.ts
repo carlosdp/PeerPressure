@@ -73,7 +73,7 @@ Deno.serve(async (req) => {
     );
   }
 
-  let activeInterview = interview;
+  let activeInterview = interview.length > 0 ? interview[0] : null;
 
   if (!activeInterview) {
     const { data: newInterview, error: newInterviewError } = await supabase
@@ -89,6 +89,14 @@ Deno.serve(async (req) => {
     }
 
     activeInterview = newInterview;
+  }
+
+  if (!activeInterview) {
+    console.error("No active interview");
+    return new Response(
+      JSON.stringify({ error: "Server error" }),
+      { status: 500, headers: { "Content-Type": "application/json" } },
+    );
   }
 
   const { data: messages, error: messagesError } = await supabase.from(
@@ -190,7 +198,7 @@ Deno.serve(async (req) => {
           const { error: insertError } = await supabase.from(
             "interview_messages",
           ).insert({
-            interview_id: activeInterview.id,
+            interview_id: activeInterview!.id,
             role: "assistant",
             content: message,
             metadata: {
@@ -206,7 +214,7 @@ Deno.serve(async (req) => {
             const { error: updateError } = await supabase.from("interviews")
               .update({
                 completed_at: new Date().toISOString(),
-              }).eq("id", activeInterview.id);
+              }).eq("id", activeInterview!.id);
             if (updateError) {
               console.error(
                 "Error updating interview for completion:",
