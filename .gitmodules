@@ -1,3 +1,0 @@
-[submodule "flutter_app/packages/vad/src/libfvad"]
-	path = flutter_app/packages/vad/src/libfvad
-	url = git@github.com:dpirch/libfvad.git
