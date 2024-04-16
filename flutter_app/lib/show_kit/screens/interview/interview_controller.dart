@@ -190,7 +190,7 @@ class InterviewController {
   void _onSpeechResult(srr.SpeechRecognitionResult result) {
     if (result.finalResult && result.recognizedWords.isNotEmpty) {
       log.fine('Speech result: ${result.recognizedWords}');
-      // _sendTextMessage(result.recognizedWords, _isAwaitingResponse);
+      _sendTextMessage(result.recognizedWords, _isAwaitingResponse);
     }
   }
 
@@ -209,8 +209,6 @@ class InterviewController {
     await _speech.stop();
     // cancel any current response we're getting
     _responseStream?.cancel();
-
-    _startRecording();
   }
 
   Future<void> _sendTextMessage(String message, bool isInterruption) async {
@@ -253,10 +251,13 @@ class InterviewController {
             // override the AudioSession temporarily during playback, and then
             // restore it to the recording mode when it's done.
             _audioPlayer.setVolume(1.0);
-            _audioPlayer.play().then((_) {
-              _setupAudioSession();
+            _audioPlayer.play().then((_) async {
+              await _setupAudioSession();
+              await _startRecording();
             });
           });
+        } else if (!_audioSource!.hasAudio()) {
+          await _startRecording();
         }
       });
     } catch (e) {
