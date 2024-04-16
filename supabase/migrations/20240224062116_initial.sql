@@ -128,6 +128,7 @@ create table interview_messages (
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
+alter publication supabase_realtime add table interview_messages;
 
 -- Storage Buckets
 insert into storage.buckets (id, name) values ('photos', 'photos');

@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app/models/interview.dart';
 import 'package:flutter_app/models/profile.dart';
 import 'package:flutter_app/show_kit/screens/interview/complete.dart';
 import 'package:flutter_app/show_kit/screens/interview/inflight.dart';
@@ -29,10 +30,13 @@ class _InterviewState extends State<Interview> {
   late BuilderConversation _conversation;
   late InterviewController _interviewController;
   late String _profileId;
+  final InterviewModel _interviewModel = InterviewModel();
 
   @override
   void initState() {
     super.initState();
+
+    _interviewModel.fetchActiveInterview();
 
     final profile = Provider.of<ProfileModel>(context, listen: false).profile;
     _profileId = profile!.id;
@@ -40,9 +44,6 @@ class _InterviewState extends State<Interview> {
     _interviewController = InterviewController(
       onSubmit: () {
         _uploadVideoSegment();
-      },
-      onStageUpdate: () {
-        setState(() {});
       },
       onPause: () {
         setState(() {});
@@ -96,9 +97,7 @@ class _InterviewState extends State<Interview> {
   }
 
   bool get _isPaused =>
-      _interviewController.isPaused ||
-      (!_interviewController.isInterviewing &&
-          _conversation.messages.isNotEmpty);
+      _interviewController.isPaused && _interviewModel.currentStage != null;
 
   bool get _isComplete => _conversation.state == BuilderState.finished;
 
@@ -106,7 +105,13 @@ class _InterviewState extends State<Interview> {
     // Ordering of these is important! If the order is swapped, echo cancellation fails to work.
     // Not sure why this happens yet, perhaps something to do with the AudioSession?
     await _startVideoRecording();
-    await _interviewController.beginInterview();
+
+    if (_isPaused) {
+      await _interviewController.resumeInterview();
+    } else {
+      await _interviewController.beginInterview();
+    }
+
     setState(() {});
   }
 
@@ -167,29 +172,28 @@ class _InterviewState extends State<Interview> {
         Container(
           color: Colors.black.withOpacity(0.7),
         ),
-        AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
-          transitionBuilder: (child, animation) =>
-              FadeTransition(opacity: animation, child: child),
-          child: currentScreen(),
+        ListenableBuilder(
+          listenable: _interviewModel,
+          builder: (context, child) => AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            transitionBuilder: (child, animation) =>
+                FadeTransition(opacity: animation, child: child),
+            child: currentScreen(),
+          ),
         ),
       ]),
     );
   }
 
   Widget currentScreen() {
-    // final stage = _interviewController.currentStage ??
-    //     _interviewModel.messages
-    //         .lastWhere((m) => m.role == 'assistant')
-    //         ?.metadata as InterviewStage?;
     if (_isComplete) {
       return InterviewComplete(onDismiss: () {});
     } else if (_interviewController.isInterviewing &&
-        _interviewController.currentStage != null) {
+        _interviewModel.currentStage != null) {
       return InterviewInflight(
         key: const ValueKey('inflight'),
-        stage: _interviewController.currentStage!,
-        progress: _interviewController.currentStage!.progress,
+        stage: _interviewModel.currentStage!,
+        progress: _interviewModel.currentStage!.progress,
         onPause: _pauseInterview,
       );
     } else {

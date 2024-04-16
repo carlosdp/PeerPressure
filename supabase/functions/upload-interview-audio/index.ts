@@ -193,6 +193,9 @@ Deno.serve(async (req) => {
       const reader = body.getReader();
       let buffer = "";
       let tag = "";
+      let title = "";
+      let topic = "";
+      let instructions = "";
       let message = "";
       let waiting = false;
 
@@ -224,6 +227,12 @@ Deno.serve(async (req) => {
                     }
                   } else if (tag === "progress") {
                     progress = parseInt(buffer);
+                  } else if (tag === "title") {
+                    title = buffer;
+                  } else if (tag === "topic") {
+                    topic = buffer;
+                  } else if (tag === "instructions") {
+                    instructions = buffer;
                   }
 
                   tag = "";
@@ -258,6 +267,9 @@ Deno.serve(async (req) => {
           role: "assistant",
           content: message,
           metadata: {
+            title,
+            topic,
+            instructions,
             progress,
           },
         });

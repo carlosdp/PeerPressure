@@ -2,9 +2,10 @@ import 'dart:ui' as ui;
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/show_kit/screens/interview/common.dart';
+import 'package:flutter_app/supabase_types.dart';
 
 class InterviewInflight extends StatelessWidget {
-  final InterviewStage stage;
+  final InterviewMessageMetadata stage;
   final int progress;
   final int targetMinutes = 30;
   final Function() onPause;

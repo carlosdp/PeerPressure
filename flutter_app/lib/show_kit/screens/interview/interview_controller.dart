@@ -3,9 +3,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:flutter_app/models/interview.dart';
-import 'package:flutter_app/show_kit/screens/interview/common.dart';
-import 'package:flutter_app/show_kit/screens/interview/stream_parser.dart';
 import 'package:flutter_app/show_kit/screens/interview/streaming_source.dart';
 import 'package:flutter_app/show_kit/screens/interview/vad_iterator.dart';
 import 'package:flutter_app/supabase.dart';
@@ -32,11 +29,9 @@ Future<String> getFileDataUrl(String filePath, String mimeType) async {
 
 class InterviewController {
   Function() onSubmit;
-  Function() onStageUpdate;
   Function() onPause;
   Function() onComplete;
   String profileId;
-  InterviewStage? currentStage;
   bool isInterviewing = false;
 
   Stream<Uint8List>? _audioStream;
@@ -54,19 +49,17 @@ class InterviewController {
   StreamSubscription? _listener;
   late VadIterator _vadIterator;
   final audioPlayer = AudioPlayer(handleAudioSessionActivation: true);
-  final InterviewModel _interviewModel = InterviewModel();
   final _speech = stt.SpeechToText();
 
-  bool get isPaused => !isInterviewing && currentStage != null;
+  bool get isPaused => !isInterviewing;
 
   InterviewController({
     required this.onSubmit,
-    required this.onStageUpdate,
     required this.onPause,
     required this.onComplete,
     required this.profileId,
   }) {
-    _vadIterator = VadIterator(64, _sampleRate);
+    _vadIterator = VadIterator(_vadFrameSizeMs, _sampleRate);
     _vadIterator.initModel();
 
     _speech.initialize();
@@ -74,24 +67,13 @@ class InterviewController {
     _setupAudioSession().then((_) {
       _startListening();
     });
-
-    _interviewModel.fetchActiveInterview().then((_) {
-      if (_interviewModel.interview != null) {
-        final idx = _interviewModel.messages
-            .lastIndexWhere((e) => e.role == 'assistant');
-        if (idx > -1) {
-          final stage =
-              _interviewModel.messages[idx].metadata as InterviewStage?;
-          currentStage = stage;
-          onStageUpdate();
-        }
-      }
-    });
   }
 
   void dispose() {
+    _speech.cancel();
     _listener?.cancel();
     _listenRecorder.dispose();
+    _vadIterator.release();
     audioPlayer.dispose();
   }
 
@@ -101,6 +83,11 @@ class InterviewController {
     _sendTextMessage(
         isPaused ? 'Please repeat the question' : "I'm ready", false);
 
+    await _startRecording();
+  }
+
+  Future<void> resumeInterview() async {
+    isInterviewing = true;
     await _startRecording();
   }
 
@@ -179,8 +166,10 @@ class InterviewController {
       listenOptions: stt.SpeechListenOptions(
         partialResults: false,
         listenMode: stt.ListenMode.dictation,
+        enableHapticFeedback: true,
       ),
     );
+    // await _setupAudioSession();
     _isRecording = true;
   }
 
