@@ -77,9 +77,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void dispose() {
-    super.dispose();
-
     authSubscription?.cancel();
+
+    super.dispose();
   }
 
   @override

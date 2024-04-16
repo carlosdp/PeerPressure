@@ -619,11 +619,9 @@ packages:
   record_darwin:
     dependency: "direct overridden"
     description:
-      path: record_darwin
-      ref: echo-cancel-ios
-      resolved-ref: b3a59ad634eaf656c39733a4b2b2cd6231f4b902
-      url: "https://github.com/carlosdp/record.git"
-    source: git
+      path: "../../record/record_darwin"
+      relative: true
+    source: path
     version: "1.0.1"
   record_linux:
     dependency: transitive
@@ -793,26 +791,23 @@ packages:
   speech_to_text:
     dependency: "direct main"
     description:
-      name: speech_to_text
-      sha256: "57fef1d41bdebe298e84842c89bb4ac91f31cdbec7830c8cb1fc6b91d03abd42"
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.6.0"
+      path: "../../speech_to_text/speech_to_text"
+      relative: true
+    source: path
+    version: "6.6.1"
   speech_to_text_macos:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: speech_to_text_macos
-      sha256: e685750f7542fcaa087a5396ee471e727ec648bf681f4da83c84d086322173f6
-      url: "https://pub.dev"
-    source: hosted
+      path: "../../speech_to_text/speech_to_text_macos"
+      relative: true
+    source: path
     version: "1.1.0"
   speech_to_text_platform_interface:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: speech_to_text_platform_interface
-      sha256: a0df1a907091ea09880077dc25aae02af9f79811264e6e97ddb08639b7f771c2
-      url: "https://pub.dev"
-    source: hosted
+      path: "../../speech_to_text/speech_to_text_platform_interface"
+      relative: true
+    source: path
     version: "2.2.0"
   stack_trace:
     dependency: transitive

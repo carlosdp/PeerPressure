@@ -13,6 +13,7 @@ import 'package:http/http.dart' as http;
 import 'package:audio_session/audio_session.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:speech_to_text/speech_recognition_result.dart' as srr;
+import 'package:speech_to_text/speech_recognition_error.dart';
 
 final log = Logger('InterviewController');
 
@@ -39,7 +40,7 @@ class InterviewController {
   bool _isAwaitingResponse = false;
   final int _sampleRate = 16000;
   final int _vadFrameSizeMs = 64;
-  final int _voiceDebounceMs = 1000;
+  final int _voiceDebounceMs = 2000;
   bool _voiceActivity = false;
   DateTime? _voiceActivityStart;
   DateTime? _lastVoiceActivity;
@@ -48,7 +49,7 @@ class InterviewController {
   final _listenRecorder = AudioRecorder();
   StreamSubscription? _listener;
   late VadIterator _vadIterator;
-  final audioPlayer = AudioPlayer(handleAudioSessionActivation: true);
+  final _audioPlayer = AudioPlayer(handleAudioSessionActivation: true);
   final _speech = stt.SpeechToText();
 
   bool get isPaused => !isInterviewing;
@@ -62,7 +63,10 @@ class InterviewController {
     _vadIterator = VadIterator(_vadFrameSizeMs, _sampleRate);
     _vadIterator.initModel();
 
-    _speech.initialize();
+    _speech.initialize().then((_) {
+      log.fine('Speech initialized');
+    });
+    _speech.errorListener = _onSpeechError;
 
     _setupAudioSession().then((_) {
       _startListening();
@@ -74,7 +78,7 @@ class InterviewController {
     _listener?.cancel();
     _listenRecorder.dispose();
     _vadIterator.release();
-    audioPlayer.dispose();
+    _audioPlayer.dispose();
   }
 
   Future<void> beginInterview() async {
@@ -92,7 +96,9 @@ class InterviewController {
   }
 
   Future<void> pauseInterview() async {
+    await _speech.cancel();
     await _stopRecording();
+    _audioPlayer.stop();
     onPause();
   }
 
@@ -157,19 +163,21 @@ class InterviewController {
               AVAudioSessionCategoryOptions.defaultToSpeaker,
       avAudioSessionMode: AVAudioSessionMode.videoChat,
     ));
-    session.setActive(true);
+    await session.setActive(true);
   }
 
   Future<void> _startRecording() async {
     await _speech.listen(
       onResult: _onSpeechResult,
       listenOptions: stt.SpeechListenOptions(
-        partialResults: false,
+        sampleRate: _sampleRate,
+        partialResults: true,
         listenMode: stt.ListenMode.dictation,
         enableHapticFeedback: true,
+        setupAudioSession: false,
+        echoCancel: false,
       ),
     );
-    // await _setupAudioSession();
     _isRecording = true;
   }
 
@@ -182,7 +190,14 @@ class InterviewController {
   void _onSpeechResult(srr.SpeechRecognitionResult result) {
     if (result.finalResult && result.recognizedWords.isNotEmpty) {
       log.fine('Speech result: ${result.recognizedWords}');
-      _sendTextMessage(result.recognizedWords, _isAwaitingResponse);
+      // _sendTextMessage(result.recognizedWords, _isAwaitingResponse);
+    }
+  }
+
+  void _onSpeechError(SpeechRecognitionError error) {
+    if (error.permanent && _isRecording) {
+      log.warning('Speech error: ${error.errorMsg}');
+      _startRecording();
     }
   }
 
@@ -229,16 +244,16 @@ class InterviewController {
         _audioSource!.addToBuffer(chunk);
       }, onDone: () async {
         if (!isPaused && _audioSource!.hasAudio()) {
-          if (audioPlayer.playing) {
-            await audioPlayer.stop();
+          if (_audioPlayer.playing) {
+            await _audioPlayer.stop();
           }
 
-          audioPlayer.setAudioSource(_audioSource!).then((duration) {
+          _audioPlayer.setAudioSource(_audioSource!).then((duration) {
             // I think we fixed the volume issue. We need to let audioPlayer
             // override the AudioSession temporarily during playback, and then
             // restore it to the recording mode when it's done.
-            audioPlayer.setVolume(1.0);
-            audioPlayer.play().then((_) {
+            _audioPlayer.setVolume(1.0);
+            _audioPlayer.play().then((_) {
               _setupAudioSession();
             });
           });

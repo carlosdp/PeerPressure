@@ -57,10 +57,17 @@ dependencies:
 
 dependency_overrides:
   record_darwin:
-    git:
-      url: https://github.com/carlosdp/record.git
-      ref: echo-cancel-ios
-      path: record_darwin
+    path: ../../record/record_darwin
+    # git:
+    #   url: https://github.com/carlosdp/record.git
+    #   ref: echo-cancel-ios
+    #   path: record_darwin
+  speech_to_text:
+    path: ../../speech_to_text/speech_to_text
+  speech_to_text_platform_interface:
+    path: ../../speech_to_text/speech_to_text_platform_interface
+  speech_to_text_macos:
+    path: ../../speech_to_text/speech_to_text_macos
 
 dev_dependencies:
   flutter_test:
