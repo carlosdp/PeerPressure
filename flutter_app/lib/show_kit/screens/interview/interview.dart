@@ -54,7 +54,8 @@ class _InterviewState extends State<Interview> {
             cameras.firstWhere(
                 (cam) => cam.lensDirection == CameraLensDirection.front),
             ResolutionPreset.veryHigh);
-        _controller!.initialize().then((_) {
+        _controller!.initialize().then((_) async {
+          await _controller!.prepareForVideoRecording();
           if (!mounted) {
             return;
           }
