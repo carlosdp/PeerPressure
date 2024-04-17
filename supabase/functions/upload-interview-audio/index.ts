@@ -1,4 +1,3 @@
-import process from "https://deno.land/std@0.177.1/node/process.ts";
 import { createSupabaseClient } from "../_shared/supabase.ts";
 import { transcribe } from "../_shared/utils.ts";
 import logger from "../logger.ts";
@@ -302,7 +301,7 @@ Deno.serve(async (req) => {
 
       async function createAudioStream(text: string) {
         const audioRes = await fetch(
-          "https://api.elevenlabs.io/v1/text-to-speech/XqpJyEffBCIfiqUJ5cyZ/stream?output_format=pcm_44100",
+          "https://api.elevenlabs.io/v1/text-to-speech/XqpJyEffBCIfiqUJ5cyZ/stream",
           {
             method: "POST",
             body: JSON.stringify({
@@ -346,7 +345,7 @@ Deno.serve(async (req) => {
     stream,
     {
       headers: {
-        "Content-Type": "audio/pcm",
+        "Content-Type": "audio/mp3",
       },
     },
   );

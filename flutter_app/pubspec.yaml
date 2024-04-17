@@ -52,7 +52,6 @@ dependencies:
   just_audio: ^0.9.37
   speech_to_text: ^6.6.0
   onnxruntime: ^1.4.1
-  flutter_sound: ^9.2.13
 
 dependency_overrides:
   speech_to_text:
