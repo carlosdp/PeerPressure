@@ -738,7 +738,7 @@ packages:
     description:
       path: speech_to_text
       ref: echo-cancel-audio-session
-      resolved-ref: b6db101a2413a18233b451bd118cac0bb0edd92a
+      resolved-ref: "583f2f2efad418afa8027a771dcc6331e5004e89"
       url: "https://github.com/carlosdp/speech_to_text.git"
     source: git
     version: "6.6.1"
@@ -755,7 +755,7 @@ packages:
     description:
       path: speech_to_text_platform_interface
       ref: echo-cancel-audio-session
-      resolved-ref: b6db101a2413a18233b451bd118cac0bb0edd92a
+      resolved-ref: "583f2f2efad418afa8027a771dcc6331e5004e89"
       url: "https://github.com/carlosdp/speech_to_text.git"
     source: git
     version: "2.2.0"
