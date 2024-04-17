@@ -29,6 +29,7 @@ class _InterviewState extends State<Interview> {
   late InterviewController _interviewController;
   late String _profileId;
   final InterviewModel _interviewModel = InterviewModel();
+  Timer? _videoCheckpointTimer;
 
   @override
   void initState() {
@@ -108,12 +109,16 @@ class _InterviewState extends State<Interview> {
   Future<void> _startVideoRecording() async {
     if (_controller != null) {
       await _controller!.startVideoRecording();
+      _videoCheckpointTimer =
+          Timer(const Duration(seconds: 60), _uploadVideoSegment);
     }
   }
 
   Future<void> _uploadVideoSegment() async {
     XFile? videoFile;
     if (_controller != null) {
+      _videoCheckpointTimer?.cancel();
+      _videoCheckpointTimer = null;
       videoFile = await _controller!.stopVideoRecording();
     }
 
