@@ -617,11 +617,12 @@ packages:
     source: hosted
     version: "1.1.0"
   record_darwin:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: "../../record/record_darwin"
-      relative: true
-    source: path
+      name: record_darwin
+      sha256: ee8cb1bb1712d7ce38140ecabe70e5c286c02f05296d66043bee865ace7eb1b9
+      url: "https://pub.dev"
+    source: hosted
     version: "1.0.1"
   record_linux:
     dependency: transitive

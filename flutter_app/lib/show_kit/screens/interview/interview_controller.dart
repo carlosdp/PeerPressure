@@ -35,8 +35,7 @@ class InterviewController {
   String profileId;
   bool isInterviewing = false;
 
-  Stream<Uint8List>? _audioStream;
-  bool _isRecording = false;
+  bool _isListening = false;
   bool _isAwaitingResponse = false;
   final int _sampleRate = 16000;
   final int _vadFrameSizeMs = 64;
@@ -46,8 +45,6 @@ class InterviewController {
   DateTime? _lastVoiceActivity;
   StreamSubscription<List<int>>? _responseStream;
   StreamingSource? _audioSource;
-  final _listenRecorder = AudioRecorder();
-  StreamSubscription? _listener;
   late VadIterator _vadIterator;
   final _audioPlayer = AudioPlayer(handleAudioSessionActivation: true);
   final _speech = stt.SpeechToText();
@@ -67,16 +64,10 @@ class InterviewController {
       log.fine('Speech initialized');
     });
     _speech.errorListener = _onSpeechError;
-
-    _setupAudioSession().then((_) {
-      _startListening();
-    });
   }
 
   void dispose() {
     _speech.cancel();
-    _listener?.cancel();
-    _listenRecorder.dispose();
     _vadIterator.release();
     _audioPlayer.dispose();
   }
@@ -87,103 +78,45 @@ class InterviewController {
     _sendTextMessage(
         isPaused ? 'Please repeat the question' : "I'm ready", false);
 
-    await _startRecording();
+    await _startListening();
   }
 
   Future<void> resumeInterview() async {
     isInterviewing = true;
-    await _startRecording();
+    await _startListening();
   }
 
   Future<void> pauseInterview() async {
     await _speech.cancel();
-    await _stopRecording();
+    await _stopListening();
     _audioPlayer.stop();
     onPause();
   }
 
   Future<void> endInterview() async {
-    await _stopRecording();
+    await _stopListening();
     isInterviewing = false;
-    _listener?.cancel();
-    _listenRecorder.stop();
   }
 
   Future<void> _startListening() async {
-    if (await _listenRecorder.hasPermission()) {
-      _audioStream = await _listenRecorder.startStream(
-        RecordConfig(
-          encoder: AudioEncoder.pcm16bits,
-          sampleRate: _sampleRate,
-          numChannels: 1,
-          echoCancel: true,
-          noiseSuppress: true,
-        ),
-      );
-
-      _listener = _audioStream!.listen((event) async {
-        final windowByteCount = _vadFrameSizeMs * 2 * _sampleRate ~/ 1000;
-        final frame = event.sublist(0, windowByteCount);
-
-        final previousVoiceActivity = _voiceActivity;
-
-        final floatBytes = Float32List.fromList(
-            Int16List.view(frame.buffer).map((e) => e / 32768).toList());
-
-        _voiceActivity = await _vadIterator.predict(floatBytes, false);
-
-        if (previousVoiceActivity != _voiceActivity) {
-          log.fine('Voice activity: $_voiceActivity');
-        }
-
-        if (_voiceActivity && isInterviewing) {
-          if (previousVoiceActivity) {
-            _voiceActivityStart = DateTime.now();
-          }
-
-          _lastVoiceActivity = DateTime.now();
-        } else if (_lastVoiceActivity != null &&
-            _voiceActivityStart != null &&
-            DateTime.now().difference(_lastVoiceActivity!).inMilliseconds >
-                _voiceDebounceMs &&
-            _isRecording) {
-          log.fine('Finished segment, uploading');
-          _finishSegment();
-        }
-      });
-    }
-  }
-
-  Future<void> _setupAudioSession() async {
-    final session = await AudioSession.instance;
-    await session.configure(AudioSessionConfiguration(
-      avAudioSessionCategory: AVAudioSessionCategory.playAndRecord,
-      avAudioSessionCategoryOptions:
-          AVAudioSessionCategoryOptions.allowBluetooth |
-              AVAudioSessionCategoryOptions.defaultToSpeaker,
-      avAudioSessionMode: AVAudioSessionMode.videoChat,
-    ));
-    await session.setActive(true);
-  }
-
-  Future<void> _startRecording() async {
     await _speech.listen(
       onResult: _onSpeechResult,
+      onSoundChunk: _onSpeechSoundChunk,
       listenOptions: stt.SpeechListenOptions(
         sampleRate: _sampleRate,
         partialResults: true,
         listenMode: stt.ListenMode.dictation,
         enableHapticFeedback: true,
-        setupAudioSession: false,
+        setupAudioSession: true,
         echoCancel: false,
       ),
     );
-    _isRecording = true;
+    _isListening = true;
   }
 
-  Future<void> _stopRecording() async {
+  Future<void> _stopListening() async {
     await _speech.stop();
-    _isRecording = false;
+    _isListening = false;
     isInterviewing = false;
   }
 
@@ -195,14 +128,45 @@ class InterviewController {
   }
 
   void _onSpeechError(SpeechRecognitionError error) {
-    if (error.permanent && _isRecording) {
+    if (error.permanent && _isListening) {
       log.warning('Speech error: ${error.errorMsg}');
-      _startRecording();
+      _startListening();
+    }
+  }
+
+  void _onSpeechSoundChunk(Uint8List chunk) async {
+    final windowByteCount = _vadFrameSizeMs * 2 * _sampleRate ~/ 1000;
+    final frame = chunk.sublist(0, windowByteCount);
+
+    final previousVoiceActivity = _voiceActivity;
+
+    final floatBytes = Float32List.fromList(
+        Int16List.view(frame.buffer).map((e) => e / 32768).toList());
+
+    _voiceActivity = await _vadIterator.predict(floatBytes, false);
+
+    if (previousVoiceActivity != _voiceActivity) {
+      log.fine('Voice activity: $_voiceActivity');
+    }
+
+    if (_voiceActivity && isInterviewing) {
+      if (previousVoiceActivity) {
+        _voiceActivityStart = DateTime.now();
+      }
+
+      _lastVoiceActivity = DateTime.now();
+    } else if (_lastVoiceActivity != null &&
+        _voiceActivityStart != null &&
+        DateTime.now().difference(_lastVoiceActivity!).inMilliseconds >
+            _voiceDebounceMs &&
+        _isListening) {
+      log.fine('Finished segment, uploading');
+      _finishSegment();
     }
   }
 
   Future<void> _finishSegment() async {
-    _isRecording = false;
+    _isListening = false;
     _isAwaitingResponse = true;
     _lastVoiceActivity = null;
 
@@ -252,12 +216,11 @@ class InterviewController {
             // restore it to the recording mode when it's done.
             _audioPlayer.setVolume(1.0);
             _audioPlayer.play().then((_) async {
-              await _setupAudioSession();
-              await _startRecording();
+              await _startListening();
             });
           });
         } else if (!_audioSource!.hasAudio()) {
-          await _startRecording();
+          await _startListening();
         }
       });
     } catch (e) {
