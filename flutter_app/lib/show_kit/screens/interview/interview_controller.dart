@@ -175,6 +175,8 @@ class InterviewController extends ChangeNotifier {
     await _speech.stop();
     // cancel any current response we're getting
     _responseStream?.cancel();
+
+    onSubmit();
   }
 
   Future<void> _sendTextMessage(String message, bool isInterruption) async {
