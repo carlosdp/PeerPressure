@@ -1,46 +1,76 @@
 PODS:
   - app_links (1.0.0):
     - FlutterMacOS
+  - audio_session (0.0.1):
+    - FlutterMacOS
   - FlutterMacOS (1.0.0)
+  - just_audio (0.0.1):
+    - FlutterMacOS
+  - onnxruntime (0.0.1):
+    - FlutterMacOS
   - path_provider_foundation (0.0.1):
     - Flutter
+    - FlutterMacOS
+  - rive_common (0.0.1):
     - FlutterMacOS
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
   - sign_in_with_apple (0.0.1):
     - FlutterMacOS
+  - speech_to_text_macos (0.0.1):
+    - FlutterMacOS
   - url_launcher_macos (0.0.1):
     - FlutterMacOS
 
 DEPENDENCIES:
   - app_links (from `Flutter/ephemeral/.symlinks/plugins/app_links/macos`)
+  - audio_session (from `Flutter/ephemeral/.symlinks/plugins/audio_session/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
+  - just_audio (from `Flutter/ephemeral/.symlinks/plugins/just_audio/macos`)
+  - onnxruntime (from `Flutter/ephemeral/.symlinks/plugins/onnxruntime/macos`)
   - path_provider_foundation (from `Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin`)
+  - rive_common (from `Flutter/ephemeral/.symlinks/plugins/rive_common/macos`)
   - shared_preferences_foundation (from `Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/darwin`)
   - sign_in_with_apple (from `Flutter/ephemeral/.symlinks/plugins/sign_in_with_apple/macos`)
+  - speech_to_text_macos (from `Flutter/ephemeral/.symlinks/plugins/speech_to_text_macos/macos`)
   - url_launcher_macos (from `Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos`)
 
 EXTERNAL SOURCES:
   app_links:
     :path: Flutter/ephemeral/.symlinks/plugins/app_links/macos
+  audio_session:
+    :path: Flutter/ephemeral/.symlinks/plugins/audio_session/macos
   FlutterMacOS:
     :path: Flutter/ephemeral
+  just_audio:
+    :path: Flutter/ephemeral/.symlinks/plugins/just_audio/macos
+  onnxruntime:
+    :path: Flutter/ephemeral/.symlinks/plugins/onnxruntime/macos
   path_provider_foundation:
     :path: Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin
+  rive_common:
+    :path: Flutter/ephemeral/.symlinks/plugins/rive_common/macos
   shared_preferences_foundation:
     :path: Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/darwin
   sign_in_with_apple:
     :path: Flutter/ephemeral/.symlinks/plugins/sign_in_with_apple/macos
+  speech_to_text_macos:
+    :path: Flutter/ephemeral/.symlinks/plugins/speech_to_text_macos/macos
   url_launcher_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos
 
 SPEC CHECKSUMS:
   app_links: 10e0a0ab602ffaf34d142cd4862f29d34b303b2a
+  audio_session: dea1f41890dbf1718f04a56f1d6150fd50039b72
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
+  just_audio: 9b67ca7b97c61cfc9784ea23cd8cc55eb226d489
+  onnxruntime: 922a85d3c9ed1b3c2b515ec903fc4d9b8f51d96b
   path_provider_foundation: 3784922295ac71e43754bd15e0653ccfd36a147c
+  rive_common: 90d667125afd74095b697cf7d2d2e9c50813ec8c
   shared_preferences_foundation: b4c3b4cddf1c21f02770737f147a3f5da9d39695
   sign_in_with_apple: a9e97e744e8edc36aefc2723111f652102a7a727
+  speech_to_text_macos: ae04291713998dede24b85d3b50bd8fedcbfb565
   url_launcher_macos: d2691c7dd33ed713bf3544850a623080ec693d95
 
 PODFILE CHECKSUM: 236401fc2c932af29a9fcf0e97baeeb2d750d367

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_app/show_kit/screens/interview/streaming_source.dart';
 import 'package:flutter_app/show_kit/screens/interview/vad_iterator.dart';
 import 'package:flutter_app/supabase.dart';
@@ -26,10 +27,8 @@ Future<String> getFileDataUrl(String filePath, String mimeType) async {
   }
 }
 
-class InterviewController {
+class InterviewController extends ChangeNotifier {
   Function() onSubmit;
-  Function() onPause;
-  Function() onComplete;
   String profileId;
   bool isInterviewing = false;
 
@@ -48,11 +47,10 @@ class InterviewController {
   final _speech = stt.SpeechToText();
 
   bool get isPaused => !isInterviewing;
+  bool get isBetweenStages => _isAwaitingResponse;
 
   InterviewController({
     required this.onSubmit,
-    required this.onPause,
-    required this.onComplete,
     required this.profileId,
   }) {
     _vadIterator = VadIterator(_vadFrameSizeMs, _sampleRate);
@@ -64,10 +62,13 @@ class InterviewController {
     _speech.errorListener = _onSpeechError;
   }
 
+  @override
   void dispose() {
     _speech.cancel();
     _vadIterator.release();
     _audioPlayer.dispose();
+
+    super.dispose();
   }
 
   Future<void> beginInterview() async {
@@ -82,18 +83,21 @@ class InterviewController {
   Future<void> resumeInterview() async {
     isInterviewing = true;
     await _startListening();
+    notifyListeners();
   }
 
   Future<void> pauseInterview() async {
+    isInterviewing = false;
     await _speech.cancel();
     await _stopListening();
     _audioPlayer.stop();
-    onPause();
+    notifyListeners();
   }
 
   Future<void> endInterview() async {
     await _stopListening();
     isInterviewing = false;
+    notifyListeners();
   }
 
   Future<void> _startListening() async {
@@ -112,15 +116,14 @@ class InterviewController {
   }
 
   Future<void> _stopListening() async {
-    await _speech.stop();
+    await _speech.cancel();
     _isListening = false;
-    isInterviewing = false;
   }
 
   void _onSpeechResult(srr.SpeechRecognitionResult result) {
     if (result.finalResult && result.recognizedWords.isNotEmpty) {
       log.fine('Speech result: ${result.recognizedWords}');
-      _sendTextMessage(result.recognizedWords, _isAwaitingResponse);
+      _sendTextMessage(result.recognizedWords, false);
     }
   }
 
@@ -167,6 +170,8 @@ class InterviewController {
     _isAwaitingResponse = true;
     _lastVoiceActivity = null;
 
+    notifyListeners();
+
     await _speech.stop();
     // cancel any current response we're getting
     _responseStream?.cancel();
@@ -202,6 +207,9 @@ class InterviewController {
       _responseStream = response.stream.listen((chunk) {
         _audioSource!.addToBuffer(chunk);
       }, onDone: () async {
+        _isAwaitingResponse = false;
+        notifyListeners();
+
         if (!isPaused && _audioSource!.hasAudio()) {
           if (_audioPlayer.playing) {
             await _audioPlayer.stop();

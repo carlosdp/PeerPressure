@@ -207,7 +207,13 @@ Deno.serve(async (req) => {
             createAudioStream(message);
           }
         } else if (tag === "progress") {
-          progress = parseInt(buffer);
+          console.log("PROGRESS", buffer);
+          const intProgress = parseInt(buffer);
+          if (!isNaN(intProgress)) {
+            progress = intProgress;
+          } else {
+            console.error("Invalid progress value:", buffer);
+          }
         } else if (tag === "title") {
           title = buffer;
         } else if (tag === "topic") {

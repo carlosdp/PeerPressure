@@ -724,6 +724,17 @@ export interface Database {
           user_id: string | null
         }
       }
+      get_or_create_active_interview_for_profile: {
+        Args: {
+          profile_id: string
+        }
+        Returns: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          profile_id: string
+        }[]
+      }
       get_pending_bot_matches: {
         Args: Record<PropertyKey, never>
         Returns: {

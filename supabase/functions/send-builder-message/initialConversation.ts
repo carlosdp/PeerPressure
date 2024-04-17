@@ -107,12 +107,12 @@ export async function generateInitialConversationMessage(
         - instructions: Short clarifying instructions for what the question is asking and how to answer
         
         Provide each field in this format, no other text should be included in your message:
-        <thought>thought here<voice>voice script here<instructions>instructions here<title>title here<topic>topic here<isFollowUp>true or false<progress>0-100`,
+        <thought>thought here<voice>voice script here<instructions>instructions here<progress>80<title>title here<topic>topic here<isFollowUp>true or false`,
       },
     ],
     {
       temperature: 0,
-      maxTokens: 500,
+      maxTokens: 800,
     },
   );
 

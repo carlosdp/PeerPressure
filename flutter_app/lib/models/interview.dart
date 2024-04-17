@@ -9,9 +9,14 @@ class InterviewModel extends ChangeNotifier {
   InterviewMessageMetadata? currentStage;
   final _channel = supabase.channel('public:interview_messages');
 
+  bool get isCompleted => currentStage != null && currentStage!.progress >= 100;
+
   Future<void> fetchActiveInterview() async {
     try {
-      final response = await supabase.rpc('active_interview').select().single();
+      final response = await supabase
+          .rpc('get_or_create_active_interview')
+          .select()
+          .single();
       final messagesResponse = await supabase
           .from('interview_messages')
           .select()

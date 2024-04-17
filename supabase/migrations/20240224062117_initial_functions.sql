@@ -163,3 +163,22 @@ begin
   return query select * from interviews where interviews.profile_id = (select id from get_profile()) and completed_at is null limit 1;
 end;
 $$ language plpgsql stable;
+
+create or replace function get_or_create_active_interview_for_profile(profile_id uuid) returns setof interviews as $$
+declare
+  active_interview interviews;
+begin
+  select * into active_interview from interviews i where i.profile_id = $1 and completed_at is null limit 1;
+  if active_interview is null then
+    insert into interviews (profile_id) values ($1);
+    select * into active_interview from interviews i where i.profile_id = $1 and completed_at is null limit 1;
+  end if;
+  return next active_interview;
+end;
+$$ language plpgsql;
+
+create or replace function get_or_create_active_interview() returns setof interviews as $$
+begin
+  return query select * from get_or_create_active_interview_for_profile((select id from get_profile()));
+end;
+$$ language plpgsql;

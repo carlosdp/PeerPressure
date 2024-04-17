@@ -11,7 +11,6 @@ import 'package:flutter_app/show_kit/screens/interview/interview_controller.dart
 import 'package:flutter_app/show_kit/screens/interview/pre_start.dart';
 import 'package:flutter_app/supabase.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_app/supabase_types.dart';
 import 'package:logging/logging.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -27,7 +26,6 @@ class Interview extends StatefulWidget {
 class _InterviewState extends State<Interview> {
   CameraController? _controller;
   List<CameraDescription> _cameras = [];
-  late BuilderConversation _conversation;
   late InterviewController _interviewController;
   late String _profileId;
   final InterviewModel _interviewModel = InterviewModel();
@@ -45,21 +43,8 @@ class _InterviewState extends State<Interview> {
       onSubmit: () {
         _uploadVideoSegment();
       },
-      onPause: () {
-        setState(() {});
-      },
-      onComplete: () {
-        setState(() {
-          _conversation.state = BuilderState.finished;
-        });
-      },
       profileId: _profileId,
     );
-
-    _conversation = Provider.of<ProfileModel>(context, listen: false)
-            .profile
-            ?.currentConversation ??
-        BuilderConversation(state: BuilderState.inProgress, messages: []);
 
     availableCameras().then((cameras) {
       _cameras = cameras;
@@ -99,7 +84,7 @@ class _InterviewState extends State<Interview> {
   bool get _isPaused =>
       _interviewController.isPaused && _interviewModel.currentStage != null;
 
-  bool get _isComplete => _conversation.state == BuilderState.finished;
+  bool get _isComplete => _interviewModel.isCompleted;
 
   Future<void> _beginInterview() async {
     // Ordering of these is important! If the order is swapped, echo cancellation fails to work.
@@ -173,12 +158,15 @@ class _InterviewState extends State<Interview> {
           color: Colors.black.withOpacity(0.7),
         ),
         ListenableBuilder(
-          listenable: _interviewModel,
-          builder: (context, child) => AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            transitionBuilder: (child, animation) =>
-                FadeTransition(opacity: animation, child: child),
-            child: currentScreen(),
+          listenable: _interviewController,
+          builder: (context, child) => ListenableBuilder(
+            listenable: _interviewModel,
+            builder: (context, child) => AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              transitionBuilder: (child, animation) =>
+                  FadeTransition(opacity: animation, child: child),
+              child: currentScreen(),
+            ),
           ),
         ),
       ]),
@@ -194,6 +182,7 @@ class _InterviewState extends State<Interview> {
         key: const ValueKey('inflight'),
         stage: _interviewModel.currentStage!,
         progress: _interviewModel.currentStage!.progress,
+        isAwaitingNextStage: _interviewController.isBetweenStages,
         onPause: _pauseInterview,
       );
     } else {

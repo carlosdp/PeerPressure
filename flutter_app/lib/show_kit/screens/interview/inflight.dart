@@ -9,12 +9,14 @@ class InterviewInflight extends StatelessWidget {
   final int progress;
   final int targetMinutes = 30;
   final Function() onPause;
+  final bool? isAwaitingNextStage;
 
   const InterviewInflight({
     super.key,
     required this.stage,
     required this.progress,
     required this.onPause,
+    this.isAwaitingNextStage,
   });
 
   @override
@@ -30,59 +32,7 @@ class InterviewInflight extends StatelessWidget {
               const SizedBox(height: 70),
               const Zara(),
               const SizedBox(height: 26),
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 500),
-                switchInCurve: Curves.elasticOut,
-                switchOutCurve: Curves.easeIn,
-                transitionBuilder: (child, animation) {
-                  if (child.key == ValueKey(stage.title)) {
-                    return SlideTransition(
-                      position: Tween<Offset>(
-                        begin: const Offset(1.2, 0.0),
-                        end: Offset.zero,
-                      ).animate(animation),
-                      child: child,
-                    );
-                  } else {
-                    return FadeTransition(
-                      opacity: animation,
-                      child: child,
-                    );
-                  }
-                },
-                child: AutoSizeText(
-                  stage.title,
-                  maxFontSize: 48,
-                  minFontSize: 36,
-                  maxLines: 2,
-                  wrapWords: false,
-                  key: ValueKey(stage.title),
-                  style: const TextStyle(
-                    fontSize: 48,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 26),
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 1000),
-                transitionBuilder: (child, animation) => FadeTransition(
-                  opacity: animation,
-                  child: child,
-                ),
-                child: AutoSizeText(
-                  stage.instructions,
-                  key: ValueKey(stage.instructions),
-                  minFontSize: 12,
-                  maxFontSize: 32,
-                  maxLines: 5,
-                  style: const TextStyle(
-                    fontSize: 32,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
+              isAwaitingNextStage == true ? waiting() : stageInformation(),
               const Spacer(),
               LinearProgressIndicator(
                 value: progress / 100,
@@ -139,6 +89,85 @@ class InterviewInflight extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget stageInformation() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 500),
+          switchInCurve: Curves.elasticOut,
+          switchOutCurve: Curves.easeOut,
+          transitionBuilder: (child, animation) {
+            if (child.key == ValueKey(stage.title)) {
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(1.2, 0.0),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
+              );
+            } else {
+              return FadeTransition(
+                opacity: animation,
+                child: child,
+              );
+            }
+          },
+          child: AutoSizeText(
+            stage.title,
+            maxFontSize: 48,
+            minFontSize: 36,
+            maxLines: 2,
+            wrapWords: false,
+            key: ValueKey(stage.title),
+            style: const TextStyle(
+              fontSize: 48,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+        ),
+        const SizedBox(height: 26),
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          transitionBuilder: (child, animation) => FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
+          child: AutoSizeText(
+            stage.instructions,
+            key: ValueKey(stage.instructions),
+            minFontSize: 12,
+            maxFontSize: 32,
+            maxLines: 5,
+            style: const TextStyle(
+              fontSize: 32,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget waiting() {
+    return const Center(
+      child: Column(
+        children: [
+          Text(
+            'Waiting for next stage...',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+            ),
+          ),
+          SizedBox(height: 20),
+          CircularProgressIndicator(),
+        ],
       ),
     );
   }
