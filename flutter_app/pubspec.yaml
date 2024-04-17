@@ -44,24 +44,27 @@ dependencies:
   auto_size_text: ^3.0.0
   camera: ^0.10.5+9
   path_provider: ^2.1.2
-  record: ^5.0.5
   scroll_date_picker: ^3.8.0
   geocoding: ^3.0.0
   logging: ^1.2.0
   rive: ^0.13.1
   http: ^1.2.1
   just_audio: ^0.9.37
-  audio_session: ^0.1.19
   speech_to_text: ^6.6.0
   onnxruntime: ^1.4.1
+  flutter_sound: ^9.2.13
 
 dependency_overrides:
   speech_to_text:
-    path: ../../speech_to_text/speech_to_text
+    git:
+      url: https://github.com/carlosdp/speech_to_text.git
+      ref: echo-cancel-audio-session
+      path: speech_to_text
   speech_to_text_platform_interface:
-    path: ../../speech_to_text/speech_to_text_platform_interface
-  speech_to_text_macos:
-    path: ../../speech_to_text/speech_to_text_macos
+    git:
+      url: https://github.com/carlosdp/speech_to_text.git
+      ref: echo-cancel-audio-session
+      path: speech_to_text_platform_interface
 
 dev_dependencies:
   flutter_test:

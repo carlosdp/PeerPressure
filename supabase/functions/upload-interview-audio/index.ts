@@ -1,3 +1,4 @@
+import process from "https://deno.land/std@0.177.1/node/process.ts";
 import { createSupabaseClient } from "../_shared/supabase.ts";
 import { transcribe } from "../_shared/utils.ts";
 import logger from "../logger.ts";
@@ -175,7 +176,6 @@ Deno.serve(async (req) => {
   let progress = isInterviewAssistantMessageData(lastAssistantMessageMetadata)
     ? lastAssistantMessageMetadata.progress ?? 0
     : 0;
-  const queuingStrategy = new CountQueuingStrategy({ highWaterMark: 1 });
   let cancelled = false;
   let audioStream: ReadableStream<Uint8Array> | undefined;
 
@@ -188,7 +188,7 @@ Deno.serve(async (req) => {
         close() {
           controller.close();
         },
-      }, queuingStrategy);
+      });
 
       const reader = body.getReader();
       let buffer = "";
@@ -199,6 +199,28 @@ Deno.serve(async (req) => {
       let message = "";
       let waiting = false;
 
+      function processCurrentTag() {
+        if (tag === "voice") {
+          // initiate call to 11labs w/ buffer
+          message = buffer;
+
+          if (!waiting && !cancelled) {
+            createAudioStream(message);
+          }
+        } else if (tag === "progress") {
+          progress = parseInt(buffer);
+        } else if (tag === "title") {
+          title = buffer;
+        } else if (tag === "topic") {
+          topic = buffer;
+        } else if (tag === "instructions") {
+          instructions = buffer;
+        }
+
+        tag = "";
+        buffer = "";
+      }
+
       async function readStream() {
         while (true) {
           const { done, value } = await reader.read();
@@ -208,6 +230,7 @@ Deno.serve(async (req) => {
           const chunk = new TextDecoder().decode(value);
           if (chunk.includes("data: [DONE]")) {
             console.log("DONE WITH LLM");
+            processCurrentTag();
             break;
           }
           const lines = chunk.split("\n");
@@ -218,25 +241,7 @@ Deno.serve(async (req) => {
 
               for (const c of content) {
                 if (c === "<") {
-                  if (tag === "voice") {
-                    // initiate call to 11labs w/ buffer
-                    message = buffer;
-
-                    if (!waiting && !cancelled) {
-                      createAudioStream(message);
-                    }
-                  } else if (tag === "progress") {
-                    progress = parseInt(buffer);
-                  } else if (tag === "title") {
-                    title = buffer;
-                  } else if (tag === "topic") {
-                    topic = buffer;
-                  } else if (tag === "instructions") {
-                    instructions = buffer;
-                  }
-
-                  tag = "";
-                  buffer = "";
+                  processCurrentTag();
                 } else if (c === ">") {
                   tag = buffer;
                   console.log("TAG", tag);
@@ -297,7 +302,7 @@ Deno.serve(async (req) => {
 
       async function createAudioStream(text: string) {
         const audioRes = await fetch(
-          "https://api.elevenlabs.io/v1/text-to-speech/XqpJyEffBCIfiqUJ5cyZ/stream", // ?output_format=pcm_16000",
+          "https://api.elevenlabs.io/v1/text-to-speech/XqpJyEffBCIfiqUJ5cyZ/stream?output_format=pcm_44100",
           {
             method: "POST",
             body: JSON.stringify({
@@ -335,13 +340,13 @@ Deno.serve(async (req) => {
       audioStream?.cancel();
       cancelled = true;
     },
-  }, queuingStrategy);
+  });
 
   return new Response(
     stream,
     {
       headers: {
-        "Content-Type": "audio/mp3",
+        "Content-Type": "audio/pcm",
       },
     },
   );

@@ -8,9 +8,7 @@ import 'package:flutter_app/show_kit/screens/interview/vad_iterator.dart';
 import 'package:flutter_app/supabase.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:logging/logging.dart';
-import 'package:record/record.dart';
 import 'package:http/http.dart' as http;
-import 'package:audio_session/audio_session.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:speech_to_text/speech_recognition_result.dart' as srr;
 import 'package:speech_to_text/speech_recognition_error.dart';
@@ -103,7 +101,6 @@ class InterviewController {
       onResult: _onSpeechResult,
       onSoundChunk: _onSpeechSoundChunk,
       listenOptions: stt.SpeechListenOptions(
-        sampleRate: _sampleRate,
         partialResults: true,
         listenMode: stt.ListenMode.dictation,
         enableHapticFeedback: true,
