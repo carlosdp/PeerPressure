@@ -307,12 +307,16 @@ Deno.serve(async (req) => {
 
       async function createAudioStream(text: string) {
         const audioRes = await fetch(
-          "https://api.elevenlabs.io/v1/text-to-speech/XqpJyEffBCIfiqUJ5cyZ/stream",
+          "https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM/stream",
           {
             method: "POST",
             body: JSON.stringify({
               text: text,
-              model: "eleven_turbo_v2",
+              model_id: "eleven_turbo_v2",
+              voice_settings: {
+                stability: 0.35,
+                similarity_boost: 0.6,
+              },
             }),
             headers: {
               "Content-Type": "application/json",

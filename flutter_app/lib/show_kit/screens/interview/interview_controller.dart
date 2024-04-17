@@ -35,7 +35,7 @@ class InterviewController extends ChangeNotifier {
   bool _isListening = false;
   bool _isAwaitingResponse = false;
   final int _sampleRate = 16000;
-  final int _vadFrameSizeMs = 64;
+  final int _vadFrameSizeMs = 32;
   final int _voiceDebounceMs = 2000;
   bool _voiceActivity = false;
   DateTime? _voiceActivityStart;

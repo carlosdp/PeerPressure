@@ -43,6 +43,7 @@ const PROMPT =
   - When you have a good answer in an area, move on to another area in a natural way. Each area should have a maximum of two follow-up questions.
   - You only have 10 responses maximum to gather information for the profile, so don't linger on a topic too long and cover as much ground as possible.
   - If the user's message is marked <INTERRUPT>, that means they interrupted before your previous message was finished reading. Assume the user did not finish reading the previous message.
+  - Do not mention the user's name constantly in your responses.
   
   Profile Information: {profile}
 
