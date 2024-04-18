@@ -1,21 +1,110 @@
 import 'dart:ui' as ui;
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app/show_kit/screens/interview/common.dart';
 import 'package:flutter_app/supabase_types.dart';
+import 'package:gradient_borders/gradient_borders.dart';
+
+class _BackgroundCircle extends StatefulWidget {
+  final Widget? child;
+  final bool? opened;
+
+  const _BackgroundCircle({this.child, this.opened});
+
+  @override
+  State<_BackgroundCircle> createState() => _BackgroundCircleState();
+}
+
+class _BackgroundCircleState extends State<_BackgroundCircle>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  final _textInterval = const Interval(0.3, 1, curve: Curves.easeInOutCubic);
+  final _circleInterval = const Interval(0, 0.3, curve: Curves.easeInOutCubic);
+
+  final double _sizeOpened = 550;
+
+  final double _sizeClosed = 300;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    );
+
+    if (widget.opened == true) {
+      _controller.forward();
+    }
+  }
+
+  @override
+  void didUpdateWidget(_BackgroundCircle oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.opened != widget.opened) {
+      if (widget.opened == true) {
+        _controller.forward();
+      } else {
+        _controller.reverse();
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(children: [
+      OverflowBox(
+        maxWidth: double.infinity,
+        maxHeight: double.infinity,
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) => Container(
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: Color.fromRGBO(106, 0, 212, 0.8),
+              border: GradientBoxBorder(
+                gradient: LinearGradient(
+                  colors: [
+                    Color.fromRGBO(138, 36, 240, 1),
+                    Color.fromRGBO(110, 52, 169, 1),
+                  ],
+                ),
+              ),
+            ),
+            width: _sizeClosed +
+                _circleInterval.transform(_controller.value) *
+                    (_sizeOpened - _sizeClosed),
+            height: _sizeClosed +
+                _circleInterval.transform(_controller.value) *
+                    (_sizeOpened - _sizeClosed),
+          ),
+        ),
+      ),
+      AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) => Container(
+          padding: EdgeInsets.symmetric(vertical: _sizeOpened / 5),
+          child: Opacity(
+            opacity: _textInterval.transform(_controller.value),
+            child: child,
+          ),
+        ),
+        child: widget.child,
+      )
+    ]);
+  }
+}
 
 class InterviewInflight extends StatelessWidget {
-  final InterviewMessageMetadata stage;
-  final int progress;
+  final InterviewMessageMetadata? stage;
   final int targetMinutes = 30;
-  final Function() onPause;
+  final Function()? onPause;
   final bool? isAwaitingNextStage;
 
   const InterviewInflight({
     super.key,
     required this.stage,
-    required this.progress,
-    required this.onPause,
+    this.onPause,
     this.isAwaitingNextStage,
   });
 
@@ -30,12 +119,14 @@ class InterviewInflight extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 70),
-              const Zara(),
-              const SizedBox(height: 26),
-              isAwaitingNextStage == true ? waiting() : stageInformation(),
-              const Spacer(),
+              Expanded(
+                child: _BackgroundCircle(
+                  opened: isAwaitingNextStage != true && stage != null,
+                  child: stage != null ? stageInformation() : const SizedBox(),
+                ),
+              ),
               LinearProgressIndicator(
-                value: progress / 100,
+                value: stage != null ? stage!.progress / 100 : 0,
                 valueColor: const AlwaysStoppedAnimation<Color>(
                   Color.fromRGBO(240, 71, 255, 1.0),
                 ),
@@ -45,7 +136,7 @@ class InterviewInflight extends StatelessWidget {
               const SizedBox(height: 9),
               Center(
                 child: Text(
-                  stage.topic,
+                  stage?.topic ?? '',
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -55,7 +146,7 @@ class InterviewInflight extends StatelessWidget {
               ),
               Center(
                 child: Text(
-                  '~${(targetMinutes - targetMinutes * (progress / 100)).floor()} min left',
+                  '~${(targetMinutes - targetMinutes * (stage != null ? stage!.progress / 100 : 0)).floor()} min left',
                   style: const TextStyle(
                     fontSize: 12,
                     color: Colors.white,
@@ -97,78 +188,32 @@ class InterviewInflight extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AnimatedSwitcher(
-          duration: const Duration(milliseconds: 500),
-          switchInCurve: Curves.elasticOut,
-          switchOutCurve: Curves.easeOut,
-          transitionBuilder: (child, animation) {
-            if (child.key == ValueKey(stage.title)) {
-              return SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(1.2, 0.0),
-                  end: Offset.zero,
-                ).animate(animation),
-                child: child,
-              );
-            } else {
-              return FadeTransition(
-                opacity: animation,
-                child: child,
-              );
-            }
-          },
-          child: AutoSizeText(
-            stage.title,
-            maxFontSize: 48,
-            minFontSize: 36,
-            maxLines: 2,
-            wrapWords: false,
-            key: ValueKey(stage.title),
-            style: const TextStyle(
-              fontSize: 48,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
+        AutoSizeText(
+          stage!.title,
+          maxFontSize: 48,
+          minFontSize: 36,
+          maxLines: 3,
+          wrapWords: false,
+          key: ValueKey(stage!.title),
+          style: const TextStyle(
+            fontSize: 48,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
         ),
         const SizedBox(height: 26),
-        AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
-          transitionBuilder: (child, animation) => FadeTransition(
-            opacity: animation,
-            child: child,
-          ),
-          child: AutoSizeText(
-            stage.instructions,
-            key: ValueKey(stage.instructions),
-            minFontSize: 12,
-            maxFontSize: 32,
-            maxLines: 5,
-            style: const TextStyle(
-              fontSize: 32,
-              color: Colors.white,
-            ),
+        AutoSizeText(
+          stage!.instructions,
+          key: ValueKey(stage!.instructions),
+          minFontSize: 12,
+          maxFontSize: 32,
+          maxLines: 5,
+          style: const TextStyle(
+            fontSize: 32,
+            color: Colors.white,
           ),
         ),
       ],
-    );
-  }
-
-  Widget waiting() {
-    return const Center(
-      child: Column(
-        children: [
-          Text(
-            'Waiting for next stage...',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-            ),
-          ),
-          SizedBox(height: 20),
-          CircularProgressIndicator(),
-        ],
-      ),
     );
   }
 }

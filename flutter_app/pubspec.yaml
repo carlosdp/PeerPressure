@@ -52,6 +52,7 @@ dependencies:
   just_audio: ^0.9.37
   speech_to_text: ^6.6.0
   onnxruntime: ^1.4.1
+  gradient_borders: ^1.0.0
 
 dependency_overrides:
   speech_to_text:

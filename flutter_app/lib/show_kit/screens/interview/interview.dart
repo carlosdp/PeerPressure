@@ -182,12 +182,10 @@ class _InterviewState extends State<Interview> {
   Widget currentScreen() {
     if (_isComplete) {
       return InterviewComplete(onDismiss: () {});
-    } else if (_interviewController.isInterviewing &&
-        _interviewModel.currentStage != null) {
+    } else if (_interviewController.isInterviewing) {
       return InterviewInflight(
         key: const ValueKey('inflight'),
-        stage: _interviewModel.currentStage!,
-        progress: _interviewModel.currentStage!.progress,
+        stage: _interviewModel.currentStage,
         isAwaitingNextStage: _interviewController.isBetweenStages,
         onPause: _pauseInterview,
       );
