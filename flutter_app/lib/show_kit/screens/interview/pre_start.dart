@@ -23,7 +23,10 @@ class InterviewPreStart extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Zara(),
+                const PurpleCircle(
+                  height: 65,
+                  width: 65,
+                ),
                 const SizedBox(width: 16),
                 Flexible(
                   child: Column(

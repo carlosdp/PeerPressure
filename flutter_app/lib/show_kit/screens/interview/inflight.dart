@@ -1,8 +1,8 @@
 import 'dart:ui' as ui;
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app/show_kit/screens/interview/common.dart';
 import 'package:flutter_app/supabase_types.dart';
-import 'package:gradient_borders/gradient_borders.dart';
 
 class _BackgroundCircle extends StatefulWidget {
   final Widget? child;
@@ -21,7 +21,6 @@ class _BackgroundCircleState extends State<_BackgroundCircle>
   final _circleInterval = const Interval(0, 0.3, curve: Curves.easeInOutCubic);
 
   final double _sizeOpened = 550;
-
   final double _sizeClosed = 300;
 
   @override
@@ -58,19 +57,7 @@ class _BackgroundCircleState extends State<_BackgroundCircle>
         maxHeight: double.infinity,
         child: AnimatedBuilder(
           animation: _controller,
-          builder: (context, child) => Container(
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: Color.fromRGBO(106, 0, 212, 0.8),
-              border: GradientBoxBorder(
-                gradient: LinearGradient(
-                  colors: [
-                    Color.fromRGBO(138, 36, 240, 1),
-                    Color.fromRGBO(110, 52, 169, 1),
-                  ],
-                ),
-              ),
-            ),
+          builder: (context, child) => PurpleCircle(
             width: _sizeClosed +
                 _circleInterval.transform(_controller.value) *
                     (_sizeOpened - _sizeClosed),

@@ -18,7 +18,10 @@ class InterviewComplete extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Zara(),
+            const PurpleCircle(
+              width: 65,
+              height: 65,
+            ),
             const SizedBox(width: 16),
             const Text(
               'Working on your profile',

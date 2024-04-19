@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rive/rive.dart';
+import 'package:gradient_borders/gradient_borders.dart';
 
 class InterviewStage {
   String title;
@@ -16,18 +16,28 @@ class InterviewStage {
   });
 }
 
-class Zara extends StatelessWidget {
-  const Zara({super.key});
+class PurpleCircle extends StatelessWidget {
+  final double? width;
+  final double? height;
+  const PurpleCircle({super.key, this.width, this.height});
 
   @override
   Widget build(BuildContext context) {
-    return const Hero(
-      tag: 'zara',
-      child: SizedBox(
-        width: 65,
-        height: 65,
-        child: RiveAnimation.asset('assets/zara.riv'),
+    return Container(
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        color: Color.fromRGBO(106, 0, 212, 0.8),
+        border: GradientBoxBorder(
+          gradient: LinearGradient(
+            colors: [
+              Color.fromRGBO(138, 36, 240, 1),
+              Color.fromRGBO(110, 52, 169, 1),
+            ],
+          ),
+        ),
       ),
+      width: width,
+      height: height,
     );
   }
 }
