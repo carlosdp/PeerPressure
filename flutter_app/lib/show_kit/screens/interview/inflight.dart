@@ -1,8 +1,14 @@
+import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/show_kit/screens/interview/common.dart';
 import 'package:flutter_app/supabase_types.dart';
+
+class SinCurve extends Curve {
+  @override
+  double transform(double t) => sin(2 * pi * t);
+}
 
 class _BackgroundCircle extends StatefulWidget {
   final Widget? child;
@@ -15,13 +21,15 @@ class _BackgroundCircle extends StatefulWidget {
 }
 
 class _BackgroundCircleState extends State<_BackgroundCircle>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late AnimationController _controller;
-  final _textInterval = const Interval(0.3, 1, curve: Curves.easeInOutCubic);
-  final _circleInterval = const Interval(0, 0.3, curve: Curves.easeInOutCubic);
+  late AnimationController _pulseController;
+  late Animation<double> _pulseAnimation;
+  final _textInterval = const Interval(0.5, 1, curve: Curves.easeInOutCubic);
+  final _circleInterval = const Interval(0, 0.5, curve: Curves.easeInOutCubic);
 
   final double _sizeOpened = 550;
-  final double _sizeClosed = 300;
+  final double _sizeClosed = 200;
 
   @override
   void initState() {
@@ -29,6 +37,18 @@ class _BackgroundCircleState extends State<_BackgroundCircle>
     _controller = AnimationController(
       duration: const Duration(milliseconds: 1000),
       vsync: this,
+    );
+
+    _pulseController = AnimationController(
+      duration: const Duration(seconds: 4),
+      vsync: this,
+    )..repeat();
+
+    _pulseAnimation = Tween<double>(begin: 0, end: 30).animate(
+      CurvedAnimation(
+        parent: _pulseController,
+        curve: SinCurve(),
+      ),
     );
 
     if (widget.opened == true) {
@@ -56,15 +76,18 @@ class _BackgroundCircleState extends State<_BackgroundCircle>
         maxWidth: double.infinity,
         maxHeight: double.infinity,
         child: AnimatedBuilder(
-          animation: _controller,
-          builder: (context, child) => PurpleCircle(
-            width: _sizeClosed +
-                _circleInterval.transform(_controller.value) *
-                    (_sizeOpened - _sizeClosed),
-            height: _sizeClosed +
-                _circleInterval.transform(_controller.value) *
-                    (_sizeOpened - _sizeClosed),
-          ),
+          animation: Listenable.merge([_controller, _pulseController]),
+          builder: (context, child) {
+            final value = _circleInterval.transform(_controller.value);
+            final size = _sizeClosed +
+                value * (_sizeOpened - _sizeClosed) +
+                (_pulseAnimation.value - (value * _pulseAnimation.value));
+
+            return PurpleCircle(
+              width: size,
+              height: size,
+            );
+          },
         ),
       ),
       AnimatedBuilder(
