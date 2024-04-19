@@ -198,18 +198,71 @@ class Birthdate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const scrollOptions = ScrollViewDetailOptions(
+      isLoop: false,
+      margin: EdgeInsets.symmetric(horizontal: 10),
+      textStyle: TextStyle(
+        fontSize: 24,
+        color: Colors.white,
+      ),
+      selectedTextStyle: TextStyle(
+        fontSize: 24,
+        color: Colors.white,
+      ),
+    );
+
     return SafeArea(
-      child: SizedBox(
-        height: 250,
-        child: ScrollDatePicker(
-          selectedDate: profile.birthDate,
-          onDateTimeChanged: (value) => onBirthDateChanged(value),
-          minimumDate: DateTime.now().subtract(const Duration(days: 365 * 100)),
-          maximumDate: DateTime.now().subtract(const Duration(days: 365 * 18)),
-          options: const DatePickerOptions(
-            isLoop: false,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Starting with basics',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                  )),
+              Text(
+                "Let's get some basic information out of the way.",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                ),
+              ),
+            ],
           ),
-        ),
+          const SizedBox(height: 26),
+          const Text(
+            'Birth Date',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(
+            height: 230,
+            child: ScrollDatePicker(
+              selectedDate: profile.birthDate,
+              onDateTimeChanged: (value) => onBirthDateChanged(value),
+              minimumDate: DateTime(DateTime.now().year - 100, 1, 1),
+              maximumDate:
+                  DateTime.now().subtract(const Duration(days: 365 * 18)),
+              options: const DatePickerOptions(
+                isLoop: false,
+                backgroundColor: Color.fromRGBO(41, 39, 39, 1),
+                itemExtent: 50,
+              ),
+              scrollViewOptions: const DatePickerScrollViewOptions(
+                month: scrollOptions,
+                day: scrollOptions,
+                year: scrollOptions,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
