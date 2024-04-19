@@ -22,11 +22,11 @@ class _ContestantRouterState extends State<ContestantRouter> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Consumer<ProfileModel>(builder: (context, model, child) {
-        if (model.profile == null) {
-          return const BasicProfileCreator();
-        }
+        // if (model.profile == null) {
+        return const BasicProfileCreator();
+        // }
 
-        return const Interview();
+        // return const Interview();
       }),
     );
   }

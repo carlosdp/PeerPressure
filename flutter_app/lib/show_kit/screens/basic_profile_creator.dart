@@ -1,6 +1,12 @@
+import 'dart:ui';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_app/models/profile.dart';
+import 'package:flutter_app/show_kit/screens/interview/common.dart';
 import 'package:flutter_app/supabase_types.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:scroll_date_picker/scroll_date_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:geocoding/geocoding.dart';
@@ -23,41 +29,75 @@ class GenderSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         button(
           'Male',
           'male',
           selected: gender == 'male',
+          icon: FontAwesomeIcons.mars,
         ),
         button(
           'Female',
           'female',
           selected: gender == 'female',
+          icon: FontAwesomeIcons.venus,
         ),
         button(
           'Other',
           'other',
           selected: gender == 'other',
+          icon: FontAwesomeIcons.venusMars,
         ),
       ],
     );
   }
 
-  Widget button(String label, String value, {bool selected = false}) {
+  Widget button(String label, String value,
+      {bool selected = false, IconData icon = FontAwesomeIcons.venus}) {
     return GestureDetector(
       onTap: () => onGenderSelected(value),
-      child: Container(
+      child: AnimatedContainer(
+        width: 97,
+        height: 93,
+        duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
         decoration: BoxDecoration(
-          color: selected ? Colors.black : Colors.grey.shade700,
+          color: selected ? Colors.white : const Color.fromRGBO(91, 91, 91, 1),
           borderRadius: BorderRadius.circular(4),
         ),
-        child: Text(
-          label,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-          ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            AnimatedOpacity(
+              opacity: selected ? 1 : 0.4,
+              duration: const Duration(milliseconds: 200),
+              child: FaIcon(
+                icon,
+                color: selected
+                    ? Colors.black
+                    : const Color.fromRGBO(213, 213, 213, 1),
+                size: 28,
+              ),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            AnimatedOpacity(
+              opacity: selected ? 1 : 0.4,
+              duration: const Duration(milliseconds: 200),
+              child: Text(
+                label,
+                style: TextStyle(
+                  color: selected
+                      ? Colors.black
+                      : const Color.fromRGBO(213, 213, 213, 1),
+                  fontSize: 20,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -79,10 +119,66 @@ class NameAndGender extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Starting with basics',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                )),
+            Text(
+              "Let's get some basic information out of the way.",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 26),
+        const Text(
+          'Name',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 12),
         TextField(
-          decoration: const InputDecoration(labelText: 'First Name'),
           onChanged: (value) => onNameChanged(value),
+          style: const TextStyle(
+            fontSize: 40,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+          cursorColor: Colors.black,
+          decoration: const InputDecoration(
+            filled: true,
+            fillColor: Colors.white,
+            enabledBorder: UnderlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(8)),
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(8)),
+            ),
+          ),
+        ),
+        const SizedBox(height: 80),
+        const Text(
+          'Gender',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(
+          height: 40,
         ),
         GenderSelector(
           gender: profile.gender,
@@ -172,31 +268,33 @@ class _BasicProfileCreatorState extends State<BasicProfileCreator> {
     };
 
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            currentStep,
-            const Spacer(),
-            InkWell(
-              onTap: () {
-                setState(() {
-                  if (BasicProfileCreatorStep.values.length - 1 > _step.index) {
-                    _step = BasicProfileCreatorStep.values[_step.index + 1];
-                  } else {
-                    createProfile();
-                  }
-                });
-              },
-              child: Text(
-                BasicProfileCreatorStep.values.length - 1 > _step.index
-                    ? 'Next'
-                    : 'Done',
-                style: const TextStyle(
-                  fontSize: 32,
+      body: Container(
+        color: const Color.fromRGBO(41, 39, 39, 1),
+        child: SafeArea(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 35),
+            child: Column(
+              children: [
+                currentStep,
+                const Spacer(),
+                PrimaryButton(
+                  BasicProfileCreatorStep.values.length - 1 > _step.index
+                      ? 'Next'
+                      : 'Done',
+                  onTap: () {
+                    setState(() {
+                      if (BasicProfileCreatorStep.values.length - 1 >
+                          _step.index) {
+                        _step = BasicProfileCreatorStep.values[_step.index + 1];
+                      } else {
+                        createProfile();
+                      }
+                    });
+                  },
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

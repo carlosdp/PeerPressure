@@ -41,3 +41,35 @@ class PurpleCircle extends StatelessWidget {
     );
   }
 }
+
+class PrimaryButton extends StatelessWidget {
+  final String label;
+  final Function()? onTap;
+
+  const PrimaryButton(this.label, {super.key, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color.fromRGBO(150, 16, 255, 0.8),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        width: 300,
+        padding: const EdgeInsets.all(18),
+        child: Center(
+          child: Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
