@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gaimon/gaimon.dart';
 import 'package:gradient_borders/gradient_borders.dart';
 
 class InterviewStage {
@@ -48,10 +49,18 @@ class PrimaryButton extends StatelessWidget {
 
   const PrimaryButton(this.label, {super.key, this.onTap});
 
+  void _onTap() {
+    if (onTap != null) {
+      onTap!();
+    }
+
+    Gaimon.medium();
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: _onTap,
       child: Container(
         decoration: BoxDecoration(
           color: const Color.fromRGBO(150, 16, 255, 0.8),
