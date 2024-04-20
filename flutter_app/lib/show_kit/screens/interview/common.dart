@@ -58,6 +58,7 @@ class PrimaryButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
         ),
         width: 300,
+        height: 60,
         padding: const EdgeInsets.all(18),
         child: Center(
           child: Text(

@@ -90,6 +90,7 @@ flutter:
 
   assets:
     - assets/zara.riv
+    - assets/height-man.riv
     - assets/silero_vad.onnx
 
   # An image asset can refer to one or more resolution-specific "variants", see

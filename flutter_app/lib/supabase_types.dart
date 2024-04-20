@@ -87,6 +87,24 @@ class BuilderConversationData {
             [];
 }
 
+class BiographicalData {
+  // height in inches
+  int? height;
+
+  BiographicalData({
+    this.height,
+  });
+
+  BiographicalData.fromJson(Map<String, dynamic> json)
+      : height = json['height'] as int?;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'height': height,
+    };
+  }
+}
+
 class Profile {
   String id = '';
   String userId = '';
@@ -97,6 +115,7 @@ class Profile {
   String? displayLocation;
   List<Block> blocks = [];
   BuilderConversationData? builderConversationData;
+  BiographicalData biographicalData = BiographicalData();
 
   BuilderConversation get currentConversation {
     return builderConversationData?.conversations.lastWhere(
@@ -119,6 +138,9 @@ class Profile {
         gender = json['gender'] as String,
         birthDate = DateTime.parse(json['birth_date'] as String),
         blocks = json['blocks'].map<Block>((b) => Block.fromJson(b)).toList(),
+        biographicalData = json['biographical_data'] != null
+            ? BiographicalData.fromJson(json['biographical_data'])
+            : BiographicalData(),
         builderConversationData = json['builder_conversation_data'] != null
             ? BuilderConversationData.fromJson(
                 json['builder_conversation_data'])
@@ -130,6 +152,7 @@ class Profile {
       'first_name': firstName,
       'gender': gender,
       'birth_date': birthDate.toIso8601String(),
+      'biographical_data': biographicalData.toJson(),
     };
 
     if (location != null) {
