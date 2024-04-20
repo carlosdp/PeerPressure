@@ -10,6 +10,7 @@ import 'package:rive/rive.dart';
 import 'package:scroll_date_picker/scroll_date_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:gaimon/gaimon.dart';
 
 enum BasicProfileCreatorStep {
   nameAndGender,
@@ -400,6 +401,8 @@ class _HeightState extends State<Height> {
                       _dragPosition = details.globalPosition;
                     });
 
+                    Gaimon.light();
+
                     _updateHeight(_dragStart.dy - _dragPosition.dy);
                   },
                   onVerticalDragEnd: (details) {
@@ -412,6 +415,8 @@ class _HeightState extends State<Height> {
                         (normalized / 100 * (_maxHeight - _minHeight) +
                                 _minHeight)
                             .floor());
+
+                    Gaimon.success();
 
                     setState(() {
                       _dragStart = Offset.zero;
