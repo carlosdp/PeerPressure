@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:animated_digit/animated_digit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/models/profile.dart';
+import 'package:flutter_app/show_kit/screens/contestant_onboarding/steps/location.dart';
 import 'package:flutter_app/show_kit/screens/interview/common.dart';
 import 'package:flutter_app/supabase_types.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -16,6 +17,7 @@ enum BasicProfileCreatorStep {
   nameAndGender,
   birthDate,
   height,
+  location,
 }
 
 class GenderSelector extends StatelessWidget {
@@ -123,25 +125,6 @@ class NameAndGender extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Starting with basics',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                )),
-            Text(
-              "Let's get some basic information out of the way.",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 26),
         const Text(
           'Name',
           style: TextStyle(
@@ -217,25 +200,6 @@ class Birthdate extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Starting with basics',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                  )),
-              Text(
-                "Let's get some basic information out of the way.",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 26),
           const Text(
             'Birth Date',
             style: TextStyle(
@@ -356,25 +320,6 @@ class _HeightState extends State<Height> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Starting with basics',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                )),
-            Text(
-              "Let's get some basic information out of the way.",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 26),
         const Text(
           'Height',
           style: TextStyle(
@@ -500,11 +445,6 @@ class _BasicProfileCreatorState extends State<BasicProfileCreator> {
   Future<void> createProfile() async {
     final model = Provider.of<ProfileModel>(context, listen: false);
 
-    List<Location> locations = await locationFromAddress(
-        '1600 Amphitheatre Parkway, Mountain View, CA');
-    _profile.location = locations.first;
-    _profile.displayLocation = 'Cupertino, CA';
-
     await model.createProfile(_profile);
   }
 
@@ -538,6 +478,17 @@ class _BasicProfileCreatorState extends State<BasicProfileCreator> {
             _profile.biographicalData.height = value;
           },
         ),
+      BasicProfileCreatorStep.location => LocationStep(
+          profile: _profile,
+          onLocationChanged: (lat, long, displayName) {
+            _profile.location = Location(
+              latitude: lat,
+              longitude: long,
+              timestamp: DateTime.now(),
+            );
+            _profile.displayLocation = displayName;
+          },
+        ),
     };
 
     return Scaffold(
@@ -548,6 +499,25 @@ class _BasicProfileCreatorState extends State<BasicProfileCreator> {
             padding: const EdgeInsets.symmetric(horizontal: 35),
             child: Column(
               children: [
+                const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Starting with basics',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                        )),
+                    Text(
+                      "Let's get some basic information out of the way.",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 26),
                 Expanded(child: currentStep),
                 PrimaryButton(
                   BasicProfileCreatorStep.values.length - 1 > _step.index

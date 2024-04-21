@@ -12,6 +12,8 @@ PODS:
     - Flutter
   - just_audio (0.0.1):
     - Flutter
+  - location (0.0.1):
+    - Flutter
   - onnxruntime (0.0.1):
     - Flutter
     - onnxruntime-objc (= 1.15.1)
@@ -45,6 +47,7 @@ DEPENDENCIES:
   - gaimon (from `.symlinks/plugins/gaimon/ios`)
   - geocoding_ios (from `.symlinks/plugins/geocoding_ios/ios`)
   - just_audio (from `.symlinks/plugins/just_audio/ios`)
+  - location (from `.symlinks/plugins/location/ios`)
   - onnxruntime (from `.symlinks/plugins/onnxruntime/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - rive_common (from `.symlinks/plugins/rive_common/ios`)
@@ -74,6 +77,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/geocoding_ios/ios"
   just_audio:
     :path: ".symlinks/plugins/just_audio/ios"
+  location:
+    :path: ".symlinks/plugins/location/ios"
   onnxruntime:
     :path: ".symlinks/plugins/onnxruntime/ios"
   path_provider_foundation:
@@ -97,6 +102,7 @@ SPEC CHECKSUMS:
   gaimon: 7688c586f38dcc4782e6fe26f648057d280a9d8b
   geocoding_ios: d7460f56e80e118d57678efe5c2cdc888739ff18
   just_audio: baa7252489dbcf47a4c7cc9ca663e9661c99aafa
+  location: d5cf8598915965547c3f36761ae9cc4f4e87d22e
   onnxruntime: e9346181d75b8dea8733bdae512a22c298962e00
   onnxruntime-c: ebdcfd8650bcbd10121c125262f99dea681b92a3
   onnxruntime-objc: ae7acec7a3d03eaf072d340afed7a35635c1c2a6
