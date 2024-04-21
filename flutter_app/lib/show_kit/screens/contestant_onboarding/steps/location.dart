@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/show_kit/screens/interview/common.dart';
 import 'package:flutter_app/supabase_types.dart';
 import 'package:geocoding/geocoding.dart' as geo;
 import 'package:location/location.dart';
@@ -7,10 +8,15 @@ class LocationStep extends StatefulWidget {
   final Profile profile;
   final Function(double, double, String) onLocationChanged;
 
+  final String submitLabel;
+  final void Function() onSubmit;
+
   const LocationStep({
     super.key,
     required this.profile,
     required this.onLocationChanged,
+    required this.submitLabel,
+    required this.onSubmit,
   });
 
   @override
@@ -99,6 +105,15 @@ class _LocationStepState extends State<LocationStep> {
           const CircularProgressIndicator(
             color: Colors.white,
           ),
+        Expanded(
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: PrimaryButton(
+              widget.submitLabel,
+              onTap: widget.onSubmit,
+            ),
+          ),
+        ),
       ],
     );
   }

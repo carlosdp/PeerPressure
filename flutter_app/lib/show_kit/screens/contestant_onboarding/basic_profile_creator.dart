@@ -17,7 +17,20 @@ enum BasicProfileCreatorStep {
   nameAndGender,
   birthDate,
   height,
-  location,
+  location;
+
+  String route() {
+    switch (this) {
+      case BasicProfileCreatorStep.nameAndGender:
+        return 'contestant/onboarding/nameAndGender';
+      case BasicProfileCreatorStep.birthDate:
+        return 'contestant/onboarding/birthDate';
+      case BasicProfileCreatorStep.height:
+        return 'contestant/onboarding/height';
+      case BasicProfileCreatorStep.location:
+        return 'contestant/onboarding/location';
+    }
+  }
 }
 
 class GenderSelector extends StatelessWidget {
@@ -113,11 +126,16 @@ class NameAndGender extends StatelessWidget {
   final void Function(String) onNameChanged;
   final void Function(String) onGenderSelected;
 
+  final String submitLabel;
+  final void Function() onSubmit;
+
   const NameAndGender({
     super.key,
     required this.profile,
     required this.onNameChanged,
     required this.onGenderSelected,
+    required this.submitLabel,
+    required this.onSubmit,
   });
 
   @override
@@ -169,6 +187,15 @@ class NameAndGender extends StatelessWidget {
           gender: profile.gender,
           onGenderSelected: onGenderSelected,
         ),
+        Expanded(
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: PrimaryButton(
+              submitLabel,
+              onTap: onSubmit,
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -178,8 +205,16 @@ class Birthdate extends StatelessWidget {
   final Profile profile;
   final void Function(DateTime) onBirthDateChanged;
 
-  const Birthdate(
-      {super.key, required this.profile, required this.onBirthDateChanged});
+  final String submitLabel;
+  final void Function() onSubmit;
+
+  const Birthdate({
+    super.key,
+    required this.profile,
+    required this.onBirthDateChanged,
+    required this.submitLabel,
+    required this.onSubmit,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -228,6 +263,15 @@ class Birthdate extends StatelessWidget {
               ),
             ),
           ),
+          Expanded(
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: PrimaryButton(
+                submitLabel,
+                onTap: onSubmit,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -239,10 +283,15 @@ class Height extends StatefulWidget {
   // height in inches
   final void Function(int) onHeightChanged;
 
+  final String submitLabel;
+  final void Function() onSubmit;
+
   const Height({
     super.key,
     required this.profile,
     required this.onHeightChanged,
+    required this.submitLabel,
+    required this.onSubmit,
   });
 
   @override
@@ -422,6 +471,13 @@ class _HeightState extends State<Height> {
           ],
         ),
         const SizedBox(height: 38),
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: PrimaryButton(
+            widget.submitLabel,
+            onTap: widget.onSubmit,
+          ),
+        ),
       ],
     );
   }
@@ -435,12 +491,12 @@ class BasicProfileCreator extends StatefulWidget {
 }
 
 class _BasicProfileCreatorState extends State<BasicProfileCreator> {
-  BasicProfileCreatorStep _step = BasicProfileCreatorStep.nameAndGender;
   final _profile = Profile(
     firstName: '',
     gender: 'male',
     birthDate: DateTime.now(),
   );
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey();
 
   Future<void> createProfile() async {
     final model = Provider.of<ProfileModel>(context, listen: false);
@@ -450,47 +506,6 @@ class _BasicProfileCreatorState extends State<BasicProfileCreator> {
 
   @override
   Widget build(BuildContext context) {
-    final currentStep = switch (_step) {
-      BasicProfileCreatorStep.nameAndGender => NameAndGender(
-          profile: _profile,
-          onNameChanged: (value) {
-            setState(() {
-              _profile.firstName = value;
-            });
-          },
-          onGenderSelected: (value) {
-            setState(() {
-              _profile.gender = value;
-            });
-          },
-        ),
-      BasicProfileCreatorStep.birthDate => Birthdate(
-          profile: _profile,
-          onBirthDateChanged: (value) {
-            setState(() {
-              _profile.birthDate = value;
-            });
-          },
-        ),
-      BasicProfileCreatorStep.height => Height(
-          profile: _profile,
-          onHeightChanged: (value) {
-            _profile.biographicalData.height = value;
-          },
-        ),
-      BasicProfileCreatorStep.location => LocationStep(
-          profile: _profile,
-          onLocationChanged: (lat, long, displayName) {
-            _profile.location = Location(
-              latitude: lat,
-              longitude: long,
-              timestamp: DateTime.now(),
-            );
-            _profile.displayLocation = displayName;
-          },
-        ),
-    };
-
     return Scaffold(
       body: Container(
         color: const Color.fromRGBO(41, 39, 39, 1),
@@ -518,21 +533,86 @@ class _BasicProfileCreatorState extends State<BasicProfileCreator> {
                   ],
                 ),
                 const SizedBox(height: 26),
-                Expanded(child: currentStep),
-                PrimaryButton(
-                  BasicProfileCreatorStep.values.length - 1 > _step.index
-                      ? 'Next'
-                      : 'Done',
-                  onTap: () {
-                    setState(() {
-                      if (BasicProfileCreatorStep.values.length - 1 >
-                          _step.index) {
-                        _step = BasicProfileCreatorStep.values[_step.index + 1];
-                      } else {
-                        createProfile();
-                      }
-                    });
-                  },
+                Expanded(
+                  child: Navigator(
+                      key: _navigatorKey,
+                      initialRoute:
+                          BasicProfileCreatorStep.nameAndGender.route(),
+                      onGenerateRoute: (settings) {
+                        final builders = {
+                          BasicProfileCreatorStep.nameAndGender.route():
+                              (context) => NameAndGender(
+                                    profile: _profile,
+                                    onNameChanged: (value) {
+                                      setState(() {
+                                        _profile.firstName = value;
+                                      });
+                                    },
+                                    onGenderSelected: (value) {
+                                      setState(() {
+                                        _profile.gender = value;
+                                      });
+                                    },
+                                    submitLabel: 'Next',
+                                    onSubmit: () {
+                                      _navigatorKey.currentState?.pushNamed(
+                                          BasicProfileCreatorStep.birthDate
+                                              .route());
+                                    },
+                                  ),
+                          BasicProfileCreatorStep.birthDate.route():
+                              (context) => Birthdate(
+                                    profile: _profile,
+                                    onBirthDateChanged: (value) {
+                                      setState(() {
+                                        _profile.birthDate = value;
+                                      });
+                                    },
+                                    submitLabel: 'Next',
+                                    onSubmit: () {
+                                      _navigatorKey.currentState?.pushNamed(
+                                          BasicProfileCreatorStep.height
+                                              .route());
+                                    },
+                                  ),
+                          BasicProfileCreatorStep.height.route(): (context) =>
+                              Height(
+                                profile: _profile,
+                                onHeightChanged: (value) {
+                                  _profile.biographicalData.height = value;
+                                },
+                                submitLabel: 'Next',
+                                onSubmit: () {
+                                  _navigatorKey.currentState?.pushNamed(
+                                      BasicProfileCreatorStep.location.route());
+                                },
+                              ),
+                          BasicProfileCreatorStep.location.route(): (context) =>
+                              LocationStep(
+                                profile: _profile,
+                                onLocationChanged: (lat, long, displayName) {
+                                  _profile.location = Location(
+                                    latitude: lat,
+                                    longitude: long,
+                                    timestamp: DateTime.now(),
+                                  );
+                                  _profile.displayLocation = displayName;
+                                },
+                                submitLabel: 'Done',
+                                onSubmit: () {
+                                  createProfile();
+                                },
+                              ),
+                        };
+
+                        if (builders.containsKey(settings.name)) {
+                          return MaterialPageRoute(
+                            builder: builders[settings.name]!,
+                          );
+                        } else {
+                          throw Exception('Invalid route: ${settings.name}');
+                        }
+                      }),
                 ),
               ],
             ),
