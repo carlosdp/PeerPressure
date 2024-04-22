@@ -112,6 +112,8 @@ class NameAndGender extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const StepHeader(),
+        const SizedBox(height: 26),
         const Text(
           'Name',
           style: TextStyle(

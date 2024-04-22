@@ -37,6 +37,8 @@ class Birthdate extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const StepHeader(),
+          const SizedBox(height: 26),
           const Text(
             'Birth Date',
             style: TextStyle(

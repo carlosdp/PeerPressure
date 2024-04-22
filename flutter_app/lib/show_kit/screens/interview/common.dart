@@ -83,3 +83,36 @@ class PrimaryButton extends StatelessWidget {
     );
   }
 }
+
+class StepHeader extends StatelessWidget {
+  final String title;
+  final String subtitle;
+
+  const StepHeader({
+    super.key,
+    this.title = 'Starting with basics',
+    this.subtitle = "Let's get some basic information out of the way.",
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
+            )),
+        Text(
+          subtitle,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+          ),
+        ),
+      ],
+    );
+  }
+}

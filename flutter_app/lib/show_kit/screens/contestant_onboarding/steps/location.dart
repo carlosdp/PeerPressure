@@ -84,6 +84,8 @@ class _LocationStepState extends State<LocationStep> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
+        const StepHeader(),
+        const SizedBox(height: 26),
         const Text(
           'Location',
           style: TextStyle(

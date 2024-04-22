@@ -4,11 +4,13 @@ import 'package:flutter_app/show_kit/screens/contestant_onboarding/steps/height.
 import 'package:flutter_app/show_kit/screens/contestant_onboarding/steps/name_and_gender.dart';
 import 'package:flutter_app/show_kit/screens/contestant_onboarding/steps/birthdate.dart';
 import 'package:flutter_app/show_kit/screens/contestant_onboarding/steps/location.dart';
+import 'package:flutter_app/show_kit/screens/contestant_onboarding/steps/start.dart';
 import 'package:flutter_app/supabase_types.dart';
 import 'package:provider/provider.dart';
 import 'package:geocoding/geocoding.dart';
 
 enum BasicProfileCreatorStep {
+  start,
   nameAndGender,
   birthDate,
   height,
@@ -16,6 +18,8 @@ enum BasicProfileCreatorStep {
 
   String route() {
     switch (this) {
+      case BasicProfileCreatorStep.start:
+        return 'contestant/onboarding';
       case BasicProfileCreatorStep.nameAndGender:
         return 'contestant/onboarding/nameAndGender';
       case BasicProfileCreatorStep.birthDate:
@@ -57,110 +61,89 @@ class _BasicProfileCreatorState extends State<BasicProfileCreator> {
         child: SafeArea(
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 35),
-            child: Column(
-              children: [
-                const Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Starting with basics',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                        )),
-                    Text(
-                      "Let's get some basic information out of the way.",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 26),
-                Expanded(
-                  child: Navigator(
-                      key: _navigatorKey,
-                      initialRoute:
-                          BasicProfileCreatorStep.nameAndGender.route(),
-                      onGenerateRoute: (settings) {
-                        final builders = {
-                          BasicProfileCreatorStep.nameAndGender.route():
-                              (context) => NameAndGender(
-                                    profile: _profile,
-                                    onNameChanged: (value) {
-                                      setState(() {
-                                        _profile.firstName = value;
-                                      });
-                                    },
-                                    onGenderSelected: (value) {
-                                      setState(() {
-                                        _profile.gender = value;
-                                      });
-                                    },
-                                    submitLabel: 'Next',
-                                    onSubmit: () {
-                                      _navigatorKey.currentState?.pushNamed(
-                                          BasicProfileCreatorStep.birthDate
-                                              .route());
-                                    },
-                                  ),
-                          BasicProfileCreatorStep.birthDate.route():
-                              (context) => Birthdate(
-                                    profile: _profile,
-                                    onBirthDateChanged: (value) {
-                                      setState(() {
-                                        _profile.birthDate = value;
-                                      });
-                                    },
-                                    submitLabel: 'Next',
-                                    onSubmit: () {
-                                      _navigatorKey.currentState?.pushNamed(
-                                          BasicProfileCreatorStep.height
-                                              .route());
-                                    },
-                                  ),
-                          BasicProfileCreatorStep.height.route(): (context) =>
-                              Height(
-                                profile: _profile,
-                                onHeightChanged: (value) {
-                                  _profile.biographicalData.height = value;
-                                },
-                                submitLabel: 'Next',
-                                onSubmit: () {
-                                  _navigatorKey.currentState?.pushNamed(
-                                      BasicProfileCreatorStep.location.route());
-                                },
-                              ),
-                          BasicProfileCreatorStep.location.route(): (context) =>
-                              LocationStep(
-                                profile: _profile,
-                                onLocationChanged: (lat, long, displayName) {
-                                  _profile.location = Location(
-                                    latitude: lat,
-                                    longitude: long,
-                                    timestamp: DateTime.now(),
-                                  );
-                                  _profile.displayLocation = displayName;
-                                },
-                                submitLabel: 'Done',
-                                onSubmit: () {
-                                  createProfile();
-                                },
-                              ),
-                        };
+            child: Navigator(
+                key: _navigatorKey,
+                initialRoute: BasicProfileCreatorStep.start.route(),
+                onGenerateRoute: (settings) {
+                  final builders = {
+                    BasicProfileCreatorStep.start.route(): (context) =>
+                        StartStep(
+                            submitLabel: 'Start',
+                            onSubmit: () {
+                              _navigatorKey.currentState?.pushNamed(
+                                  BasicProfileCreatorStep.nameAndGender
+                                      .route());
+                            }),
+                    BasicProfileCreatorStep.nameAndGender.route(): (context) =>
+                        NameAndGender(
+                          profile: _profile,
+                          onNameChanged: (value) {
+                            setState(() {
+                              _profile.firstName = value;
+                            });
+                          },
+                          onGenderSelected: (value) {
+                            setState(() {
+                              _profile.gender = value;
+                            });
+                          },
+                          submitLabel: 'Next',
+                          onSubmit: () {
+                            _navigatorKey.currentState?.pushNamed(
+                                BasicProfileCreatorStep.birthDate.route());
+                          },
+                        ),
+                    BasicProfileCreatorStep.birthDate.route(): (context) =>
+                        Birthdate(
+                          profile: _profile,
+                          onBirthDateChanged: (value) {
+                            setState(() {
+                              _profile.birthDate = value;
+                            });
+                          },
+                          submitLabel: 'Next',
+                          onSubmit: () {
+                            _navigatorKey.currentState?.pushNamed(
+                                BasicProfileCreatorStep.height.route());
+                          },
+                        ),
+                    BasicProfileCreatorStep.height.route(): (context) => Height(
+                          profile: _profile,
+                          onHeightChanged: (value) {
+                            _profile.biographicalData.height = value;
+                          },
+                          submitLabel: 'Next',
+                          onSubmit: () {
+                            _navigatorKey.currentState?.pushNamed(
+                                BasicProfileCreatorStep.location.route());
+                          },
+                        ),
+                    BasicProfileCreatorStep.location.route(): (context) =>
+                        LocationStep(
+                          profile: _profile,
+                          onLocationChanged: (lat, long, displayName) {
+                            _profile.location = Location(
+                              latitude: lat,
+                              longitude: long,
+                              timestamp: DateTime.now(),
+                            );
+                            _profile.displayLocation = displayName;
+                          },
+                          submitLabel: 'Done',
+                          onSubmit: () {
+                            createProfile();
+                          },
+                        ),
+                  };
 
-                        if (builders.containsKey(settings.name)) {
-                          return MaterialPageRoute(
-                            builder: builders[settings.name]!,
-                          );
-                        } else {
-                          throw Exception('Invalid route: ${settings.name}');
-                        }
-                      }),
-                ),
-              ],
-            ),
+                  if (builders.containsKey(settings.name)) {
+                    return MaterialPageRoute(
+                      builder: builders[settings.name]!,
+                    );
+                  } else {
+                    throw Exception('Invalid route: ${settings.name}');
+                  }
+                }),
           ),
         ),
       ),

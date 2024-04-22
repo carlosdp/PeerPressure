@@ -97,6 +97,8 @@ class _HeightState extends State<Height> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const StepHeader(),
+        const SizedBox(height: 26),
         const Text(
           'Height',
           style: TextStyle(
