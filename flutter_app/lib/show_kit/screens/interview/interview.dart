@@ -8,8 +8,10 @@ import 'package:flutter_app/models/profile.dart';
 import 'package:flutter_app/show_kit/screens/interview/complete.dart';
 import 'package:flutter_app/show_kit/screens/interview/inflight.dart';
 import 'package:flutter_app/show_kit/screens/interview/interview_controller.dart';
+import 'package:flutter_app/show_kit/screens/interview/permissions_gate.dart';
 import 'package:flutter_app/show_kit/screens/interview/pre_start.dart';
 import 'package:flutter_app/supabase.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:logging/logging.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -30,10 +32,13 @@ class _InterviewState extends State<Interview> {
   late String _profileId;
   final InterviewModel _interviewModel = InterviewModel();
   Timer? _videoCheckpointTimer;
+  bool? _permissionsRequired;
 
   @override
   void initState() {
     super.initState();
+
+    _checkPermissions();
 
     _interviewModel.fetchActiveInterview();
 
@@ -87,6 +92,18 @@ class _InterviewState extends State<Interview> {
       _interviewController.isPaused && _interviewModel.currentStage != null;
 
   bool get _isComplete => _interviewModel.isCompleted;
+
+  void _checkPermissions() async {
+    final isCameraAllowed = await Permission.camera.isGranted;
+    final isMicrophoneAllowed = await Permission.microphone.isGranted;
+    final isSpeechRecognitionAllowed = await Permission.speech.isGranted;
+
+    setState(() {
+      _permissionsRequired = !isCameraAllowed ||
+          !isMicrophoneAllowed ||
+          !isSpeechRecognitionAllowed;
+    });
+  }
 
   Future<void> _beginInterview() async {
     // Ordering of these is important! If the order is swapped, echo cancellation fails to work.
@@ -180,7 +197,11 @@ class _InterviewState extends State<Interview> {
   }
 
   Widget currentScreen() {
-    if (_isComplete) {
+    if (_permissionsRequired == true) {
+      return PermissionsGate(
+        onPermissionsGranted: (_) => _checkPermissions(),
+      );
+    } else if (_isComplete) {
       return InterviewComplete(onDismiss: () {});
     } else if (_interviewController.isInterviewing) {
       return InterviewInflight(
