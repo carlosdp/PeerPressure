@@ -124,7 +124,11 @@ begin
     select * into matching_profile from profiles where id = (select profile_id from saved_profiles where user_id = auth.uid() order by created_at desc limit 1);
     if matching_profile.id is null then
       select * into matching_profile from profiles where id in (select id from profiles where user_id != auth.uid() or user_id is null order by random() limit 1);
-      insert into saved_profiles (user_id, profile_id) values (auth.uid(), matching_profile.id);
+      if matching_profile is not null then
+        insert into saved_profiles (user_id, profile_id) values (auth.uid(), matching_profile.id);
+      else
+        return null;
+      end if;
     end if;
     update users set matching_profile_id = matching_profile.id where id = auth.uid();
   end if;

@@ -25,11 +25,10 @@ class SwipeModel extends ChangeNotifier {
   }
 
   void updateMatchingProfile() async {
-    final data = await supabase.rpc('get_matching_profile').select().single();
+    final data = await supabase.rpc('get_matching_profile');
 
-    matchingProfile = Profile.fromJson(data);
-
-    if (currentProfile != null && matchingProfile != null) {
+    if (currentProfile != null && data != null) {
+      matchingProfile = Profile.fromJson(data);
       await fetchMatch(currentProfile!.id, matchingProfile!.id);
     }
 
