@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class TopBar extends StatefulWidget implements PreferredSizeWidget {
@@ -80,6 +81,27 @@ class _TopBarState extends State<TopBar> {
                         ),
                       ),
                     ],
+                  ),
+                ),
+                const SizedBox(width: 10),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).pushNamed('/contestant');
+                  },
+                  child: Container(
+                    width: 35,
+                    height: 35,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.purple,
+                    ),
+                    child: const Center(
+                      child: FaIcon(
+                        FontAwesomeIcons.user,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+                    ),
                   ),
                 )
               ],

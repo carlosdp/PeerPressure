@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app/models/profile.dart';
 import 'package:flutter_app/models/swipe.dart';
 import 'package:flutter_app/screens/dev_login.dart';
+import 'package:flutter_app/screens/swipe_screen.dart';
 import 'package:flutter_app/show_kit/screens/contestant_router.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
@@ -46,21 +47,29 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      initialRoute: '/',
+      onGenerateRoute: (settings) {
+        if (settings.name == '/') {
+          return MaterialPageRoute(builder: (context) => const AuthGate());
+        } else if (settings.name == '/contestant') {
+          return MaterialPageRoute(
+              builder: (context) => const ContestantRouter());
+        } else {
+          throw Exception('Invalid route: ${settings.name}');
+        }
+      },
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
+class AuthGate extends StatefulWidget {
+  const AuthGate({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<AuthGate> createState() => _AuthGateState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _AuthGateState extends State<AuthGate> {
   bool isLoggedIn = false;
   StreamSubscription<AuthState>? authSubscription;
 
@@ -84,6 +93,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return isLoggedIn ? const ContestantRouter() : const DevLogin();
+    return isLoggedIn ? const SwipeScreen() : const DevLogin();
   }
 }
