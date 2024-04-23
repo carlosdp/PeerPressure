@@ -22,7 +22,8 @@ void main() async {
   Logger.root.level = Level.FINE;
   Logger.root.onRecord.listen((record) {
     // ignore: avoid_print
-    print('${record.level.name}: ${record.time}: ${record.message}');
+    print(
+        '${record.loggerName}[${record.level.name}]: ${record.time}: ${record.message}');
   });
 
   runApp(
