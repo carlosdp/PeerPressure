@@ -95,6 +95,7 @@ flutter:
     - assets/zara.riv
     - assets/height-man.riv
     - assets/silero_vad.onnx
+    - assets/placeholder-avatar.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

@@ -91,16 +91,20 @@ class _TopBarState extends State<TopBar> {
                   child: Container(
                     width: 35,
                     height: 35,
+                    padding: const EdgeInsets.all(1),
                     decoration: const BoxDecoration(
                       shape: BoxShape.circle,
                       color: Colors.purple,
-                    ),
-                    child: const Center(
-                      child: FaIcon(
-                        FontAwesomeIcons.user,
-                        color: Colors.white,
-                        size: 18,
+                      border: Border.fromBorderSide(
+                        BorderSide(
+                          color: Colors.purple,
+                          width: 2,
+                        ),
                       ),
+                    ),
+                    child: const CircleAvatar(
+                      foregroundImage:
+                          AssetImage('assets/placeholder-avatar.jpeg'),
                     ),
                   ),
                 )
