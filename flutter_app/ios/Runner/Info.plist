@@ -35,6 +35,8 @@
 	<string>We need camera access so we can record your interview</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>We need your location so that we can match you with people near you</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>We need your location so that we can match you with people near you</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>We need microphone access so we can record your interview</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
@@ -48,6 +50,13 @@
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 	</array>
 </dict>
 </plist>
