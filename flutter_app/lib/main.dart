@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app/models/profile.dart';
 import 'package:flutter_app/models/swipe.dart';
 import 'package:flutter_app/screens/dev_login.dart';
-import 'package:flutter_app/screens/swipe_screen.dart';
+import 'package:flutter_app/screens/pregame.dart';
 import 'package:flutter_app/show_kit/screens/contestant_router.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
@@ -43,7 +43,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Peer Pressure',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
@@ -94,6 +94,6 @@ class _AuthGateState extends State<AuthGate> {
 
   @override
   Widget build(BuildContext context) {
-    return isLoggedIn ? const SwipeScreen() : const DevLogin();
+    return isLoggedIn ? const Pregame() : const DevLogin();
   }
 }

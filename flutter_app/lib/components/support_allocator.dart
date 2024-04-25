@@ -1,5 +1,6 @@
 import 'package:animated_digit/animated_digit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app/components/button.dart';
 import 'package:intl/intl.dart';
 
 class SupportSlider extends StatelessWidget {
@@ -66,75 +67,6 @@ class SupportSlider extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class SupportButton extends StatefulWidget {
-  const SupportButton({super.key});
-
-  @override
-  State<SupportButton> createState() => _SupportButtonState();
-}
-
-class _SupportButtonState extends State<SupportButton> {
-  bool _isPressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return Listener(
-      onPointerDown: (_) {
-        setState(() {
-          _isPressed = true;
-        });
-      },
-      onPointerUp: (_) {
-        setState(() {
-          _isPressed = false;
-        });
-      },
-      child: GestureDetector(
-        onTapUp: (_) {
-          setState(() {
-            _isPressed = false;
-          });
-        },
-        onTapCancel: () {
-          setState(() {
-            _isPressed = false;
-          });
-        },
-        child: Transform.translate(
-          offset: Offset(0, _isPressed ? 4 : 0),
-          child: Container(
-            height: 60,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(color: Colors.black),
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: _isPressed ? Colors.transparent : Colors.black,
-                  offset: Offset(0, _isPressed ? 0 : 4),
-                  blurRadius: 0,
-                  spreadRadius: 0,
-                ),
-              ],
-            ),
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-            child: const Center(
-              child: Text(
-                'Support',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }
@@ -238,7 +170,7 @@ class _SupportAllocatorState extends State<SupportAllocator> {
                     },
                   ),
                   const Spacer(),
-                  const SupportButton(),
+                  const PrimaryButton('Boost'),
                 ],
               ),
             ),
