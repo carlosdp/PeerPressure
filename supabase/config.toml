@@ -121,7 +121,7 @@ auth_token = "env(SUPABASE_AUTH_SMS_TWILIO_AUTH_TOKEN)"
 # `twitter`, `slack`, `spotify`, `workos`, `zoom`.
 [auth.external.apple]
 enabled = true
-client_id = "com.carlosdp.couple"
+client_id = "com.carlosdp.couple.debug"
 secret = "none"
 # Overrides the default auth redirectUrl.
 redirect_uri = ""
