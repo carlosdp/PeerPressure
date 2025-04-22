@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app/models/profile.dart';
 import 'package:flutter_app/models/swipe.dart';
 import 'package:flutter_app/screens/dev_login.dart';
+import 'package:flutter_app/screens/login.dart';
 import 'package:flutter_app/screens/pregame.dart';
 import 'package:flutter_app/show_kit/screens/contestant_router.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_app/supabase.dart';
+import './mode.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -94,6 +96,10 @@ class _AuthGateState extends State<AuthGate> {
 
   @override
   Widget build(BuildContext context) {
-    return isLoggedIn ? const Pregame() : const DevLogin();
+    return isLoggedIn
+        ? const Pregame()
+        : isDev
+            ? const DevLogin()
+            : const Login();
   }
 }
